@@ -23,10 +23,10 @@
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, home-manager, ... }@inputs: 
+  outputs = { self, nixpkgs, nixos-hardware, home-manager, ... }@inputs:
   let
 
     mkSystem = import ./lib/mksystem.nix {
@@ -36,6 +36,12 @@
   in {
 
     nixosConfigurations.framework13 = mkSystem "framework" {
+      system = "x86_64-linux";
+      user   = "framework";
+      wsl    = false;
+    };
+
+    nixosConfigurations.wsl = mkSystem "wsl" {
       system = "x86_64-linux";
       user   = "framework";
       wsl    = true;
