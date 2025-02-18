@@ -2,7 +2,7 @@
 
 {
   imports =
-    [ 
+    [
       ./hardware-configuration.nix
       ./gnome.nix
     ];
@@ -25,7 +25,7 @@
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
 
-  # Select internationalisation properties.
+  # Select internationalization properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -39,72 +39,6 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
-
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  #users.users.framework = {
-  #  description = "framework";
-  #  extraGroups = [ "networkmanager" "wheel" "docker" ];
-  #  isNormalUser = true;
-  #  shell = pkgs.zsh;
-  #};
-
-  # TODO: Move to home manager
-  # programs.firefox.enable = true;
-
-  # TODO: Move to home manager
-  # environment.systemPackages = with pkgs; [
-  #   # Browsers
-  #   firefox
-  #   chromium
-
-  #   # Desktop Apps
-  #   caffeine-ng
-  #   feh # image viewer
-  #   input-leap
-  #   pop-launcher
-  #   satty
-
-  #   # CLI Tools
-  #   awscli2
-  #   bottom
-  #   docker-compose
-  #   file
-  #   ghostty
-  #   htop
-  #   jq
-  #   kubectl
-  #   kubernetes-helm
-  #   lsof
-  #   minikube
-  #   ripgrep
-  #   tmux
-  #   xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
-  #   yubikey-manager
-  #   zoxide
-
-  #   # Network Tools
-  #   cloudflare-warp
-  #   nmap
-  #   wireshark
-
-  #   # Electron Apps
-  #   anytype
-  #   bitwarden-desktop
-  #   discord
-  #   signal-desktop
-  #   slack
-  #   spotify
-
-  #   # Development
-  #   direnv
-  #   git
-  #   python313
-  #   vscode
-
-  #   # Framework
-  #   framework-tool # https://github.com/FrameworkComputer/framework-system
-  # ];
 
   virtualisation.docker.enable = true;
 
@@ -150,6 +84,18 @@
   # Enable power-profiles-daemon, a DBus daemon
   # Recommended at https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13
   services.power-profiles-daemon.enable = true;
+
+
+  nix = {
+    # package = pkgs.nixVersions.latest;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+      keep-outputs = true
+      keep-derivations = true
+    '';
+  };
+
+
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
