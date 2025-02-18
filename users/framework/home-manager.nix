@@ -84,11 +84,41 @@ in {
     enableZshIntegration = true;
   };
 
+  # TODO: Move this to ./apps/?
   programs.vscode = {
     enable = true;
-    # extensions = with pkgs.vscode-extensions; [
-    #   myriad-dreamin.tinymist
-    # ];
+    extensions = with pkgs.vscode-extensions; [
+      dracula-theme.theme-dracula
+      github.copilot
+      github.copilot-chat
+      golang.go
+      hashicorp.terraform
+      oderwat.indent-rainbow
+      jnoortheen.nix-ide
+      mkhl.direnv
+      ms-python.python
+      ms-python.vscode-pylance
+      ms-vscode-remote.remote-ssh
+      redhat.vscode-yaml
+      streetsidesoftware.code-spell-checker
+      vscodevim.vim
+    ];
+
+    userSettings = {
+      "[nix]"."editor.tabSize" = 2;
+      "chat.commandCenter.enabled" = true;
+      "editor.formatOnSave" = true;
+      "editor.minimap.enabled" = false;
+      "explorer.confirmDelete" = false;
+      "files.insertFinalNewline" = true;
+      "files.trimFinalNewlines" = true;
+      "files.trimTrailingWhitespace" = true;
+      "github.copilot.enable"."markdown" = "true";
+
+      # telemetry
+      "redhat.telemetry.enabled" = false;
+      "telemetry.enableTelemetry" = false;
+    };
   };
 
   programs.neovim = {
