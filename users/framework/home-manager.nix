@@ -167,7 +167,7 @@ in {
   #
 
   home.shellAliases = {
-    nrebuild = "sudo nixos-rebuild switch";
+    nrebuild = "sudo nixos-rebuild switch --flake .#framework13";
     ngarbage = "sudo nix-collect-garbage -d";
   };
 
