@@ -55,6 +55,7 @@ in {
 
     # Development
     pkgs.direnv
+    pkgs.nixfmt-rfc-style
     pkgs.python313
     pkgs.vscode
 
