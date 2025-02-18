@@ -9,7 +9,7 @@
 
 let
   isDarwin = pkgs.stdenv.isDarwin;
-  isLinux = pkgs.stdenv.isLinux;
+  isLinux = pkgs.stdenv.isLinux && !isWSL;
 
 in
 {
@@ -45,7 +45,8 @@ in
       pkgs.nmap
       pkgs.wireshark
     ]
-    ++ (lib.optionals (isLinux && !isWSL) [
+    # Linux Packages
+    ++ (lib.optionals (isLinux) [
       # Browsers
       pkgs.chromium
 
@@ -70,6 +71,7 @@ in
       # Framework
       pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system
     ])
+    # WSL Packages
     ++ (lib.optionals isWSL [
       # Browsers
       pkgs.wslu
@@ -80,7 +82,7 @@ in
   #
 
   programs.firefox = {
-    enable = true;
+    enable = isLinux;
   };
 
   programs.git = {
@@ -99,7 +101,7 @@ in
 
   # TODO: Move this to ./apps/?
   programs.vscode = {
-    enable = isWSL;
+    enable = isLinux;
     extensions = with pkgs.vscode-extensions; [
       dracula-theme.theme-dracula
       github.copilot
@@ -239,6 +241,7 @@ in
   # GNOME config
   #
 
+  # TODO: Move this to gnome?
   dconf.settings = {
     "gnome/desktop/peripherals/mouse" = {
       natural-scroll = false;
