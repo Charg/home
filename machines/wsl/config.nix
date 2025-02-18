@@ -8,6 +8,16 @@
     startMenuLaunchers = true;
   };
 
+  environment.systemPackages = [
+      pkgs.wget
+  ];
+
+  # https://nix-community.github.io/NixOS-WSL/how-to/vscode.html#option-1-set-up-nix-ld
+  programs.nix-ld = {
+    enable = true;
+    package = pkgs.nix-ld-rs; # only for NixOS 24.05
+};
+
   nix = {
     package = pkgs.nixVersions.latest;
     extraOptions = ''
