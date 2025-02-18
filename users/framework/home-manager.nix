@@ -131,6 +131,7 @@ in
       # telemetry
       "redhat.telemetry.enabled" = false;
       "telemetry.enableTelemetry" = false;
+      "telemetry.telemetryLevel" = "off";
     };
   };
 
