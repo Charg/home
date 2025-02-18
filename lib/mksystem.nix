@@ -20,10 +20,10 @@ let
   userOSConfig = ../users/${user}/${if darwin then "darwin" else "nixos" }.nix;
   userHMConfig = ../users/${user}/home-manager.nix;
 
-  # NixOS vs nix-darwin functionst
+  # NixOS vs nix-darwin functions
   systemFunc = if darwin then inputs.darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
   home-manager = if darwin then inputs.home-manager.darwinModules else inputs.home-manager.nixosModules;
-in 
+in
   systemFunc rec {
     inherit system;
 
@@ -48,5 +48,16 @@ in
           inputs = inputs;
         };
       }
+
+    {
+      config._module.args = {
+        currentSystem = system;
+        currentSystemName = name;
+        currentSystemUser = user;
+        isWSL = isWSL;
+        inputs = inputs;
+      };
+    }
+
     ];
 }
