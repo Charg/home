@@ -1,6 +1,6 @@
 # :house: Home
 > [!NOTE]
-> 99% of this configuration was directly copied from Mitchell Hashimoto - you can find the source [here](https://github.com/mitchellh/nixos-config).
+> 99% of this configuration was directly copied from Mitchell Hashimoto [nixos-config](https://github.com/mitchellh/nixos-config) repo.
 
 TODO:
 - [ ] document how tf this all works
