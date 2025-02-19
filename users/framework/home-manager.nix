@@ -244,7 +244,7 @@ in
   #
 
   # TODO: Move this to gnome?
-  dconf.settings = {
+  dconf.settings = lib.mkIf isLinux {
     "gnome/desktop/peripherals/mouse" = {
       natural-scroll = false;
     };
