@@ -10,7 +10,6 @@
 let
   isDarwin = pkgs.stdenv.isDarwin;
   isLinux = pkgs.stdenv.isLinux && !isWSL;
-
 in
 {
 
@@ -19,6 +18,8 @@ in
   #
   home.packages =
     [
+      # Shared packages
+
       # CLI Tools
       pkgs.awscli2
       pkgs.bottom
@@ -33,20 +34,21 @@ in
       pkgs.lsof
       pkgs.minikube
       pkgs.nixfmt-rfc-style
+      pkgs.python313
       pkgs.ripgrep
       pkgs.tmux
       pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
       pkgs.yubikey-manager
       pkgs.zoxide
-      pkgs.python313
 
       # Network Tools
       # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
       pkgs.nmap
       pkgs.wireshark
     ]
+
     # Linux Packages
-    ++ (lib.optionals (isLinux) [
+    ++ (lib.optionals isLinux [
       # Browsers
       pkgs.chromium
 
@@ -71,9 +73,9 @@ in
       # Framework
       pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system
     ])
+
     # WSL Packages
     ++ (lib.optionals isWSL [
-      # Browsers
       pkgs.wslu
     ]);
 

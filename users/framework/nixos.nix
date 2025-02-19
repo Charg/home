@@ -4,7 +4,7 @@
   # Add ~/.local/bin to PATH
   environment.localBinInPath = true;
 
-  # enable
+  # setting this there to work with the "shell" directive below
   programs.zsh.enable = true;
 
   users.users.framework= {

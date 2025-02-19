@@ -6,32 +6,32 @@
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true; # Enable GNOME DE
   environment.gnome.excludePackages = with pkgs; [
-    gedit
-    gnome-console
-    gnome-photos
-    gnome-tour
-    snapshot
     atomix # puzzle game
     baobab # disk usage analyzer
     cheese # webcam tool
     epiphany # web browser
     evince # document viewer
     geary # email reader
+    gedit
     gnome-calendar
     gnome-characters
     gnome-clocks
+    gnome-console
     gnome-contacts
     gnome-disk-utility
     gnome-font-viewer
     gnome-logs
     gnome-maps
     gnome-music
+    gnome-photos
     gnome-system-monitor
     gnome-terminal
+    gnome-tour
     gnome-weather
     hitori # sudoku game
     iagno # go game
     simple-scan
+    snapshot
     tali # poker game
     yelp # help viewer
   ];
