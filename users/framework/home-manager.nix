@@ -166,7 +166,7 @@ in
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        identityFile = "~/ssh/github";
+        identityFile = "~/.ssh/github";
         identitiesOnly = true;
       };
     };
