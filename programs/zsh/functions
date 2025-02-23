@@ -1,0 +1,134 @@
+gfmm () {
+    # Pull changes from  and into the primary branch
+    local HEAD=$(git remote show origin | /bin/grep "HEAD branch:" | awk -F': ' '{print $2}')
+    echo "Running: git fetch origin ${HEAD}:${HEAD}"
+    git fetch origin "${HEAD}":"${HEAD}"
+}
+
+kbn () {
+    # Set kube context
+    #
+    # ARGS:
+    # $1 == Kube Context
+    # $2 == Namespace [optional]
+
+    if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]])
+    then
+      echo "Usage: kbn CONTEXT_NAME"
+      echo "Usage: kbn CONTEXT_NAME NAMESPACE"
+      echo
+      echo "Contexts you can choose from:"
+      echo
+      kubectl config get-contexts
+      return 1
+    fi
+
+    if [[ $1 ]]; then
+      local _CLUSTER=$1
+    else
+      local _CLUSTER=$(kubectl config get-contexts -o name | fzf)
+    fi
+
+    kubectl config use-context "${_CLUSTER}"
+    shift
+
+    if [[ $1 ]]; then
+      kubectl config set-context --current --namespace="${1}"
+    fi
+}
+
+kbnn () {
+    # Set kube contexts namespace
+    if [[ $1 ]]; then
+      local _NAMESPACE=$1
+      kubectl config set-context --current --namespace="${_NAMESPACE}"
+    else
+      echo "Usage: kbnn NAMESPACE"
+    fi
+}
+
+awsp () {
+    # Switch AWS profile for the current shell
+
+    if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
+    then
+        >&2 echo "Usage: awsp PROFILE_NAME"
+	return 1
+    else
+        export AWS_PROFILE="${1}"
+    fi
+}
+
+awssh () {
+    # This function connects you to an EC2 instance based on the supplied instance information.
+    #
+    # ARGS:
+    # $1 == AWS instance identifier
+    # $2 == SSH username [optional]
+
+    if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
+    then
+        echo "Usage: awssh instance_id"
+        return 1
+    fi
+
+    if [[ "${1}" =~ "i-.*" ]]; then
+        echo "LOOKUP: ${1}!"
+        SSH_IP_ADDR=$(aws ec2 describe-instances --instance-ids "${1}" --query 'Reservations[].Instances[].PrivateIpAddress' --output=text)
+        echo "${SSH_IP_ADDR}"
+    fi
+
+    if ! [[ -z "${SSH_IP_ADDR}" ]]; then
+        ssh "${SSH_IP_ADDR}"
+    else
+        echo "ERROR: SSH address not set"
+        return 1
+    fi
+}
+
+get_cert () {
+    # Display or download remote servers ssl certificate
+    if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
+    then
+        >&2 echo "Usage: getcert www.somedomain.com {port}"
+        >&2 echo "Usage: getcert -d www.somedomain.com {port}"
+	return 1
+    fi
+
+    if [[ "${1}" = "-d" ]]
+    then
+
+        # Download the certificate
+        openssl s_client -showcerts -servername ${2} -connect ${2}:${3:-443} 2</dev/null | openssl x509 -outform PEM > ${2}.pem
+
+    else
+
+        # Display the certificate
+        openssl s_client -showcerts -servername ${1} -connect ${1}:${2:-443} 2</dev/null | openssl x509 -noout -text
+
+    fi
+}
+
+help_date() {
+cat << EOD
+        Format/result           |       Command              |          Output
+--------------------------------+----------------------------+------------------------------
+ISO8601 Local TZ timestamp      | date +%FT%T%Z              | $(date +%FT%T%Z)
+ISO8601 UTC timestamp           | date --utc +%FT%T%Z        | $(date --utc +%FT%T%Z)
+ISO8601 UTC timestamp + ms      | date --utc +%FT%T.%3N%Z    | $(date --utc +%FT%T.%3N%Z)
+Nanoseconds only:               | date +%N                   | $(date +%N)
+Nanoseconds since UNIX epoch:   | date +%s%N                 | $(date +%s%N)
+Seconds since UNIX epoch:       | date +%s                   | $(date +%s)
+YYMMDD_hhmmss                   | date +%y%m%d_%H%M%S        | $(date +%y%m%d_%H%M%S)
+YYYY-MM-DD_hh:mm:ss             | date +%F_%T                | $(date +%F_%T)
+YYYYMMDD_hhmmss                 | date +%Y%m%d_%H%M%S        | $(date +%Y%m%d_%H%M%S)
+YYYYMMDD_hhmmss (UTC version)   | date --utc +%Y%m%d_%H%M%SZ | $(date --utc +%Y%m%d_%H%M%SZ)
+YYYYMMDD_hhmmss (with local TZ) | date +%Y%m%d_%H%M%S%Z      | $(date +%Y%m%d_%H%M%S%Z)
+YYYY-MM-DD (Long day)           | date +%F\(%A\)             | $(date +%F\(%A\))
+YYYY-MM-DD (Short day)          | date +%F\(%a\)             | $(date +%F\(%a\))
+YYYYMMSShhmmss                  | date +%Y%m%d%H%M%S         | $(date +%Y%m%d%H%M%S)
+YYYYMMSShhmmssnnnnnnnnn         | date +%Y%m%d%H%M%S%N       | $(date +%Y%m%d%H%M%S%N)
+Z-notation UTC timestamp        | date --utc +%FT%TZ         | $(date --utc +%FT%TZ)
+Z-notation UTC timestamp + ms   | date --utc +%FT%T.%3NZ     | $(date --utc +%FT%T.%3NZ)
+EOD
+}
