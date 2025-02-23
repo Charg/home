@@ -271,11 +271,12 @@ in
       v = "nvim";
 
       # git overrides
+      gch = "git ch";
       gcm = "git commit --message";
+      gia = "git add -p";
+      gpb = "git pushb";
       gs = "git status";
       gtr = "cd $(git rev-parse --show-cdup)";
-      gia = "git add -p";
-      gch = "git ch";
 
       # nix
       nixg = "sudo nix-collect-garbage -d";
