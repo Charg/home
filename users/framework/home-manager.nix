@@ -130,7 +130,7 @@ in
     extraConfig = {
       color.ui = "auto";
       init.defaultBranch = "main";
-      push.autoSetupRemote = true
+      push.autoSetupRemote = true;
     };
   };
 
