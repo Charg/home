@@ -104,10 +104,34 @@ in
 
   programs.git = {
     enable = true;
+    delta.enable = true;
     lfs.enable = true;
     userEmail = "chris@syn.sh";
     userName = "chris";
-    extraConfig.init.defaultBranch = "main";
+
+    aliases = {
+      a = "add -p";
+      ch = "diff --cached";
+      fixup = "commit --amend -C HEAD";
+      fpush = "push --force-with-lease";
+      lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+      pr = "!f(){ gh pr view --web; }; f";
+      pushb = "!f(){ BRANCH=$(git symbolic-ref --short HEAD); git push --set-upstream origin $BRANCH;}; f";
+      root = "rev-parse --show-toplevel";
+    };
+
+    ignores = [
+      "**/modules/*/.terraform.lock.hcl"
+      ".DS_Store"
+      ".venv"
+      "venv"
+    ];
+
+    extraConfig = {
+      color.ui = "auto";
+      init.defaultBranch = "main";
+      push.autoSetupRemote = true
+    };
   };
 
   programs.neovim = {
@@ -122,10 +146,16 @@ in
     enableZshIntegration = true;
     settings = {
       aws.disabled = false;
-      battery.disabled = true;
+      battery.disabled = false;
       direnv.disabled = false;
-      kubernetes.disabled = false;
       terraform.disabled = false;
+
+      kubernetes.disabled = false;
+      kubernetes = {
+        contexts = [
+          { context_pattern = "prod"; style = "red"; }
+        ];
+      };
 
       # Dracula Theme https://draculatheme.com/starship
       aws.style = "bold #ffb86c";
@@ -190,6 +220,7 @@ in
   programs.zsh = {
     enable = true;
     autocd = true;
+    autosuggestion.enable = true;
 
     dirHashes = {
       code  = "$HOME/code";
@@ -211,6 +242,7 @@ in
     antidote = {
       enable = true;
       plugins = [
+        "ohmyzsh/ohmyzsh"
 	"ohmyzsh/ohmyzsh path:lib/clipboard.zsh"
         "ohmyzsh/ohmyzsh path:lib/git.zsh"
 	"ohmyzsh/ohmyzsh path:plugins/aliases"
@@ -229,9 +261,8 @@ in
       ap = "ansible-playbook";
       cat = "bat";
       g = "git";
-      gtr = "cd $(git rev-parse --show-cdup)";
       h = "helm";
-      ipplz = "curl https://icanhazip.com";
+      get_ip = "curl https://icanhazip.com";
       k = "kubectl";
       kp = "kube-prompt";
       l = "eza -l --tree --level=1";
@@ -239,7 +270,14 @@ in
       n = "nnn -deHiUx";
       v = "nvim";
 
-      # Nix
+      # git overrides
+      gcm = "git commit --message";
+      gs = "git status";
+      gtr = "cd $(git rev-parse --show-cdup)";
+      gia = "git add -p";
+      gch = "git ch";
+
+      # nix
       nixg = "sudo nix-collect-garbage -d";
       # TODO: Replace framework13 with the system name
       nixrs = "sudo nixos-rebuild switch --flake ~/code/home#framework13";
@@ -348,6 +386,9 @@ in
     LC_ALL = "en_US.UTF-8";
     LC_CTYPE = "en_US.UTF-8";
     PAGER = "less -FirSwX";
+
+    # Needs to be set before antidote installs the magic-enter plugin
+    MAGIC_ENTER_GIT_COMMAND = "git status -u";
   };
 
   home.file = {
