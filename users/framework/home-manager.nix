@@ -41,10 +41,11 @@ in
       pkgs.tmux
       pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
       pkgs.yubikey-manager
+      pkgs.uv
       pkgs.zoxide
 
       # Network Tools
-      # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
+      pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
       pkgs.nmap
       pkgs.wireshark
     ]
