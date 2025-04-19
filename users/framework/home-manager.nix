@@ -147,7 +147,6 @@ in
 
   programs.neovim = {
     enable = true;
-    defaultEditor = true;
     viAlias = true;
     vimAlias = true;
   };
@@ -232,7 +231,7 @@ in
     enable = true;
     autocd = true;
     autosuggestion.enable = true;
-    defaultKeymap = "vicmd";
+    defaultKeymap = "viins";
 
     dirHashes = {
       code  = "$HOME/code";
@@ -264,6 +263,7 @@ in
 	"ohmyzsh/ohmyzsh path:plugins/kubectl"
 	"ohmyzsh/ohmyzsh path:plugins/magic-enter"
 	"ohmyzsh/ohmyzsh path:plugins/uv"
+        "ohmyzsh/ohmyzsh path:plugins/vi-mode"
       ];
     };
 
@@ -394,7 +394,8 @@ in
   #
 
   home.sessionVariables = {
-    EDITOR = "nvim";
+    EDITOR = "vim";
+    VISUAL = "vim";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
     LC_CTYPE = "en_US.UTF-8";
