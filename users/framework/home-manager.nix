@@ -535,15 +535,24 @@ in
     };
 
     "org/gnome/settings-daemon/plugins/media-keys" = {
-      screensaver = [ "<Super>Escape" ];
+      screensaver = [ "<Super>l" ];
       home = [ "<Super>f" ];
       www = [ "<Super>b" ];
-      terminal = [ "<Super>t" ];
       email = [ "<Super>e" ];
-      rotate-video-lock-static = [ ];
+      # Terminal
+      custom-keybindings = [
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+      ];
+    };
+
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+      binding = "<super>t";
+      command = "ghostty";
+      name = "Launch terminal";
     };
 
     "org/gnome/shell/extensions/pop-shell" = {
+      activate-launcher = ["<Super>space"];
       active-hint = false;
       focus-down = [
         "<Super>Down"
@@ -591,9 +600,11 @@ in
     "org/gnome/shell" = {
       disable-user-extensions = false;
       enabled-extensions = [
-        pkgs.gnomeExtensions.space-bar.extensionUuid
+        pkgs.gnomeExtensions.appindicator.extensionUuid
         pkgs.gnomeExtensions.clipboard-history.extensionUuid
         pkgs.gnomeExtensions.pop-shell.extensionUuid
+        pkgs.gnomeExtensions.space-bar.extensionUuid
+        pkgs.gnomeExtensions.tray-icons-reloaded.extensionUuid
         pkgs.gnomeExtensions.user-themes.extensionUuid
       ];
       disabled-extensions = [ ];
