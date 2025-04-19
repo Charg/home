@@ -180,8 +180,8 @@ in
         style_user = "bold #bd93f9";
       };
       character = {
-        success_symbol = "[λ](bold #f8f8f2)";
-        error_symbol = "[λ](bold #ff5555)";
+        success_symbol = "[>](bold #f8f8f2)";
+        error_symbol = "[>](bold #ff5555)";
       };
 
 
@@ -232,6 +232,7 @@ in
     enable = true;
     autocd = true;
     autosuggestion.enable = true;
+    defaultKeymap = "vicmd";
 
     dirHashes = {
       code  = "$HOME/code";
