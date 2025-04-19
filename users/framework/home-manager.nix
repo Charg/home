@@ -23,7 +23,7 @@ in
       # CLI Tools
       pkgs.awscli2
       pkgs.bottom
-      pkgs.direnv
+      pkgs.dig
       pkgs.docker-compose
       pkgs.file
       pkgs.ghostty
@@ -57,10 +57,14 @@ in
 
       # Desktop Apps
       pkgs.caffeine-ng
+      pkgs.calibre
       pkgs.feh # image viewer
+      pkgs.flameshot # screenshots
       pkgs.input-leap
       pkgs.pop-launcher
       pkgs.satty
+      pkgs.synology-drive-client
+      pkgs.vlc
 
       # Electron Apps
       pkgs.anytype
