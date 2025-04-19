@@ -39,9 +39,11 @@
   # List of Gnome specific packages
   environment.systemPackages = with pkgs; [
     dconf2nix
+    gnomeExtensions.appindicator
     gnomeExtensions.clipboard-history
     gnomeExtensions.pop-shell # https://github.com/pop-os/shell
     gnomeExtensions.space-bar
+    gnomeExtensions.tray-icons-reloaded
     gnomeExtensions.user-themes
     gnome-tweaks
     xclip
