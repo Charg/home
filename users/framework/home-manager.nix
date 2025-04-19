@@ -198,12 +198,12 @@ in
       github.copilot-chat
       golang.go
       hashicorp.terraform
-      oderwat.indent-rainbow
       jnoortheen.nix-ide
       mkhl.direnv
       ms-python.python
       ms-python.vscode-pylance
       ms-vscode-remote.remote-ssh
+      oderwat.indent-rainbow
       redhat.vscode-yaml
       streetsidesoftware.code-spell-checker
       vscodevim.vim
