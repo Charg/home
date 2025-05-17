@@ -36,8 +36,10 @@ in
       pkgs.minikube
       pkgs.nixfmt-rfc-style
       pkgs.nnn
+      pkgs.nodejs
       pkgs.python313
       pkgs.ripgrep
+      pkgs.sqlite
       pkgs.tmux
       pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
       pkgs.yubikey-manager
@@ -58,6 +60,7 @@ in
       # Desktop Apps
       pkgs.caffeine-ng
       pkgs.calibre
+      pkgs.darktable # image editing
       pkgs.feh # image viewer
       pkgs.flameshot # screenshots
       pkgs.input-leap
