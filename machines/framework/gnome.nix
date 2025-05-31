@@ -1,8 +1,10 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
 
   #
   # GNOME
   #
+  services.udev.packages = [ pkgs.gnome-settings-daemon ];
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true; # Enable GNOME DE
   environment.gnome.excludePackages = with pkgs; [

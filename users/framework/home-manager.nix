@@ -57,6 +57,15 @@ in
       # Browsers
       pkgs.chromium
 
+      # gnome/GTK
+      pkgs.gnome-themes-extra
+      pkgs.pop-gtk-theme
+      pkgs.pop-icon-theme
+      pkgs.pop-launcher
+
+      # Fonts
+      pkgs.adwaita-icon-theme
+
       # Desktop Apps
       pkgs.caffeine-ng
       pkgs.calibre
@@ -64,7 +73,6 @@ in
       pkgs.feh # image viewer
       pkgs.flameshot # screenshots
       pkgs.input-leap
-      pkgs.pop-launcher
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
@@ -166,7 +174,10 @@ in
       kubernetes.disabled = false;
       kubernetes = {
         contexts = [
-          { context_pattern = "prod"; style = "red"; }
+          {
+            context_pattern = "prod";
+            style = "red";
+          }
         ];
       };
 
@@ -185,8 +196,6 @@ in
         success_symbol = "[>](bold #f8f8f2)";
         error_symbol = "[>](bold #ff5555)";
       };
-
-
 
     };
   };
@@ -237,10 +246,10 @@ in
     defaultKeymap = "viins";
 
     dirHashes = {
-      code  = "$HOME/code";
-      docs  = "$HOME/Documents";
-      down  = "$HOME/Downloads";
-      home  = "$HOME/code/home";
+      code = "$HOME/code";
+      docs = "$HOME/Documents";
+      down = "$HOME/Downloads";
+      home = "$HOME/code/home";
     };
 
     history = {
@@ -257,15 +266,15 @@ in
       enable = true;
       plugins = [
         "ohmyzsh/ohmyzsh"
-	"ohmyzsh/ohmyzsh path:lib/clipboard.zsh"
+        "ohmyzsh/ohmyzsh path:lib/clipboard.zsh"
         "ohmyzsh/ohmyzsh path:lib/git.zsh"
-	"ohmyzsh/ohmyzsh path:plugins/aliases"
-	"ohmyzsh/ohmyzsh path:plugins/extract"
-	"ohmyzsh/ohmyzsh path:plugins/git"
-	"ohmyzsh/ohmyzsh path:plugins/git-extras"
-	"ohmyzsh/ohmyzsh path:plugins/kubectl"
-	"ohmyzsh/ohmyzsh path:plugins/magic-enter"
-	"ohmyzsh/ohmyzsh path:plugins/uv"
+        "ohmyzsh/ohmyzsh path:plugins/aliases"
+        "ohmyzsh/ohmyzsh path:plugins/extract"
+        "ohmyzsh/ohmyzsh path:plugins/git"
+        "ohmyzsh/ohmyzsh path:plugins/git-extras"
+        "ohmyzsh/ohmyzsh path:plugins/kubectl"
+        "ohmyzsh/ohmyzsh path:plugins/magic-enter"
+        "ohmyzsh/ohmyzsh path:plugins/uv"
         "ohmyzsh/ohmyzsh path:plugins/vi-mode"
       ];
     };
@@ -556,7 +565,8 @@ in
     };
 
     "org/gnome/shell/extensions/pop-shell" = {
-      activate-launcher = ["<Super>space"];
+      activate-launcher = [ "<Super>space" ];
+      fullscreen-launcher = true; # pop-launcher didnt work without this setting
       active-hint = false;
       focus-down = [
         "<Super>Down"
@@ -614,6 +624,8 @@ in
       disabled-extensions = [ ];
     };
 
+    "org/gnome/shell/extensions/user-theme".name = "Pop-dark";
+
     "org/gnome/desktop/wm/preferences" = {
       audible-bell = false;
       num-workspaces = 8;
@@ -621,13 +633,11 @@ in
 
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
-      # font-antialiasing = "rgba";
-      # font-hinting = "full";
-      # gtk-enable-primary-paste = true;
-      # # TODO: might not be needed with Stylix
-      # gtk-theme = "Adwaita"; # breaks stylix on build
-      # icon-theme = "Adwaita";
-      # cursor-theme = "Adwaita";
+      cursor-theme = "Pop";
+      font-antialiasing = "rgba";
+      font-hinting = "slight";
+      gtk-theme = "Pop-dark";
+      icon-theme = "Pop";
     };
   };
 
