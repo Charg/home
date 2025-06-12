@@ -8,10 +8,17 @@
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
+  boot = {
+    extraModulePackages = [ ];
+    initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
+    initrd.kernelModules = [ ];
+    kernelModules = [ "kvm-amd" ];
+    kernelParams = [
+      # https://community.frame.work/t/fw13-amd-ui-freeze/64555
+      # Alleviates UI (amdgpu crashing) freezing issue
+      "amdgpu.dcdebugmask=0x10"
+    ];
+  };
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/da1b7722-0521-46b7-8dd0-c16521f50f4e";

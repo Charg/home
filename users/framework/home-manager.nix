@@ -72,7 +72,7 @@ in
       pkgs.darktable # image editing
       pkgs.feh # image viewer
       pkgs.flameshot # screenshots
-      pkgs.input-leap
+      # pkgs.input-leap
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
@@ -203,7 +203,7 @@ in
   # TODO: Move this to ./apps/?
   programs.vscode = {
     enable = isLinux;
-    extensions = with pkgs.vscode-extensions; [
+    profiles.default.extensions = with pkgs.vscode-extensions; [
       dracula-theme.theme-dracula
       github.copilot
       github.copilot-chat
@@ -220,7 +220,7 @@ in
       vscodevim.vim
     ];
 
-    userSettings = {
+    profiles.default.userSettings = {
       "[nix]"."editor.tabSize" = 2;
       "chat.commandCenter.enabled" = true;
       "editor.formatOnSave" = true;
@@ -258,7 +258,7 @@ in
       size = 99999;
     };
 
-    initExtra = ''
+    initContent = ''
       . $HOME/.zsh_functions
     '';
 
@@ -538,6 +538,8 @@ in
       toggle-overview = [ ];
     };
 
+    "org/gnome/mutter".dynamic-workspaces = false;
+
     "org/gnome/mutter/keybindings" = {
       toggle-tiled-left = [ ];
       toggle-tiled-right = [ ];
@@ -566,7 +568,7 @@ in
 
     "org/gnome/shell/extensions/pop-shell" = {
       activate-launcher = [ "<Super>space" ];
-      fullscreen-launcher = true; # pop-launcher didnt work without this setting
+      fullscreen-launcher = false; # pop-launcher didnt work without this setting
       active-hint = false;
       focus-down = [
         "<Super>Down"
@@ -628,6 +630,8 @@ in
 
     "org/gnome/desktop/wm/preferences" = {
       audible-bell = false;
+      # org/gnome/mutter/dynamic-workspaces must be false
+      # otherwise num-workspaces isn't static
       num-workspaces = 8;
     };
 
