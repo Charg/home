@@ -1,11 +1,15 @@
-{ config, pkgs, inputs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-      ./gnome.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+    ./gnome.nix
+  ];
 
   #
   # Bootloader
@@ -58,7 +62,7 @@
   # services.xserver.enable = true;
   services.xserver = {
     enable = true;
-    excludePackages = with pkgs; [xterm];
+    excludePackages = with pkgs; [ xterm ];
     # Configure keymap in X11
     xkb = {
       layout = "us";
@@ -73,7 +77,9 @@
   # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
-    settings = { PasswordAuthentication = false; };
+    settings = {
+      PasswordAuthentication = false;
+    };
   };
 
   # A simple daemon allowing you to update some devices' firmware
@@ -98,8 +104,6 @@
     '';
   };
 
-
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
@@ -109,4 +113,3 @@
 
   system.stateVersion = "24.11";
 }
-
