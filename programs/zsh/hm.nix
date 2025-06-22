@@ -53,4 +53,6 @@
       nixfc = "nix flake check ~/code/home";
     };
   };
+
+  home.file.".zsh_functions".source = ../../programs/zsh/functions;
 }

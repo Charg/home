@@ -5,6 +5,16 @@
   ...
 }:
 {
+  home.packages = [
+    pkgs.gnome-themes-extra
+    pkgs.pop-gtk-theme
+    pkgs.pop-icon-theme
+    pkgs.pop-launcher
+
+    # Fonts
+    pkgs.adwaita-icon-theme
+  ];
+
   dconf.settings = lib.mkIf isLinux {
     "gnome/desktop/peripherals/mouse" = {
       natural-scroll = false;
@@ -165,4 +175,31 @@
       icon-theme = "Pop";
     };
   };
+
+  # pop-shell configuration
+  home.file.".config/pop-shell/config.json".text = ''
+    {
+      "float": [
+        {
+          "class": "pop-shell-example",
+          "title": "pop-shell-example"
+        },
+        {
+          "class": "firefox",
+          "title": "^(?!.*Mozilla Firefox).*$",
+          "disabled": true
+        },
+        {
+          "class": "zoom",
+          "disabled": true
+        },
+        {
+          "class": "Slack",
+          "disabled": true
+        },
+      ],
+      "skiptaskbarhidden": [],
+      "log_on_focus": false
+    }
+  '';
 }

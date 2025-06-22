@@ -15,4 +15,6 @@
       };
     };
   };
+
+  home.file.".ssh/sockets/.keep".text = "# Managed by Home Manager";
 }

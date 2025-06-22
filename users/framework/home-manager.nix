@@ -12,20 +12,23 @@
 
 {
 
-  imports = [
-    ../../programs/direnv/hm.nix
-    ../../programs/eza/hm.nix
-    ../../programs/fzf/hm.nix
-    ../../programs/git/hm.nix
-    ../../programs/gnome/hm.nix # TODO: check if we are even using gnome. currently wrapped in a lib.mkfif isLinux
-    ../../programs/neovim/hm.nix
-    ../../programs/ssh/hm.nix
-    ../../programs/starship/hm.nix
-    ../../programs/tmux/hm.nix
-    ../../programs/vscode/hm.nix
-    ../../programs/zoxide/hm.nix
-    ../../programs/zsh/hm.nix
-  ];
+  imports =
+    [
+      ../../programs/direnv/hm.nix
+      ../../programs/eza/hm.nix
+      ../../programs/fzf/hm.nix
+      ../../programs/git/hm.nix
+      ../../programs/neovim/hm.nix
+      ../../programs/ssh/hm.nix
+      ../../programs/starship/hm.nix
+      ../../programs/tmux/hm.nix
+      ../../programs/vscode/hm.nix
+      ../../programs/zoxide/hm.nix
+      ../../programs/zsh/hm.nix
+    ]
+    ++ lib.optionals isLinux [
+      ../../programs/gnome/hm.nix # TODO: check if we are even using gnome. currently wrapped in a lib.mkfif isLinux
+    ];
 
   #
   # Packages
@@ -55,7 +58,6 @@
       pkgs.ripgrep
       pkgs.sqlite
       pkgs.tmux
-      pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
       pkgs.yubikey-manager
       pkgs.uv
       pkgs.zoxide
@@ -70,15 +72,6 @@
     ++ (lib.optionals isLinux [
       # Browsers
       pkgs.chromium
-
-      # gnome/GTK
-      pkgs.gnome-themes-extra
-      pkgs.pop-gtk-theme
-      pkgs.pop-icon-theme
-      pkgs.pop-launcher
-
-      # Fonts
-      pkgs.adwaita-icon-theme
 
       # Desktop Apps
       pkgs.caffeine-ng
@@ -99,11 +92,11 @@
       pkgs.slack
       pkgs.spotify
 
-      # Development
-      pkgs.vscode
-
       # Framework
       pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system
+
+      # Misc
+      pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
     ])
 
     # WSL Packages
@@ -131,55 +124,6 @@
 
     # Needs to be set before antidote installs the magic-enter plugin
     MAGIC_ENTER_GIT_COMMAND = "git status -u";
-  };
-
-  home.file = {
-    ".ssh/sockets/.keep".text = "# Managed by Home Manager";
-    ".zsh_functions".source = ../../programs/zsh/functions;
-
-    ".direnvrc".text = ''
-      layout_uv() {
-        watch_file .python-version pyproject.toml uv.lock
-        uv sync --frozen || true
-        venv_path="$(expand_path "''${UV_PROJECT_ENVIRONMENT:-.venv}")"
-        if [[ -e $venv_path ]]; then
-            VIRTUAL_ENV="$(pwd)/.venv"
-            PATH_add "$VIRTUAL_ENV/bin"
-            export UV_ACTIVE=1  # or VENV_ACTIVE=1
-            export VIRTUAL_ENV
-        fi
-        if [[ ! -e $venv_path ]]; then
-            log_status "No virtual environment exists. Executing \`uv venv\` to create one."
-        fi
-      }
-    '';
-
-    # TODO: mkif isLinux
-    ".config/pop-shell/config.json".text = ''
-      {
-        "float": [
-          {
-            "class": "pop-shell-example",
-            "title": "pop-shell-example"
-          },
-          {
-            "class": "firefox",
-            "title": "^(?!.*Mozilla Firefox).*$",
-            "disabled": true
-          },
-          {
-            "class": "zoom",
-            "disabled": true
-          },
-          {
-            "class": "Slack",
-            "disabled": true
-          },
-        ],
-        "skiptaskbarhidden": [],
-        "log_on_focus": false
-      }
-    '';
   };
 
   xdg.mimeApps = {
