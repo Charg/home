@@ -1,11 +1,12 @@
 {
   pkgs,
   isLinux,
+  isDarwin,
   ...
 }:
 {
   programs.vscode = {
-    enable = isLinux;
+    enable = isLinux || isDarwin;
     profiles.default.extensions = with pkgs.vscode-extensions; [
       dracula-theme.theme-dracula
       github.copilot
