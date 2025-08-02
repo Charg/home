@@ -20,8 +20,7 @@ let
 
   # NixOS vs nix-darwin functions
   systemFunc = if isDarwin then inputs.darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
-  home-manager =
-    if isDarwin then inputs.home-manager.darwinModules else inputs.home-manager.nixosModules;
+  home-manager = if isDarwin then inputs.home-manager.darwinModules else inputs.home-manager.nixosModules;
 in
 systemFunc rec {
   inherit system;
