@@ -2,6 +2,7 @@
 {
   programs.tmux = {
     enable = true;
+    shell = "${pkgs.zsh}/bin/zsh";
     aggressiveResize = true;
     historyLimit = 500000;
     keyMode = "vi";
