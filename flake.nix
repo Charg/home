@@ -47,5 +47,11 @@
       user   = "framework";
       wsl    = true;
     };
+
+    nixosConfigurations."USCARGEROS" = mkSystem "mbp-work-1" {
+      system = "aarch64-darwin";
+      user   = "cargeros";
+      darwin = true;
+    };
   };
 }
