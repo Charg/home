@@ -12,6 +12,7 @@
     autocd = true;
     autosuggestion.enable = true;
     defaultKeymap = "viins";
+    syntaxHighlighting.enable = true;
 
     dirHashes = {
       code = "$HOME/code";
@@ -26,11 +27,12 @@
       size = 99999;
     };
 
-    # Note: the source path is relative to THIS file now.
-    # However, since you point to the root of the repo, an absolute path
-    # derived from `config.home.homeDirectory` is more robust.
-    # For now, let's keep it simple.
     initContent = ''
+      # https://scottspence.com/posts/speeding-up-my-zsh-shell
+      DISABLE_AUTO_UPDATE="true"
+      DISABLE_MAGIC_FUNCTIONS="true"
+      DISABLE_COMPFIX="true"
+
       . $HOME/.zsh_functions
     '';
 
@@ -38,7 +40,12 @@
       enable = true;
       plugins = [
         "ohmyzsh/ohmyzsh"
-        "ohmyzsh/ohmyzsh path:lib/clipboard.zsh"
+        "ohmyzsh/ohmyzsh path:lib"
+        "ohmyzsh/ohmyzsh path:plugins/aws"
+        "ohmyzsh/ohmyzsh path:plugins/git"
+        "ohmyzsh/ohmyzsh path:plugins/helm"
+        "ohmyzsh/ohmyzsh path:plugins/kubectl"
+	"ohmyzsh/ohmyzsh path:plugins/magic-enter"
       ];
     };
 
