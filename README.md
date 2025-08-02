@@ -32,7 +32,7 @@ This will produce a tarball `nixos-wsl.tar.gz` which can be copied into a window
 ❯ nix flake show
 git+file:///home/framework/code/home
 └───nixosConfigurations
-    ├───framework13: NixOS configuration
+    ├───framework: NixOS configuration
     └───wsl: NixOS configuration
 ```
 

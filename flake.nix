@@ -36,7 +36,7 @@
 
   in {
 
-    nixosConfigurations.framework13 = mkSystem "framework" {
+    nixosConfigurations.framework = mkSystem "framework" {
       system = "x86_64-linux";
       user   = "framework";
       wsl    = false;
