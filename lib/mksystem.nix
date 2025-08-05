@@ -52,15 +52,15 @@ systemFunc rec {
       };
     }
 
-    # {
-    #   config._module.args = {
-    #     currentSystem = system;
-    #     currentSystemName = name;
-    #     currentSystemUser = user;
-    #     isWSL = isWSL;
-    #     inputs = inputs;
-    #   };
-    # }
+    {
+      config._module.args = {
+        currentSystem = system;
+        currentSystemName = name;
+        currentSystemUser = user;
+        isWSL = isWSL;
+        inputs = inputs;
+      };
+    }
 
   ];
 }
