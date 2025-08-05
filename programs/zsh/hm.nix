@@ -11,7 +11,6 @@
     enable = true;
     autocd = true;
     autosuggestion.enable = true;
-    defaultKeymap = "viins";
     syntaxHighlighting.enable = true;
 
     dirHashes = {
@@ -28,6 +27,7 @@
     };
 
     initContent = ''
+      bindkey -v
       # https://scottspence.com/posts/speeding-up-my-zsh-shell
       DISABLE_AUTO_UPDATE="true"
       DISABLE_MAGIC_FUNCTIONS="true"
