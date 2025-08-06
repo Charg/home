@@ -27,6 +27,7 @@
     };
 
     initContent = ''
+      # Enable vim mode. This works better than the home manager setting.
       bindkey -v
 
       # https://scottspence.com/posts/speeding-up-my-zsh-shell
@@ -34,14 +35,20 @@
       DISABLE_MAGIC_FUNCTIONS="true"
       DISABLE_COMPFIX="true"
 
+      # TODO: Can I check if `isDarwin` and add this conditionally?
       if [[ -d /opt/homebrew ]]; then
       	eval "$(/opt/homebrew/bin/brew shellenv)"
+      fi
+
+      # TODO: Once I get SOPS working import these functions/aliases into the repo
+      if [[ -f $HOME/.zsh_functions_work ]]; then
+        . $HOME/.zsh_functions_work
       fi
 
       . $HOME/.zsh_functions
 
       # PATH Updates
-      PATH="$HOME/.local/bin:$PATH"
+      export PATH="$HOME/.local/bin:$PATH"
     '';
 
     antidote = {
