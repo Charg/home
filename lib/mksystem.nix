@@ -45,6 +45,7 @@ systemFunc rec {
       home-manager.users.${user} = userHMConfig;
       home-manager.extraSpecialArgs = {
         currentSystemName = name;
+        currentSystemUser = user;
         inputs = inputs;
         isDarwin = isDarwin;
         isLinux = isLinux;

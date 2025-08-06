@@ -12,8 +12,7 @@
 
 {
 
-  imports =
-    [
+  imports = [
       ../../programs/direnv/hm.nix
       ../../programs/eza/hm.nix
       ../../programs/fzf/hm.nix
@@ -25,7 +24,7 @@
       ../../programs/vscode/hm.nix
       ../../programs/zoxide/hm.nix
       ../../programs/zsh/hm.nix
-    ];
+  ];
 
   #
   # Packages

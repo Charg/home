@@ -6,6 +6,7 @@
     controlPersist = "10m";
     addKeysToAgent = "yes";
     forwardAgent = false;
+    includes = ["~/.ssh/config.d/*"];
     matchBlocks = {
       "github.com" = {
         hostname = "github.com";
@@ -16,5 +17,6 @@
     };
   };
 
+  home.file.".ssh/config.d/.keep".text = "# Managed by Home Manager";
   home.file.".ssh/sockets/.keep".text = "# Managed by Home Manager";
 }

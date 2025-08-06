@@ -13,8 +13,6 @@
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
 
-  environment.systemPackages = [];
-
   programs.zsh.enable = true;
 
   services.openssh.enable = true;

@@ -28,12 +28,20 @@
 
     initContent = ''
       bindkey -v
+
       # https://scottspence.com/posts/speeding-up-my-zsh-shell
       DISABLE_AUTO_UPDATE="true"
       DISABLE_MAGIC_FUNCTIONS="true"
       DISABLE_COMPFIX="true"
 
+      if [[ -d /opt/homebrew ]]; then
+      	eval "$(/opt/homebrew/bin/brew shellenv)"
+      fi
+
       . $HOME/.zsh_functions
+
+      # PATH Updates
+      PATH="$HOME/.local/bin:$PATH"
     '';
 
     antidote = {
