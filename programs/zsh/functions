@@ -1,6 +1,6 @@
 gfmm () {
     # Pull changes from  and into the primary branch
-    local HEAD=$(git remote show origin | /bin/grep "HEAD branch:" | awk -F': ' '{print $2}')
+    local HEAD=$(git remote show origin | rg "HEAD branch:" | awk -F': ' '{print $2}')
     echo "Running: git fetch origin ${HEAD}:${HEAD}"
     git fetch origin "${HEAD}":"${HEAD}"
 }
