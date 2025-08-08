@@ -51,7 +51,7 @@ in
       pkgs.darktable # image editing
       pkgs.feh # image viewer
       pkgs.flameshot # screenshots
-      # pkgs.input-leap
+      pkgs.ghostty # terminal emulator
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc

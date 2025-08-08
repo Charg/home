@@ -9,7 +9,6 @@
   pkgs.dig
   pkgs.docker-compose
   pkgs.file
-  pkgs.ghostty
   pkgs.htop
   pkgs.jq
   pkgs.kubectl
