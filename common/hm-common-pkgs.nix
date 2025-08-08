@@ -28,7 +28,6 @@
   pkgs.zoxide
 
   # Network Tools
-  pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
   pkgs.nmap
   pkgs.wireshark
 

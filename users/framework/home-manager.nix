@@ -67,6 +67,9 @@ in
       # Framework
       pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system
 
+      # Network Tools
+      # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
+
       # Misc
       pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
     ])
