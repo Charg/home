@@ -10,6 +10,10 @@
   ...
 }:
 
+let
+  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs; };
+in
+
 {
 
   imports =
@@ -27,46 +31,14 @@
       ../../programs/zsh/hm.nix
     ]
     ++ lib.optionals isLinux [
-      ../../programs/gnome/hm.nix # TODO: check if we are even using gnome. currently wrapped in a lib.mkfif isLinux
+      ../../programs/gnome/hm.nix # TODO: check if we are even using gnome
     ];
 
   #
   # Packages
   #
   home.packages =
-    [
-      # Shared packages
-
-      # CLI Tools
-      pkgs.awscli2
-      pkgs.bottom
-      pkgs.dig
-      pkgs.docker-compose
-      pkgs.file
-      pkgs.ghostty
-      pkgs.htop
-      pkgs.jq
-      pkgs.kubectl
-      pkgs.kube-prompt
-      pkgs.kubernetes-helm
-      pkgs.lsof
-      pkgs.minikube
-      pkgs.nixfmt-rfc-style
-      pkgs.nnn
-      pkgs.nodejs
-      pkgs.python313
-      pkgs.ripgrep
-      pkgs.sqlite
-      pkgs.tmux
-      pkgs.yubikey-manager
-      pkgs.uv
-      pkgs.zoxide
-
-      # Network Tools
-      pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
-      pkgs.nmap
-      pkgs.wireshark
-    ]
+    commonPkgs
 
     # Linux Packages
     ++ (lib.optionals isLinux [
