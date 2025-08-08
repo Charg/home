@@ -9,6 +9,7 @@
     casks  = [
       "amethyst"
       "bitwarden"
+      "deskflow"
       "firefox"
       "flameshot"
       "ghostty"
@@ -16,6 +17,9 @@
       "podman-desktop"
       "raycast"
       "slack"
+    ];
+    taps = [
+      "deskflow/homebrew-tap"
     ];
   };
 
