@@ -11,7 +11,7 @@
 }:
 
 let
-  commonPkgs = import ../hm-common-pkgs.nix { inherit pkgs; };
+  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs; };
 in
 
 {
@@ -33,7 +33,7 @@ in
   #
   # Packages
   #
-  home.packages = commonPkgs
+  home.packages = commonPkgs;
 
   #
   # Program config
