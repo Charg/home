@@ -7,38 +7,53 @@
 {
   programs.vscode = {
     enable = isLinux || isDarwin;
-    profiles.default.extensions = with pkgs.vscode-extensions; [
-      dracula-theme.theme-dracula
-      github.copilot
-      github.copilot-chat
-      golang.go
-      hashicorp.terraform
-      jnoortheen.nix-ide
-      mkhl.direnv
-      ms-python.python
-      ms-python.vscode-pylance
-      ms-vscode-remote.remote-ssh
-      oderwat.indent-rainbow
-      redhat.vscode-yaml
-      streetsidesoftware.code-spell-checker
-      vscodevim.vim
-    ];
+    profiles = {
+      default = {
+        enableUpdateCheck = false;
+        extensions = with pkgs.vscode-extensions; [
+          # Appearance
+          dracula-theme.theme-dracula
 
-    profiles.default.userSettings = {
-      "[nix]"."editor.tabSize" = 2;
-      "chat.commandCenter.enabled" = true;
-      "editor.formatOnSave" = true;
-      "editor.minimap.enabled" = false;
-      "explorer.confirmDelete" = false;
-      "files.insertFinalNewline" = true;
-      "files.trimFinalNewlines" = true;
-      "files.trimTrailingWhitespace" = true;
-      "github.copilot.enable"."markdown" = "true";
+          # AI
+          github.copilot
+          github.copilot-chat
 
-      # telemetry
-      "redhat.telemetry.enabled" = false;
-      "telemetry.enableTelemetry" = false;
-      "telemetry.telemetryLevel" = "off";
+          # Languages
+          golang.go
+          hashicorp.terraform
+          jnoortheen.nix-ide
+          redhat.vscode-yaml
+          ms-python.python
+          ms-python.vscode-pylance
+
+          # Tools
+          mkhl.direnv
+          ms-vscode-remote.remote-ssh
+
+          # Other
+          streetsidesoftware.code-spell-checker
+          oderwat.indent-rainbow
+          vscodevim.vim
+        ];
+
+        userSettings = {
+          "[nix]"."editor.tabSize" = 2;
+          "chat.commandCenter.enabled" = true;
+          "editor.formatOnSave" = true;
+          "editor.minimap.enabled" = false;
+          "explorer.confirmDelete" = false;
+          "files.autoSave" = "onFocusChange";
+          "files.insertFinalNewline" = true;
+          "files.trimFinalNewlines" = true;
+          "files.trimTrailingWhitespace" = true;
+          "github.copilot.enable"."markdown" = true;
+
+          # telemetry
+          "redhat.telemetry.enabled" = false;
+          "telemetry.enableTelemetry" = false;
+          "telemetry.telemetryLevel" = "off";
+        };
+      };
     };
   };
 }
