@@ -12,6 +12,10 @@
       tmuxPlugins.sensible
     ];
     extraConfig = ''
+      # Ensure tmux loads the correct shell
+      set -gu default-command
+      set -g default-shell "$SHELL"
+
       set -g base-index 1
       set -g pane-base-index 1
 
