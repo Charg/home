@@ -23,6 +23,11 @@
   networking.networkmanager.enable = true; # Enable networking
   networking.hostName = "framework13";
 
+  # Deskflow KVM
+  # TODO: Can I make this conditional on if deskflow is installed? OR move it somewhere better...
+  networking.firewall.allowedTCPPorts = [ 24800 ];
+  networking.firewall.allowedUDPPorts = [ 24800 ];
+
   #
   # System
   #

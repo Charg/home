@@ -55,6 +55,7 @@ in
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
+      pkgs.deskflow # mouse/keyboard sharing
 
       # Electron Apps
       pkgs.anytype
