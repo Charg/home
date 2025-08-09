@@ -82,15 +82,15 @@
       #
       _ = "sudo";
       a = "ansible";
+      py = "python3";
       reboot = "sudo reboot";
       shut = "sudo shutdown -h now";
       weather = "curl wttr.in/sf";
 
-
       #
       # AWS
       #
-      asl="aws sso login";
+      asl = "aws sso login";
 
       #
       # Git
