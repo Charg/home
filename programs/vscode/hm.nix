@@ -48,6 +48,12 @@
           "files.trimTrailingWhitespace" = true;
           "github.copilot.enable"."markdown" = true;
 
+          # vim
+          "vim.easymotion" = true;
+          "vim.hlsearch" = true;
+          "vim.timeout" = 500;
+          "vim.leader" = "<space>";
+
           # telemetry
           "redhat.telemetry.enabled" = false;
           "telemetry.enableTelemetry" = false;
