@@ -111,7 +111,7 @@
       # Kubernetes
       #
       k = "kubectl";
-      kc = "k get configmap -o go-template='{{ range \$key, \$value := .data }}{{ printf \"%s:\n%s\n\n\" \$key \$value }}{{ end }}'";
+      kc = "k get configmap -o go-template='{{ range \$key, \$value := .data }}{{ printf \"%s:\\n%s\\n\\n\" \$key \$value }}{{ end }}'";
       kga = "kubectl get all";
       kgcj = "kubectl get cronjob";
       kgj = "kubectl get job";
@@ -121,7 +121,7 @@
       kgrs = "kubectl get replicaset";
       kgs = "kubectl get svc";
       kgss = "kubectl get statefulset";
-      ks = "k get secrets -o go-template='{{ range \$key, \$value := .data }}{{ printf \"%s:\n%s\n\n\" \$key (\$value | base64decode) }}{{ end }}'";
+      ks = "k get secrets -o go-template='{{ range \$key, \$value := .data }}{{ printf \"%s:\\n%s\\n\\n\" \$key (\$value | base64decode) }}{{ end }}'";
 
       #
       # Nix
