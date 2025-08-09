@@ -37,32 +37,58 @@
 
       # TODO: Can I check if `isDarwin` and add this conditionally?
       if [[ -d /opt/homebrew ]]; then
-      	eval "$(/opt/homebrew/bin/brew shellenv)"
+        eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
+
 
       # TODO: Once I get SOPS working import these functions/aliases into the repo
       if [[ -f $HOME/.zsh_functions_work ]]; then
-        . $HOME/.zsh_functions_work
+        source $HOME/.zsh_functions_work
       fi
 
-      . $HOME/.zsh_functions
+      source $HOME/.zsh_functions
 
-      # PATH Updates
+      # Load Plugins
+      source $HOME/.local/share/zplugins/magic-enter/magic-enter.plugin.zsh
+
+      # Plugin Configuration
+      zstyle ':zshzoo:magic-enter' command 'ls -alh'
+      zstyle ':zshzoo:magic-enter' git-command 'git status'
+
+      #
+      # Alias Configuration
+      #
+
+      # Git
+      alias ga='git add'
+      alias gap='git add --patch'
+      alias gcm='git commit --message'
+      alias gfm='git pull'
+      alias gp='git push'
+      alias gs='git stash' # with magic-enter, maybe I move this to git stash
+
+      # Kubernetes
+      alias k='kubectl'
+      alias kgp='kubectl get pods'
+      alias kgs='kubectl get svc'
+      alias kgn='kubectl get nodes'
+
       export PATH="$HOME/.local/bin:$PATH"
     '';
 
-    antidote = {
-      enable = true;
-      plugins = [
-        "ohmyzsh/ohmyzsh"
-        "ohmyzsh/ohmyzsh path:lib"
-        "ohmyzsh/ohmyzsh path:plugins/aws"
-        "ohmyzsh/ohmyzsh path:plugins/git"
-        "ohmyzsh/ohmyzsh path:plugins/helm"
-        "ohmyzsh/ohmyzsh path:plugins/kubectl"
-	"ohmyzsh/ohmyzsh path:plugins/magic-enter"
-      ];
-    };
+    # So slow. What's the point? I can source files myself.
+    # antidote = {
+    #   enable = true;
+    #   plugins = [
+    #     "ohmyzsh/ohmyzsh"
+    #     "ohmyzsh/ohmyzsh path:lib"
+    #     "ohmyzsh/ohmyzsh path:plugins/aws"
+    #     "ohmyzsh/ohmyzsh path:plugins/git"
+    #     "ohmyzsh/ohmyzsh path:plugins/helm"
+    #     "ohmyzsh/ohmyzsh path:plugins/kubectl"
+    #     "ohmyzsh/ohmyzsh path:plugins/magic-enter"
+    #   ];
+    # };
 
     shellAliases = {
       _ = "sudo";
@@ -76,5 +102,11 @@
     };
   };
 
-  home.file.".zsh_functions".source = ../../programs/zsh/functions;
+  home.file = {
+    ".zsh_functions".source = ../../programs/zsh/functions;
+    ".local/share/zplugins/magic-enter".source = builtins.fetchGit {
+      url = "https://github.com/zshzoo/magic-enter.git";
+      rev = "b5a7d0a55abab268ebd94969e2df6ea867fa2cd5";
+    };
+  };
 }
