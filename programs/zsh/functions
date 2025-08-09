@@ -1,11 +1,11 @@
-gfmm () {
+function gfmm {
     # Pull changes from  and into the primary branch
     local HEAD=$(git remote show origin | rg "HEAD branch:" | awk -F': ' '{print $2}')
     echo "Running: git fetch origin ${HEAD}:${HEAD}"
     git fetch origin "${HEAD}":"${HEAD}"
 }
 
-kbn () {
+function kbn {
     # Set kube context
     #
     # ARGS:
@@ -37,7 +37,7 @@ kbn () {
     fi
 }
 
-kbnn () {
+function kbnn {
     # Set kube contexts namespace
     if [[ $1 ]]; then
       local _NAMESPACE=$1
@@ -47,7 +47,7 @@ kbnn () {
     fi
 }
 
-awsp () {
+function awsp {
     # Switch AWS profile for the current shell
 
     if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
@@ -59,7 +59,7 @@ awsp () {
     fi
 }
 
-awssh () {
+function awssh {
     # This function connects you to an EC2 instance based on the supplied instance information.
     #
     # ARGS:
@@ -86,7 +86,7 @@ awssh () {
     fi
 }
 
-get_cert () {
+function get_cert {
     # Display or download remote servers ssl certificate
     if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
     then
@@ -109,7 +109,7 @@ get_cert () {
     fi
 }
 
-help_date() {
+function help_date {
 cat << EOD
         Format/result           |       Command              |          Output
 --------------------------------+----------------------------+------------------------------

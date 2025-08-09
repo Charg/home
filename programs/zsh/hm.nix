@@ -77,25 +77,41 @@
     # };
 
     shellAliases = {
+      #
+      # MISC
+      #
       _ = "sudo";
       a = "ansible";
-      # ... other aliases
+      reboot = "sudo reboot";
+      shut = "sudo shutdown -h now";
+      weather = "curl wttr.in/sf";
 
-      nixg = "sudo nix-collect-garbage -d";
-      nixrs = "sudo nixos-rebuild switch --flake ~/code/home#${currentSystemName}";
-      nixrt = "sudo nixos-rebuild test --flake ~/code/home#${currentSystemName}";
-      nixfc = "nix flake check ~/code/home";
 
+      #
+      # AWS
+      #
+      asl="aws sso login";
+
+      #
       # Git
+      #
       ga = "git add";
       gap = "git add --patch";
+      gbls = "git branch -l --sort=-committerdate --format='%(authordate:short) %(color:yellow)%(refname:short) %(color:blue)%(subject)%(color:reset)  (%(color:green)%(committerdate:relative)%(color:reset))'";
+      gch = "git ch";
       gcm = "git commit --message";
       gfm = "git pull";
+      git_show_tag_by_date = "git log --tags --simplify-by-decoration --pretty='format:%ai %d'";
       gp = "git push";
-      gs = "git stash"; # with magic-enter, maybe I move this to git stash
+      gpb = "git pushb";
+      gs = "git stash";
+      gtr = "cd $(git rev-parse --show-cdup)";
 
+      #
       # Kubernetes
+      #
       k = "kubectl";
+      kc = "k get configmap -o go-template='{{ range \$key, \$value := .data }}{{ printf \"%s:\n%s\n\n\" \$key \$value }}{{ end }}'";
       kga = "kubectl get all";
       kgcj = "kubectl get cronjob";
       kgj = "kubectl get job";
@@ -105,7 +121,22 @@
       kgrs = "kubectl get replicaset";
       kgs = "kubectl get svc";
       kgss = "kubectl get statefulset";
+      ks = "k get secrets -o go-template='{{ range \$key, \$value := .data }}{{ printf \"%s:\n%s\n\n\" \$key (\$value | base64decode) }}{{ end }}'";
 
+      #
+      # Nix
+      #
+      nixg = "sudo nix-collect-garbage -d";
+      nixrs = "sudo nixos-rebuild switch --flake ~/code/home#${currentSystemName}";
+      nixrt = "sudo nixos-rebuild test --flake ~/code/home#${currentSystemName}";
+      nixdr = "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName}";
+      nixfc = "nix flake check ~/code/home";
+    };
+
+    shellGlobalAliases = {
+      B6 = "base64 -d";
+      CP = "| pbcopy"; # switch this based on isDarwin||isLinux
+      X5 = "openssl x509 -noout -text";
     };
   };
 
