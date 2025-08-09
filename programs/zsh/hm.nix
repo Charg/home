@@ -35,43 +35,29 @@
       DISABLE_MAGIC_FUNCTIONS="true"
       DISABLE_COMPFIX="true"
 
-      # TODO: Can I check if `isDarwin` and add this conditionally?
+      # TODO: Use isDarwin to conditionally add this
       if [[ -d /opt/homebrew ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
 
 
-      # TODO: Once I get SOPS working import these functions/aliases into the repo
+      # TODO: Use SOPS to import these
       if [[ -f $HOME/.zsh_functions_work ]]; then
         source $HOME/.zsh_functions_work
       fi
 
       source $HOME/.zsh_functions
 
-      # Load Plugins
+      #
+      # Plugins
+      #
+
+      # Source Plugins
       source $HOME/.local/share/zplugins/magic-enter/magic-enter.plugin.zsh
 
       # Plugin Configuration
       zstyle ':zshzoo:magic-enter' command 'ls -alh'
       zstyle ':zshzoo:magic-enter' git-command 'git status'
-
-      #
-      # Alias Configuration
-      #
-
-      # Git
-      alias ga='git add'
-      alias gap='git add --patch'
-      alias gcm='git commit --message'
-      alias gfm='git pull'
-      alias gp='git push'
-      alias gs='git stash' # with magic-enter, maybe I move this to git stash
-
-      # Kubernetes
-      alias k='kubectl'
-      alias kgp='kubectl get pods'
-      alias kgs='kubectl get svc'
-      alias kgn='kubectl get nodes'
 
       export PATH="$HOME/.local/bin:$PATH"
     '';
@@ -99,6 +85,27 @@
       nixrs = "sudo nixos-rebuild switch --flake ~/code/home#${currentSystemName}";
       nixrt = "sudo nixos-rebuild test --flake ~/code/home#${currentSystemName}";
       nixfc = "nix flake check ~/code/home";
+
+      # Git
+      ga = "git add";
+      gap = "git add --patch";
+      gcm = "git commit --message";
+      gfm = "git pull";
+      gp = "git push";
+      gs = "git stash"; # with magic-enter, maybe I move this to git stash
+
+      # Kubernetes
+      k = "kubectl";
+      kga = "kubectl get all";
+      kgcj = "kubectl get cronjob";
+      kgj = "kubectl get job";
+      kgn = "kubectl get nodes";
+      kgp = "kubectl get pods";
+      kgpvc = "kubectl get pvc";
+      kgrs = "kubectl get replicaset";
+      kgs = "kubectl get svc";
+      kgss = "kubectl get statefulset";
+
     };
   };
 
