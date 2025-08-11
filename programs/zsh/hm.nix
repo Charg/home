@@ -82,6 +82,7 @@
       #
       _ = "sudo";
       a = "ansible";
+      l = "ls";
       py = "python3";
       reboot = "sudo reboot";
       shut = "sudo shutdown -h now";
