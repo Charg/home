@@ -17,6 +17,7 @@
       "podman-desktop"
       "raycast"
       "slack"
+      "zoom"
     ];
     taps = [
       "deskflow/homebrew-tap"
