@@ -98,8 +98,10 @@
       ga = "git add";
       gap = "git add --patch";
       gbls = "git branch -l --sort=-committerdate --format='%(authordate:short) %(color:yellow)%(refname:short) %(color:blue)%(subject)%(color:reset)  (%(color:green)%(committerdate:relative)%(color:reset))'";
+      gcb = "git checkout -b";
       gch = "git ch";
       gcm = "git commit --message";
+      gco = "git checkout";
       gfm = "git pull";
       git_show_tag_by_date = "git log --tags --simplify-by-decoration --pretty='format:%ai %d'";
       gp = "git push";
