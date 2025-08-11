@@ -17,12 +17,23 @@
 
   services.openssh.enable = true;
 
-  system.defaults.NSGlobalDomain.KeyRepeat = 2;
-  system.defaults.NSGlobalDomain.AppleInterfaceStyle = "Dark";
-  system.defaults.dock.autohide = true;
-  system.defaults.dock.mru-spaces = false;
-  system.defaults.dock.show-recents = false;
-  system.defaults.dock.tilesize = 30;
+  # MacOS Settings
+  system.defaults = {
+    NSGlobalDomain.KeyRepeat = 2;
+    # Dark mode
+    NSGlobalDomain.AppleInterfaceStyle = "Dark";
+    NSGlobalDomain."com.apple.swipescrolldirection" = false;
+    dock = {
+      autohide = true;
+      # Dissables automatically rearrange spaces based on most recent use
+      mru-spaces = false;
+      # Show recent applications in the dock.
+      show-recents = false;
+      # Size of the icons in the dock. The default is 64.
+      tilesize = 30;
+    };
+  };
+
 
   nixpkgs.hostPlatform = currentSystem;
 
