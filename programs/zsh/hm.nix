@@ -54,6 +54,7 @@
 
       # Source Plugins
       source $HOME/.local/share/zplugins/magic-enter/magic-enter.plugin.zsh
+      source $HOME/.local/share/zplugins/fzf-tab/fzf-tab.plugin.zsh
 
       # Plugin Configuration
       zstyle ':zshzoo:magic-enter' command 'ls -alh'
@@ -61,20 +62,6 @@
 
       export PATH="$HOME/.local/bin:$PATH"
     '';
-
-    # So slow. What's the point? I can source files myself.
-    # antidote = {
-    #   enable = true;
-    #   plugins = [
-    #     "ohmyzsh/ohmyzsh"
-    #     "ohmyzsh/ohmyzsh path:lib"
-    #     "ohmyzsh/ohmyzsh path:plugins/aws"
-    #     "ohmyzsh/ohmyzsh path:plugins/git"
-    #     "ohmyzsh/ohmyzsh path:plugins/helm"
-    #     "ohmyzsh/ohmyzsh path:plugins/kubectl"
-    #     "ohmyzsh/ohmyzsh path:plugins/magic-enter"
-    #   ];
-    # };
 
     shellAliases = {
       #
@@ -148,6 +135,10 @@
     ".local/share/zplugins/magic-enter".source = builtins.fetchGit {
       url = "https://github.com/zshzoo/magic-enter.git";
       rev = "b5a7d0a55abab268ebd94969e2df6ea867fa2cd5";
+    };
+    ".local/share/zplugins/fzf-tab".source = builtins.fetchGit {
+      url = "https://github.com/Aloxaf/fzf-tab";
+      rev = "fc6f0dcb2d5e41a4a685bfe9af2f2393dc39f689";
     };
   };
 }
