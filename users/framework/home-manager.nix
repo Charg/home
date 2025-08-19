@@ -21,6 +21,7 @@ in
       ../../programs/direnv/hm.nix
       ../../programs/eza/hm.nix
       ../../programs/fzf/hm.nix
+      ../../programs/ghostty/hm.nix
       ../../programs/git/hm.nix
       ../../programs/neovim/hm.nix
       ../../programs/ssh/hm.nix
@@ -50,7 +51,6 @@ in
       pkgs.calibre
       pkgs.darktable # image editing
       pkgs.feh # image viewer
-      pkgs.ghostty # terminal emulator
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
