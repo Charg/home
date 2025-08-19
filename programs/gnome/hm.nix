@@ -4,6 +4,13 @@
   pkgs,
   ...
 }:
+
+let
+  # for whatever reason, we need to create a shell script for this to work as a shortcut
+  # https://github.com/flameshot-org/flameshot/issues/3326#issuecomment-1788440850
+  flameshot-gui = pkgs.writeShellScriptBin "flameshot-gui" "${pkgs.flameshot}/bin/flameshot gui";
+in
+
 {
   home.packages = [
     pkgs.gnome-themes-extra
@@ -67,6 +74,9 @@
       switch-to-application-5 = [ ];
       toggle-message-tray = [ "<Super>v" ];
       toggle-overview = [ ];
+
+      # disable screenshot interface. replace with flameshot
+      show-screenshot-ui = [ ];
     };
 
     "org/gnome/mutter".dynamic-workspaces = false;
@@ -85,13 +95,22 @@
       home = [ "<Super>f" ];
       www = [ "<Super>b" ];
       email = [ "<Super>e" ];
+
       # Terminal
       custom-keybindings = [
-        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot/"
       ];
     };
 
-    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot" = {
+      binding="<control>Print";
+      # command="${pkgs.flameshot}/bin/flameshot gui";
+      command="${flameshot-gui}/bin/flameshot-gui";
+      name="flameshot";
+    };
+
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost" = {
       binding = "<super>t";
       command = "ghostty";
       name = "Launch terminal";
