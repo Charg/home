@@ -50,7 +50,6 @@ in
       pkgs.calibre
       pkgs.darktable # image editing
       pkgs.feh # image viewer
-      pkgs.flameshot # screenshots
       pkgs.ghostty # terminal emulator
       pkgs.satty
       pkgs.synology-drive-client
@@ -85,6 +84,14 @@ in
   #
   programs.bat.enable = true;
   programs.firefox.enable = isLinux;
+
+  #
+  # Services
+  #
+  services.flameshot = {
+    enable = true;
+    package = pkgs.flameshot.override { enableWlrSupport = true; };
+  };
 
   #
   # Home config
