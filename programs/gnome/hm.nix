@@ -36,25 +36,19 @@ in
         "<Super>q"
         "<Alt>F4"
       ];
+      maximize = [ ];
       minimize = [ "<Super>comma" ];
-      toggle-maximized = [ "<Super>m" ];
+      move-to-monitor-down = [ ];
       move-to-monitor-left = [ ];
       move-to-monitor-right = [ ];
       move-to-monitor-up = [ ];
-      move-to-monitor-down = [ ];
-      move-to-workspace-down = [ ];
-      move-to-workspace-up = [ ];
-      switch-to-workspace-down = [ "<Primary><Super>Down" ];
-      switch-to-workspace-up = [ "<Primary><Super>Up" ];
-      switch-to-workspace-left = [ ];
-      switch-to-workspace-right = [ ];
-      maximize = [ ];
-      unmaximize = [ ];
       move-to-workspace-1 = [ "<Shift><Super>1" ];
       move-to-workspace-2 = [ "<Shift><Super>2" ];
       move-to-workspace-3 = [ "<Shift><Super>3" ];
       move-to-workspace-4 = [ "<Shift><Super>4" ];
       move-to-workspace-5 = [ "<Shift><Super>5" ];
+      move-to-workspace-down = [ ];
+      move-to-workspace-up = [ ];
       switch-to-workspace-1 = [ "<Super>1" ];
       switch-to-workspace-2 = [ "<Super>2" ];
       switch-to-workspace-3 = [ "<Super>3" ];
@@ -63,6 +57,12 @@ in
       switch-to-workspace-6 = [ "<Super>6" ];
       switch-to-workspace-7 = [ "<Super>7" ];
       switch-to-workspace-8 = [ "<Super>8" ];
+      switch-to-workspace-down = [ "<Primary><Super>Down" ];
+      switch-to-workspace-left = [ ];
+      switch-to-workspace-right = [ ];
+      switch-to-workspace-up = [ "<Primary><Super>Up" ];
+      toggle-maximized = [ "<Super>m" ];
+      unmaximize = [ ];
     };
 
     "org/gnome/shell/keybindings" = {
