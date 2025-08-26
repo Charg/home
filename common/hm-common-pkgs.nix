@@ -16,6 +16,7 @@
   pkgs.kubernetes-helm
   pkgs.lsof
   pkgs.minikube
+  pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
   pkgs.nixfmt-rfc-style
   pkgs.nnn
   pkgs.nodejs
@@ -23,8 +24,8 @@
   pkgs.ripgrep
   pkgs.sqlite
   pkgs.tmux
-  pkgs.yubikey-manager
   pkgs.uv
+  pkgs.yubikey-manager
   pkgs.zoxide
 
   # Network Tools
