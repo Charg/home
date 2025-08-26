@@ -54,6 +54,8 @@ in
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
+
+      # Productivity
       pkgs.deskflow # mouse/keyboard sharing
 
       # Electron Apps
@@ -71,7 +73,7 @@ in
       # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
 
       # Misc
-      pkgs.xclip # NOTE: Xorg clipboard. wclip or wl-copy if using wayland
+      pkgs.wl-clipboard
     ])
 
     # WSL Packages

@@ -30,7 +30,4 @@
   # Network Tools
   pkgs.nmap
   pkgs.wireshark
-
-  # Productivity Tools
-  pkgs.lan-mouse
 ]
