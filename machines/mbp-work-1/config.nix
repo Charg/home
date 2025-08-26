@@ -20,9 +20,19 @@
   # MacOS Settings
   system.defaults = {
     NSGlobalDomain.KeyRepeat = 2;
-    # Dark mode
+
+    # Enable repeat key presses
     NSGlobalDomain.AppleInterfaceStyle = "Dark";
+
+    # Dark mode
+    NSGlobalDomain.ApplePressAndHoldEnabled = false;
+
     NSGlobalDomain."com.apple.swipescrolldirection" = false;
+
+    CustomUserPreferences = {
+      "com.microsoft.VSCode".ApplePressAndHoldEnabled = false;
+    };
+
     dock = {
       autohide = true;
       # Dissables automatically rearrange spaces based on most recent use
@@ -32,6 +42,15 @@
       # Size of the icons in the dock. The default is 64.
       tilesize = 30;
     };
+
+    finder = {
+      # Show full path in finder title
+      _FXShowPosixPathInTitle = true;
+      # Show file extension
+      AppleShowAllExtensions = true;
+      ShowPathbar = true;
+    };
+
   };
 
 
