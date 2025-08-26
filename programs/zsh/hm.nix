@@ -3,6 +3,8 @@
   pkgs,
   lib,
   currentSystemName,
+  isDarwin,
+  isWSL,
   ...
 }:
 
@@ -124,9 +126,31 @@
     };
 
     shellGlobalAliases = {
-      B6 = "base64 -d";
-      CP = "| pbcopy"; # switch this based on isDarwin||isLinux
-      X5 = "openssl x509 -noout -text";
+      # flags
+      H = " --help";
+      V = " --version";
+
+      # misc
+      B = "| base64 -d";
+      C = "| ${
+        if isDarwin then
+          "pbcopy"
+        else if isWSL then
+          "xclip -selection clipboard"
+        else
+          "wl-copy"
+      }";
+      M = "| more";
+      L = "| less";
+      S = "| sort";
+      U = "| uniq ";
+      X = "| openssl x509 -noout -text";
+
+      # kubernetes
+      NA = " --all-namespaces";
+      NS = " --namespace=kube-system";
+      OJ = " --output=json";
+      OY = " --output=yaml";
     };
   };
 
