@@ -37,7 +37,6 @@
       DISABLE_MAGIC_FUNCTIONS="true"
       DISABLE_COMPFIX="true"
 
-      # TODO: Use isDarwin to conditionally add this
       if [[ -d /opt/homebrew ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
@@ -75,7 +74,7 @@
       py = "python3";
       reboot = "sudo reboot";
       shut = "sudo shutdown -h now";
-      weather = "curl wttr.in/sf";
+      weather = "curl https://wttr.in/sf";
 
       #
       # AWS
