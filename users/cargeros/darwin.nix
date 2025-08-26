@@ -6,6 +6,11 @@
 
   homebrew = {
     enable = true;
+    brews = [
+      "podman"
+      "podman-compose"
+      "jfrog-cli"
+    ];
     casks  = [
       "amethyst"
       "bitwarden"
