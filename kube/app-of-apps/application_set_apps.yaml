@@ -40,5 +40,5 @@ spec:
             valueFiles:
               - "$values/kube/{{ .name }}/values.yaml"
         - repoURL: https://github.com/Charg/home.git
-          targetRevision: main
+          targetRevision: home-lab
           ref: values
