@@ -17,6 +17,11 @@ spec:
             chart: argo-cd
             targetRevision: "8.3.1"
             namespace: argocd
+          - name: host-assistant
+            repoURL: http://pajikos.github.io/home-assistant-helm-chart/
+            chart: home-assistant
+            targetRevision: 0.3.17
+            namespace: default
   template:
     metadata:
       name: "{{ .name }}"
