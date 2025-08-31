@@ -30,7 +30,7 @@
   outputs = { self, nixpkgs, nixos-hardware, home-manager, darwin, ... }@inputs:
   let
 
-    mkSystem = import ./lib/mksystem.nix {
+    mkSystem = import ./nix/lib/mksystem.nix {
       inherit nixpkgs inputs;
     };
 

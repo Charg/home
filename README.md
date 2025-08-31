@@ -1,14 +1,14 @@
 # :house: Home
 > [!NOTE]
-> 99% of this configuration was directly copied from [nixos-config](https://github.com/mitchellh/nixos-config). Thanks Mitchell Hashimoto for the starting point!
+> This repo builds upon the excellent work in Mitchell Hashimoto’s [nixos-config](https://github.com/mitchellh/nixos-config). Thanks for sharing!
 
 TODO:
 - [ ] document how tf this all works
-- [ ] declaritive disk setup for framework laptop
+- [ ] declarative disk setup for framework laptop
 - [ ] full disk encryption for framework laptop
 - [x] migrate zsh configuration to here
 - [x] migrate tmux configuration to here
-- [ ] add macos configuration
+- [x] add macos configuration
 
 ## WSL
 ### Creating An Image
