@@ -54,6 +54,7 @@ in
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
+      pkgs.kooha # screen recorder
 
       # Productivity
       pkgs.deskflow # mouse/keyboard sharing
