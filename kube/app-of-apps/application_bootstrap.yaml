@@ -11,12 +11,12 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-    - CreateNamespace=true
-    - ServerSideApply=true
+      - CreateNamespace=true
+      - ServerSideApply=true
   destination:
     namespace: argocd
     server: https://kubernetes.default.svc
   sources:
-  - repoURL: git@github.com:Charg/home.git
-    path: kube/app-of-apps
-    targetRevision: home-lab
+    - repoURL: https://github.com/Charg/home.git
+      path: kube/app-of-apps
+      targetRevision: home-lab
