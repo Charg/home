@@ -1,0 +1,44 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - name: argocd
+            repoURL: "https://argoproj.github.io/argo-helm"
+            chart: argo-cd
+            targetRevision: "8.3.1"
+            namespace: argocd
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      project: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+      destination:
+        namespace: "{{ .namespace }}"
+        server: https://kubernetes.default.svc
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .targetRevision }}"
+          helm:
+            valueFiles:
+              - "$values/kube/{{ .name }}/values.yaml"
+        - repoURL: https://github.com/Charg/home.git
+          targetRevision: main
+          ref: values
