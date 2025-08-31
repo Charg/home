@@ -16,6 +16,8 @@
   #
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  # resolves an issues with virtualbox 6.12. https://github.com/NixOS/nixpkgs/issues/363887#issuecomment-2536693220
+  boot.kernelParams = [ "kvm.enable_virt_at_load=0" ];
 
   #
   # Networking
@@ -50,6 +52,8 @@
   };
 
   virtualisation.docker.enable = true;
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableExtensionPack = true;
 
   security.sudo.wheelNeedsPassword = false;
   security.rtkit.enable = true;
