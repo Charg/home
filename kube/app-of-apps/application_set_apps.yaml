@@ -22,6 +22,11 @@ spec:
             chart: home-assistant
             targetRevision: 0.3.17
             namespace: default
+          - name: akri
+            repoURL: https://project-akri.github.io/akri/
+            chart: akri
+            targetRevision: 0.13.8
+            namespace: default
   template:
     metadata:
       name: "{{ .name }}"
