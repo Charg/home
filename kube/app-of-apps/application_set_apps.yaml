@@ -13,9 +13,9 @@ spec:
     - list:
         elements:
           - name: argocd
-            repoURL: "https://argoproj.github.io/argo-helm"
+            repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: "8.3.1"
+            targetRevision: 8.3.1
             namespace: argocd
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
