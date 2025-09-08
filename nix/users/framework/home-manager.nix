@@ -80,6 +80,7 @@ in
     # WSL Packages
     ++ (lib.optionals isWSL [
       pkgs.wslu
+      pkgs.xclip
     ]);
 
   #
