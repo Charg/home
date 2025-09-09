@@ -32,10 +32,6 @@ spec:
       name: "{{ .name }}"
     spec:
       project: default
-      syncPolicy:
-        syncOptions:
-          - CreateNamespace={{ .createNamespace | default true }}
-          - ServerSideApply={{ .serverSideApply | default true }}
       destination:
         namespace: "{{ .namespace }}"
         server: https://kubernetes.default.svc
@@ -56,3 +52,6 @@ spec:
           enabled: {{ .auto_sync | default true }}
           prune: {{ .prune | default true }}
           selfHeal: {{ .selfHeal | default true}}
+        syncOptions:
+          - CreateNamespace={{ .createNamespace | default true }}
+          - ServerSideApply={{ .serverSideApply | default true }}
