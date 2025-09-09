@@ -3,9 +3,9 @@ image:
   registry: index.docker.io
   repository: plexinc/pms-docker
   # If unset use "latest"
-  tag: "1.41.1.9057-af5eaea7a"
+  # tag: "1.41.1.9057-af5eaea7a"
   sha: ""
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 global:
   # Allow parent charts to override registry hostname
