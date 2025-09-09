@@ -34,11 +34,12 @@ spec:
       project: default
       syncPolicy:
         automated:
-          prune: true
-          selfHeal: true
+          enabled: "{{ .auto_sync | default true }}"
+          prune: "{{ .prune | default true }}"
+          selfHeal: "{{ .selfHeal | default true }}"
         syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply=true
+          - CreateNamespace={{ .createNamespace | default true }}
+          - ServerSideApply={{ .serverSideApply | default true }}
       destination:
         namespace: "{{ .namespace }}"
         server: https://kubernetes.default.svc
