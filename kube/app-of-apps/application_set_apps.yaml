@@ -49,9 +49,9 @@ spec:
     spec:
       syncPolicy:
         automated:
-          enabled: {{ .auto_sync | default true }}
-          prune: {{ .prune | default true }}
-          selfHeal: {{ .selfHeal | default true}}
+          enabled: {{ dig "auto_sync" "true" . }}
+          prune: {{ dig "prune" "true" . }}
+          selfHeal: {{ dig "selfHeal" "true" . }}
         syncOptions:
-          - CreateNamespace={{ .createNamespace | default true }}
-          - ServerSideApply={{ .serverSideApply | default true }}
+          - CreateNamespace={{ dig "createNamespace" "true" . }}
+          - ServerSideApply={{ dig "serverSideApply" "true" . }}
