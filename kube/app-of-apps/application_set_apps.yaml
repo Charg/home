@@ -27,7 +27,7 @@ spec:
             chart: akri
             targetRevision: 0.13.8
             namespace: default
-          - name: plex-blah
+          - name: plex
             repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
             chart: plex-media-server
             targetRevision: 1.1.2
