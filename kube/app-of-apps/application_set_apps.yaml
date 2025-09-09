@@ -33,10 +33,6 @@ spec:
     spec:
       project: default
       syncPolicy:
-        automated:
-          enabled: "{{ .auto_sync | default true }}"
-          prune: "{{ .prune | default true }}"
-          selfHeal: "{{ .selfHeal | default true }}"
         syncOptions:
           - CreateNamespace={{ .createNamespace | default true }}
           - ServerSideApply={{ .serverSideApply | default true }}
@@ -53,3 +49,10 @@ spec:
         - repoURL: https://github.com/Charg/home.git
           targetRevision: home-lab
           ref: values
+    templatePatch: |
+      spec:
+        syncPolicy:
+          automated:
+            enabled: {{ .auto_sync | default true }}
+            prune: {{ .prune | default true }}
+            selfHeal: {{ .selfHeal | default true}}
