@@ -49,10 +49,10 @@ spec:
         - repoURL: https://github.com/Charg/home.git
           targetRevision: home-lab
           ref: values
-    templatePatch: |
-      spec:
-        syncPolicy:
-          automated:
-            enabled: {{ .auto_sync | default true }}
-            prune: {{ .prune | default true }}
-            selfHeal: {{ .selfHeal | default true}}
+  templatePatch: |
+    spec:
+      syncPolicy:
+        automated:
+          enabled: {{ .auto_sync | default true }}
+          prune: {{ .prune | default true }}
+          selfHeal: {{ .selfHeal | default true}}
