@@ -1,0 +1,22 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap
+  namespace: argocd
+spec:
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  sources:
+    - repoURL: https://github.com/Charg/home.git
+      path: kube/app-of-apps
+      targetRevision: home-lab

@@ -1,0 +1,63 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - name: argocd
+            repoURL: https://argoproj.github.io/argo-helm
+            chart: argo-cd
+            targetRevision: 8.3.1
+            namespace: argocd
+          - name: home-assistant
+            repoURL: http://pajikos.github.io/home-assistant-helm-chart/
+            chart: home-assistant
+            targetRevision: 0.3.17
+            namespace: default
+          - name: akri
+            repoURL: https://project-akri.github.io/akri/
+            chart: akri
+            targetRevision: 0.13.8
+            namespace: default
+          - name: plex
+            repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
+            chart: plex-media-server
+            targetRevision: 1.1.2
+            namespace: default
+            auto_sync: false
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      project: default
+      destination:
+        namespace: "{{ .namespace }}"
+        server: https://kubernetes.default.svc
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .targetRevision }}"
+          helm:
+            valueFiles:
+              - "$values/kube/{{ .name }}/values.yaml"
+        - repoURL: https://github.com/Charg/home.git
+          targetRevision: home-lab
+          ref: values
+  templatePatch: |
+    spec:
+      syncPolicy:
+        automated:
+          enabled: {{ dig "auto_sync" "true" . }}
+          prune: {{ dig "prune" "true" . }}
+          selfHeal: {{ dig "selfHeal" "true" . }}
+        syncOptions:
+          - CreateNamespace={{ dig "createNamespace" "true" . }}
+          - ServerSideApply={{ dig "serverSideApply" "true" . }}
