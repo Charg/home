@@ -19,4 +19,4 @@ spec:
   sources:
     - repoURL: https://github.com/Charg/home.git
       path: kube/app-of-apps
-      targetRevision: home-lab
+      targetRevision: main
