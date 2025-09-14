@@ -24,11 +24,44 @@
   #
   networking.networkmanager.enable = true; # Enable networking
   networking.hostName = "framework13";
+  networking.wireguard.enable = true;
 
-  # Deskflow KVM
-  # TODO: Can I make this conditional on if deskflow is installed? OR move it somewhere better...
-  networking.firewall.allowedTCPPorts = [ 24800 ];
-  networking.firewall.allowedUDPPorts = [ 24800 ];
+  networking.firewall.allowedTCPPorts = [ 
+    24800 # DeskFlow
+  ];
+
+  networking.firewall.allowedUDPPorts = [ 
+    24800 # DeskFlow
+    51820 # WireGuard
+  ];
+
+  #
+  # Hardware
+  #
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        # Shows battery charge of connected devices on supported
+        # Bluetooth adapters. Defaults to 'false'.
+        Experimental = true;
+        # When enabled other devices can connect faster to us, however
+        # the tradeoff is increased power consumption. Defaults to
+        # 'false'.
+        FastConnectable = true;
+      };
+      Policy = {
+        # Enable all controllers when they are found. This includes
+        # adapters present on start as well as adapters that are plugged
+        # in later on. Defaults to 'true'.
+        AutoEnable = true;
+      };
+    };
+  };
+
+
+
 
   #
   # System
@@ -56,6 +89,7 @@
   virtualisation.virtualbox.host.enableExtensionPack = true;
 
   security.sudo.wheelNeedsPassword = false;
+  # Pipewire - allows to use the realtime scheduler for increased performance.
   security.rtkit.enable = true;
 
   # Enable sound with pipewire.
@@ -64,7 +98,34 @@
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
+    jack.enable = true;
     pulse.enable = true;
+
+    wireplumber.extraConfig = {
+      "monitor.bluez.properties" = {
+        "bluez5.enable-sbc-xq" = true;
+        "bluez5.enable-msbc" = true;
+        "bluez5.enable-hw-volume" = true;
+        "bluez5.roles" = [
+          "hsp_hs"
+          "hsp_ag"
+          "hfp_hf"
+          "hfp_ag"
+        ];
+        # aptX HD causes problems with Sonos Ace
+        "bluez5.codecs" = [
+          "sbc"
+          "sbc_xq"
+          "aac"
+          "ldac"
+          "aptx"
+          "aptx_ll"
+          "aptx_ll_duplex"
+          "lc3"
+          "lc3plus_h3"
+        ];
+      };
+    };
   };
 
   # Enable the X11 windowing system.

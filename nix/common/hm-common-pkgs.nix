@@ -31,4 +31,5 @@
   # Network Tools
   pkgs.nmap
   pkgs.wireshark
+  pkgs.wireguard-tools
 ]
