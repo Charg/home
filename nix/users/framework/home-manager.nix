@@ -16,24 +16,24 @@ in
 
 {
 
-  imports =
-    [
-      ../../programs/direnv/hm.nix
-      ../../programs/eza/hm.nix
-      ../../programs/fzf/hm.nix
-      ../../programs/ghostty/hm.nix
-      ../../programs/git/hm.nix
-      ../../programs/neovim/hm.nix
-      ../../programs/ssh/hm.nix
-      ../../programs/starship/hm.nix
-      ../../programs/tmux/hm.nix
-      ../../programs/vscode/hm.nix
-      ../../programs/zoxide/hm.nix
-      ../../programs/zsh/hm.nix
-    ]
-    ++ lib.optionals isLinux [
-      ../../programs/gnome/hm.nix # TODO: check if we are even using gnome
-    ];
+  imports = [
+    ../../programs/direnv/hm.nix
+    ../../programs/eza/hm.nix
+    ../../programs/fzf/hm.nix
+    ../../programs/ghostty/hm.nix
+    ../../programs/git/hm.nix
+    ../../programs/neovim/hm.nix
+    ../../programs/ssh/hm.nix
+    ../../programs/starship/hm.nix
+    ../../programs/tmux/hm.nix
+    (import ../../programs/vicinae/hm.nix { inherit inputs; })
+    ../../programs/vscode/hm.nix
+    ../../programs/zoxide/hm.nix
+    ../../programs/zsh/hm.nix
+  ]
+  ++ lib.optionals isLinux [
+    ../../programs/gnome/hm.nix # TODO: check if we are even using gnome
+  ];
 
   #
   # Packages

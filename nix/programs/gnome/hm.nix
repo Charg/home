@@ -16,7 +16,6 @@ in
     pkgs.gnome-themes-extra
     pkgs.pop-gtk-theme
     pkgs.pop-icon-theme
-    pkgs.pop-launcher
 
     # Fonts
     pkgs.adwaita-icon-theme
@@ -100,25 +99,30 @@ in
       custom-keybindings = [
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/"
       ];
     };
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot" = {
-      binding="<control>Print";
+      binding = "<control>Print";
       # command="${pkgs.flameshot}/bin/flameshot gui";
-      command="${flameshot-gui}/bin/flameshot-gui";
-      name="flameshot";
+      command = "${flameshot-gui}/bin/flameshot-gui";
+      name = "flameshot";
     };
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost" = {
-      binding = "<super>t";
+      binding = "<Super>t";
       command = "ghostty";
       name = "Launch terminal";
     };
 
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae" = {
+      binding = "<Alt><Super>space";
+      command = "vicinae";
+      name = "Launch Vicinae";
+    };
+
     "org/gnome/shell/extensions/pop-shell" = {
-      activate-launcher = [ "<Super>space" ];
-      fullscreen-launcher = false; # pop-launcher didnt work without this setting
       active-hint = false;
       focus-down = [
         "<Super>Down"
@@ -172,6 +176,7 @@ in
         pkgs.gnomeExtensions.space-bar.extensionUuid
         pkgs.gnomeExtensions.tray-icons-reloaded.extensionUuid
         pkgs.gnomeExtensions.user-themes.extensionUuid
+        "vicinae@dagimg-dot"
       ];
       disabled-extensions = [ ];
     };
@@ -200,21 +205,20 @@ in
     {
       "float": [
         {
-          "class": "pop-shell-example",
-          "title": "pop-shell-example"
-        },
-        {
           "class": "firefox",
           "title": "^(?!.*Mozilla Firefox).*$",
           "disabled": true
         },
         {
-          "class": "zoom",
+          "class": "Slack",
           "disabled": true
         },
         {
-          "class": "Slack",
-          "disabled": true
+          "class": "zoom",
+        },
+        {
+          "class": "vicinae",
+          "title": ".*vicinae.*",
         },
       ],
       "skiptaskbarhidden": [],

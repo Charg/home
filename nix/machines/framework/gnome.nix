@@ -1,5 +1,7 @@
 { pkgs, ... }:
-
+let
+  gnomeExtensionVicinae = pkgs.callPackage ../../packages/gnome-shell-extension-vicinae.nix { };
+in
 {
 
   #
@@ -51,6 +53,7 @@
     gnomeExtensions.user-themes
     gnome-tweaks
     xclip
+    gnomeExtensionVicinae
   ];
 
 }
