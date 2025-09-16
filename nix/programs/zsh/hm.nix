@@ -71,7 +71,7 @@
       _ = "sudo";
       a = "ansible";
       l = "ls";
-      llr = "eza -lasnew";
+      llr = "eza -larsnew";
       py = "python3";
       reboot = "sudo reboot";
       shut = "sudo shutdown -h now";
