@@ -1,9 +1,8 @@
 {
-  programs.eza = {
+  programs.direnv = {
     enable = true;
-    enableZshIntegration = true;
-    icons = "auto";
-    git = true;
+    enableZshIntegration = true; # see note on other shells below
+    nix-direnv.enable = true;
   };
 
   home.file.".direnvrc".text = ''
