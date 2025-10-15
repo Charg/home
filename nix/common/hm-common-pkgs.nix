@@ -32,4 +32,7 @@
   pkgs.nmap
   pkgs.wireshark
   pkgs.wireguard-tools
+
+  # Desktop Apps
+  pkgs.bitwarden-desktop
 ]

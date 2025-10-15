@@ -7,21 +7,26 @@
   homebrew = {
     enable = true;
     brews = [
-      "podman"
-      "podman-compose"
       "jfrog-cli"
+      "podman-compose"
+      "podman"
     ];
+    caskArgs = {
+      appdir = "~/Applications";
+      require_sha = true;
+    };
     casks  = [
       "amethyst"
-      "bitwarden"
       "deskflow"
-      "firefox"
+      "elgato-wave-link"
       "flameshot"
       "ghostty"
       "google-chrome"
       "podman-desktop"
       "raycast"
       "slack"
+      "vagrant"
+      "virtualbox"
       "zoom"
     ];
     taps = [
