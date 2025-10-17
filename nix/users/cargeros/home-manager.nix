@@ -39,6 +39,9 @@ in
   # Program config
   #
   programs.bat.enable = true;
+
+  # Firefox needs to be installed using homebrew
+  # But, you could manage firefox using this once it has been installed
   programs.firefox.enable = true;
 
   #
