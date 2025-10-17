@@ -157,11 +157,11 @@
   home.file = {
     ".zsh_functions".source = ../../programs/zsh/functions;
     ".local/share/zplugins/magic-enter".source = builtins.fetchGit {
-      url = "https://github.com/zshzoo/magic-enter.git";
+      url = "git@github.com:zshzoo/magic-enter.git";
       rev = "b5a7d0a55abab268ebd94969e2df6ea867fa2cd5";
     };
     ".local/share/zplugins/fzf-tab".source = builtins.fetchGit {
-      url = "https://github.com/Aloxaf/fzf-tab";
+      url = "git@github.com:Aloxaf/fzf-tab.git";
       rev = "fc6f0dcb2d5e41a4a685bfe9af2f2393dc39f689";
     };
   };
