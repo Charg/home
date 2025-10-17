@@ -29,6 +29,12 @@
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
     };
-  };
 
+    includes = [
+      {
+        condition = "gitdir:/Users/";
+        path = "~/.gitconfig.work";
+      }
+    ];
+  };
 }
