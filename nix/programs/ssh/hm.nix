@@ -1,4 +1,8 @@
 {
+  isLinux,
+  ...
+}:
+{
   programs.ssh = {
     enable = true;
     controlMaster = "auto";
@@ -15,6 +19,10 @@
         identitiesOnly = true;
       };
     };
+  };
+
+  services.ssh-agent = {
+    enable = isLinux;
   };
 
   home.file.".ssh/config.d/.keep".text = "# Managed by Home Manager";
