@@ -37,10 +37,20 @@
       DISABLE_MAGIC_FUNCTIONS="true"
       DISABLE_COMPFIX="true"
 
-      if [[ -d /opt/homebrew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-      fi
+      #
+      # MacOs
+      #
+      if [[ $(uname) == 'Darwin' ]]; then
+        if [[ -d /opt/homebrew ]]; then
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
 
+      # Set secretive as ssh agent
+      if [[ -e $HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh ]]
+        then
+          export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+        fi
+      fi
 
       # TODO: Use SOPS to import these
       if [[ -f $HOME/.zsh_functions_work ]]; then
