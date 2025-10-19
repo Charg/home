@@ -1,4 +1,5 @@
 {
+  isDarwin,
   config,
   pkgs,
   lib,
@@ -9,6 +10,7 @@
 {
   programs.ghostty = {
     enable = true;
+    package = lib.mkIf isDarwin null;
     enableZshIntegration = true;
     settings = {
       clipboard-read = "allow";
