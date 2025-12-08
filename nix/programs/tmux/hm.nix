@@ -16,6 +16,9 @@
       set -gu default-command
       set -g default-shell "$SHELL"
 
+      # Ensure SSH variables are updated when a new client connects
+      set-option -g update-environment "SSH_CLIENT SSH_TTY"
+
       set -g base-index 1
       set -g pane-base-index 1
 
