@@ -7,6 +7,24 @@
     # Enable Python support
     withPython3 = true;
 
+    extraConfig = ''
+      " Display Settings
+      set number
+      set relativenumber
+
+      " Indentation Settings
+      set expandtab
+      set shiftwidth=4
+      set tabstop=4
+      set smartindent
+
+      " Search Settings
+      set ignorecase
+      set smartcase
+      set hlsearch
+      set incsearch
+    '';
+
     extraLuaConfig = ''
       -- ============================================================================
       -- CLIPBOARD CONFIGURATION (OSC 52 for remote sessions)
@@ -19,7 +37,7 @@
           return vim.split(content, '\n')
         end
 
-	vim.g.clipboard = 'osc52'
+        vim.g.clipboard = 'osc52'
       end
 
       -- Schedule the setting after `UiEnter` because it can increase startup-time.
