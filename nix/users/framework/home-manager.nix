@@ -52,10 +52,11 @@ in
       pkgs.calibre
       pkgs.darktable # image editing
       pkgs.feh # image viewer
+      pkgs.kooha # screen recorder
       pkgs.satty
       pkgs.synology-drive-client
       pkgs.vlc
-      pkgs.kooha # screen recorder
+      pkgs.zathura # PDF Reader
 
       # Productivity
       pkgs.deskflow # mouse/keyboard sharing
@@ -67,6 +68,7 @@ in
       pkgs.signal-desktop
       pkgs.slack
       pkgs.spotify
+      pkgs.zoom-us
 
       # Framework
       pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system

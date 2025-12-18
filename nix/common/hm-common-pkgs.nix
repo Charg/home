@@ -20,6 +20,7 @@
   pkgs.ripgrep
   pkgs.sqlite
   pkgs.tmux
+  pkgs.unzip
   pkgs.uv
   pkgs.yubikey-manager
   pkgs.zoxide
