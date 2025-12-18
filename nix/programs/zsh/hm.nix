@@ -84,6 +84,7 @@
       llr = "eza -lasnew";
       py = "python3";
       reboot = "sudo reboot";
+      rg = "rg -i";
       shut = "sudo shutdown -h now";
       weather = "curl https://wttr.in/sf";
 
