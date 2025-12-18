@@ -1,4 +1,5 @@
 {
+  config,
   isLinux,
   lib,
   pkgs,
@@ -20,6 +21,32 @@ in
     # Fonts
     pkgs.adwaita-icon-theme
   ];
+
+  gtk = {
+    enable = true;
+
+    font = {
+      package = pkgs.pop-icon-theme;
+      name = "Adwaita Sans";
+      size = 12;
+    };
+
+    iconTheme = {
+      package = pkgs.adwaita-icon-theme;
+      name = "Pop";
+    };
+
+    gtk3 = {
+      bookmarks = [
+        "file://${config.home.homeDirectory}/code"
+        "file://${config.home.homeDirectory}/Documents"
+        "file://${config.home.homeDirectory}/Downloads"
+        "file://${config.home.homeDirectory}/Music"
+        "file://${config.home.homeDirectory}/Pictures"
+        "file://${config.home.homeDirectory}/Videos"
+      ];
+    };
+  };
 
   dconf.settings = lib.mkIf isLinux {
     "gnome/desktop/peripherals/mouse" = {
@@ -219,6 +246,10 @@ in
         {
           "class": "vicinae",
           "title": ".*vicinae.*",
+        },
+        {
+          "class": "VirtualBox",
+          "title": "^(?!.*VirtualBox).*$",
         },
       ],
       "skiptaskbarhidden": [],
