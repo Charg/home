@@ -92,6 +92,10 @@
   # Pipewire - allows to use the realtime scheduler for increased performance.
   security.rtkit.enable = true;
 
+  # Smart Card Reader Service
+  # Used for YubiKey related operations.
+  services.pcscd.enable = true;
+
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   services.pipewire = {

@@ -7,9 +7,11 @@
   # setting this there to work with the "shell" directive below
   programs.zsh.enable = true;
 
+  programs.adb.enable = true;
+
   users.users.framework= {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "docker" "vboxusers" ];
+    extraGroups = [ "adbusers" "networkmanager" "wheel" "docker" "vboxusers" ];
     shell = pkgs.zsh;
     hashedPassword = "$6$LsYSVIubO9ddl8lB$zGowqj8q0YLJZpGpKPjCf5wIDE6AnoOvOdPZIpiP213Dus0niljEDMQz0TJX3COGc70q2OHnZ.nut824iNiRo.";
     openssh.authorizedKeys.keys = [
