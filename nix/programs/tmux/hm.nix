@@ -12,6 +12,13 @@
       tmuxPlugins.sensible
     ];
     extraConfig = ''
+      # set -s (server) - Options apply to the entire tmux server instance, affecting core behaviors.
+      # set -g (global) - Options apply across all relevant sessions or windows, acting as defaults that individual sessions/windows can override.
+      # set -w (window) - Options specific to all windows within a particular session
+
+      # Server level tmux options
+      set -s set-clipboard on
+
       # Ensure tmux loads the correct shell
       set -gu default-command
       set -g default-shell "$SHELL"

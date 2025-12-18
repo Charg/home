@@ -28,31 +28,54 @@
 
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, home-manager, darwin, ... }@inputs:
-  let
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixos-hardware,
+      home-manager,
+      darwin,
+      ...
+    }@inputs:
+    let
 
-    mkSystem = import ./nix/lib/mksystem.nix {
-      inherit nixpkgs inputs;
+      overlays = [
+        (final: prev: {
+          tmux = prev.tmux.overrideAttrs (oldAttrs: rec {
+            version = "3.6a";
+            src = prev.fetchFromGitHub {
+              owner = "tmux";
+              repo = "tmux";
+              rev = version;
+              hash = "sha256-VwOyR9YYhA/uyVRJbspNrKkJWJGYFFktwPnnwnIJ97s=";
+            };
+          });
+        })
+      ];
+
+      mkSystem = import ./nix/lib/mksystem.nix {
+        inherit nixpkgs inputs overlays;
+      };
+
+    in
+    {
+
+      nixosConfigurations.framework = mkSystem "framework" {
+        system = "x86_64-linux";
+        user = "framework";
+        wsl = false;
+      };
+
+      nixosConfigurations.wsl = mkSystem "wsl" {
+        system = "x86_64-linux";
+        user = "framework";
+        wsl = true;
+      };
+
+      darwinConfigurations.mbp-work-1 = mkSystem "mbp-work-1" {
+        system = "aarch64-darwin";
+        user = "cargeros";
+        darwin = true;
+      };
     };
-
-  in {
-
-    nixosConfigurations.framework = mkSystem "framework" {
-      system = "x86_64-linux";
-      user   = "framework";
-      wsl    = false;
-    };
-
-    nixosConfigurations.wsl = mkSystem "wsl" {
-      system = "x86_64-linux";
-      user   = "framework";
-      wsl    = true;
-    };
-
-    darwinConfigurations.mbp-work-1 = mkSystem "mbp-work-1" {
-      system = "aarch64-darwin";
-      user   = "cargeros";
-      darwin = true;
-    };
-  };
 }
