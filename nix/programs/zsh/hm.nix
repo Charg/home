@@ -130,8 +130,8 @@
       # Nix
       #
       nixg = "sudo nix-collect-garbage -d";
-      nixrs = "sudo nixos-rebuild switch --flake ~/code/home#${currentSystemName}";
-      nixrt = "sudo nixos-rebuild test --flake ~/code/home#${currentSystemName}";
+      nixrs = "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName}";
+      nixrt = "nixos-rebuild test --flake ~/code/home#${currentSystemName}";
       nixdr = "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName}";
       nixfc = "nix flake check ~/code/home";
     };
