@@ -47,23 +47,20 @@
           "files.trimFinalNewlines" = true;
           "files.trimTrailingWhitespace" = true;
           "github.copilot.enable"."markdown" = true;
+          "editor.detectIndentation" = true;
+          "editor.indentSize" = 2;
+          "editor.insertSpaces" = true;
+          "editor.tabSize" = 2;
 
-	  # indent
-	  "editor.detectIndentation" = true;
-	  "editor.indentSize" = 2;
-	  "editor.insertSpaces" = true;
-	  "editor.tabSize" = 2;
-
-	  "[nix]" = {
-	    "editor.indentSize" = 2;
+          "[nix]" = {
+            "editor.indentSize" = 2;
             "editor.tabSize" = 2;
           };
 
-	  "[python]" = {
-	    "editor.indentSize" = 4;
+          "[python]" = {
+            "editor.indentSize" = 4;
             "editor.tabSize" = 4;
           };
-
 
           # vim
           "vim.easymotion" = true;
