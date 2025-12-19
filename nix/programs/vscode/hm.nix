@@ -82,5 +82,6 @@
   xdg.configFile."Code/User/prompts/docker.instructions.md".source = ./docker.instructions.md;
   xdg.configFile."Code/User/prompts/python.instructions.md".source = ./python.instructions.md;
   xdg.configFile."Code/User/prompts/makefile.instructions.md".source = ./makefile.instructions.md;
+  xdg.configFile."Code/User/prompts/terraform.instructions.md".source = ./terraform.instructions.md;
 
 }
