@@ -25,6 +25,7 @@
           redhat.vscode-yaml
           ms-python.python
           ms-python.vscode-pylance
+          ms-pyright.pyright
 
           # Tools
           mkhl.direnv
