@@ -71,6 +71,11 @@ in
       pkgs.spotify
       pkgs.zoom-us
 
+      # Kube
+      pkgs.kubectl
+      pkgs.kubernetes-helm
+      pkgs.argocd
+
       # Framework
       pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system
 
