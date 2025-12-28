@@ -13,7 +13,7 @@ in
   services.displayManager.gdm = {
       enable = true;
       wayland = true;
-  }
+  };
 
   environment.gnome.excludePackages = with pkgs; [
     atomix # puzzle game
