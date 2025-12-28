@@ -17,6 +17,7 @@ in
 {
 
   imports = [
+    ../../programs/delta/hm.nix
     ../../programs/direnv/hm.nix
     ../../programs/eza/hm.nix
     ../../programs/fzf/hm.nix

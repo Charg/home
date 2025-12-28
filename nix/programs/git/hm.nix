@@ -3,8 +3,6 @@
     enable = true;
     delta.enable = true;
     lfs.enable = true;
-    userEmail = "chris@syn.sh";
-    userName = "chris";
 
     settings = {
         aliases = {

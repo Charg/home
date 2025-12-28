@@ -16,11 +16,12 @@ in
 
 {
   imports = [
+    ../../programs/delta/hm.nix
     ../../programs/direnv/hm.nix
     ../../programs/eza/hm.nix
     ../../programs/fzf/hm.nix
-    ../../programs/git/hm.nix
     ../../programs/ghostty/hm.nix
+    ../../programs/git/hm.nix
     ../../programs/neovim/hm.nix
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix
