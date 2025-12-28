@@ -5,19 +5,24 @@
 {
   programs.ssh = {
     enable = true;
-    controlMaster = "auto";
-    controlPath = "~/.ssh/sockets/S.%r@%h:%p";
-    controlPersist = "10m";
-    addKeysToAgent = "yes";
-    forwardAgent = false;
     includes = ["~/.ssh/config.d/*"];
     matchBlocks = {
+
+      "*" = {
+        addKeysToAgent = "yes";
+        controlMaster = "auto";
+        controlPath = "~/.ssh/sockets/S.%r@%h:%p";
+        controlPersist = "10m";
+        forwardAgent = false;
+      };
+
       "github.com" = {
         hostname = "github.com";
         user = "git";
         identityFile = "~/.ssh/github";
         identitiesOnly = true;
       };
+
     };
   };
 

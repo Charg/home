@@ -8,9 +8,13 @@ in
   # GNOME
   #
   services.udev.packages = [ pkgs.gnome-settings-daemon ];
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.displayManager.gdm.wayland = true;
-  services.xserver.desktopManager.gnome.enable = true; # Enable GNOME DE
+
+  services.desktopManager.gnome.enable = true;
+  services.displayManager.gdm = {
+      enable = true;
+      wayland = true;
+  }
+
   environment.gnome.excludePackages = with pkgs; [
     atomix # puzzle game
     baobab # disk usage analyzer
