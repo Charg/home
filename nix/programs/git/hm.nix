@@ -1,7 +1,6 @@
 {
   programs.git = {
     enable = true;
-    delta.enable = true;
     lfs.enable = true;
 
     settings = {
