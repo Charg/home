@@ -33,6 +33,11 @@ spec:
             targetRevision: 1.1.2
             namespace: default
             auto_sync: false
+          - name: metallb
+            repoURL:  https://metallb.github.io/metallb
+            chart: metallb
+            targetRevision: 0.15.3
+            namespace: default
 #          - name: technitium-dnsserver
 #            repoURL: https://charts.obeone.cloud
 #            chart: technitium-dnsserver
