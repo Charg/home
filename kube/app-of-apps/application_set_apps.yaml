@@ -38,11 +38,11 @@ spec:
             chart: metallb
             targetRevision: 0.15.3
             namespace: default
-#          - name: technitium-dnsserver
-#            repoURL: https://charts.obeone.cloud
-#            chart: technitium-dnsserver
-#            targetRevision: 1.7.2
-#            namespace: default
+          - name: technitium-dnsserver
+            repoURL: https://charts.obeone.cloud
+            chart: technitium-dnsserver
+            targetRevision: 1.7.2
+            namespace: default
   template:
     metadata:
       name: "{{ .name }}"

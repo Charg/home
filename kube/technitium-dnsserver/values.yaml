@@ -4,48 +4,6 @@ image:
   repository: technitium/dns-server
   tag: latest@sha256:94f2b90d63f03181421152157a8099ea2752b13fa30b6c96833859be8e93dfa9 # 14.3.0
 
-service:
-  main:
-    type: LoadBalancer
-    externalTrafficPolicy: Local
-    ports:
-      # -- HTTP port for the web interface
-      http:
-        enabled: true
-        port: 8089
-        targetPort: 5380
-        protocol: TCP
-      # -- HTTPS port for the web interface
-      https:
-        enabled: true
-        port: 8449
-        targetPort: 53443
-      # -- UDP port for standard DNS queries
-      dns-udp:
-        enabled: true
-        port: 53
-        protocol: UDP
-      # -- TCP port for standard DNS queries and zone transfers
-      dns-tcp:
-        enabled: true
-        port: 53
-        protocol: TCP
-      # -- UDP port for DHCP services
-      dhcp:
-        enabled: true
-        port: 67
-        protocol: UDP
-      # -- TCP port for DNS-over-TLS (DoT)
-      dot:
-        enabled: true
-        port: 853
-        protocol: TCP
-      # -- TCP port for DNS-over-HTTPS (DoH) reverse proxy
-      doh-reverse:
-        enabled: true
-        port: 8053
-        protocol: TCP
-
 persistence:
   config:
     enabled: true
