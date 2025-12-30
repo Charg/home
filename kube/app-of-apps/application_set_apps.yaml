@@ -48,6 +48,12 @@ spec:
             chart: traefik-crds
             targetRevision: 1.13.0
             namespace: traefik-crds
+          - name: traefik-internal
+            repoURL: https://traefik.github.io/charts
+            chart: traefik
+            targetRevision: 38.0.1
+            namespace: traefik-internal
+            helm_skip_crds: true
   template:
     metadata:
       name: "{{ .name }}"
