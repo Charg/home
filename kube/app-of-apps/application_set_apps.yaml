@@ -43,6 +43,11 @@ spec:
             chart: technitium-dnsserver
             targetRevision: 1.7.2
             namespace: default
+          - name: traefik-crds
+            repoURL: https://traefik.github.io/charts
+            chart: traefik-crds
+            targetRevision: 1.13.0
+            namespace: traefik-crds
   template:
     metadata:
       name: "{{ .name }}"
