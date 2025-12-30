@@ -13,16 +13,21 @@ global:
 
 ingress:
   # Specify if an ingress resource for the pms server should be created or not
-  enabled: false
+  enabled: true
 
   # The ingress class that should be used
-  ingressClassName: "ingress-nginx"
+  ingressClassName: "traefik-public"
 
   # The url to use for the ingress reverse proxy to point at this pms instance
-  url: ""
+  url: "https://plex.syn.sh"
 
   # Custom annotations to put on the ingress resource
   annotations: {}
+
+  tls:
+    - hosts:
+        - plex.syn.sh
+      secretName: tls-plex-ingress
 
 pms:
   # The storage class to use when provisioning the pms config volume
