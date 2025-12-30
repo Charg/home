@@ -54,6 +54,12 @@ spec:
             targetRevision: 38.0.1
             namespace: traefik-internal
             helm_skip_crds: true
+          - name: traefik-public
+            repoURL: https://traefik.github.io/charts
+            chart: traefik
+            targetRevision: 38.0.1
+            namespace: traefik-public
+            helm_skip_crds: true
   template:
     metadata:
       name: "{{ .name }}"
