@@ -60,6 +60,11 @@ spec:
             targetRevision: 38.0.1
             namespace: traefik-public
             helm_skip_crds: true
+          - name: external-dns
+            repoURL: https://kubernetes-sigs.github.io/external-dns/
+            chart: external-dns
+            targetRevision: 1.19.0
+            namespace: external-dns
   template:
     metadata:
       name: "{{ .name }}"
