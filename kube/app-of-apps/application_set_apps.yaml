@@ -74,9 +74,17 @@ spec:
           ref: values
   templatePatch: |
     spec:
-      source:
-        helm:
-          skipCrds: {{ dig "helm_skip_crds" "false" . }}
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .targetRevision }}"
+          helm:
+            skipCrds: {{ dig "helm_skip_crds" "false" . }}
+            valueFiles:
+              - "$values/kube/{{ .name }}/values.yaml"
+        - repoURL: https://github.com/Charg/home.git
+          targetRevision: main
+          ref: values
       syncPolicy:
         automated:
           enabled: {{ dig "auto_sync" "true" . }}
