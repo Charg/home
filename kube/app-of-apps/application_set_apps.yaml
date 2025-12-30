@@ -68,6 +68,9 @@ spec:
           ref: values
   templatePatch: |
     spec:
+      source:
+        helm:
+          skipCrds: {{ dig "helm_skip_crds" "false" . }}
       syncPolicy:
         automated:
           enabled: {{ dig "auto_sync" "true" . }}
