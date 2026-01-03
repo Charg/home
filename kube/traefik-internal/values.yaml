@@ -4,3 +4,11 @@ ingressClass:
   enabled: true
   isDefaultClass: true
   name: traefik-internal
+
+providers:
+  kubernetesCRD:
+    enabled: true
+    ingressClass: traefik-internal
+  kubernetesIngress:
+    enabled: true
+    ingressClass: treafik-internal
