@@ -91,7 +91,8 @@ securityContext:
 # Pod's DNS Configuration
 # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
 # This value is useful if you need to reduce the DNS load: set "ndots" to 0 and only use FQDNs.
-dnsConfig: {}
+dnsConfig:
+  {}
   # nameservers:
   #   - 1.2.3.4
   # searches:
@@ -113,28 +114,37 @@ service:
 # Ingress settings
 ingress:
   # Enable ingress for home assistant
-  enabled: false
+  enabled: true
   # Enable external ingress (cannot be true when ingress.enabled is true)
   external: false
-  className: ""
+  className: "traefik-internal"
   labels: {}
   annotations:
-    {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: ha.packet.fail
   hosts:
-    - host: chart-example.local
+    - host: ha.packet.fail
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+          backend:
+            service:
+              name: home-assistant
+              port:
+                number: 8080
+  tls:
+    - secretName: home-assistant-tls
+      hosts:
+        - ha.packet.fail
 
 # Resource settings for the container
 resources:
-  {}
+  # Attach the zigbee USB device
+  limits:
+    akri.sh/zigbee: "1"
+  requests:
+    akri.sh/zigbee: "1"
+
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -179,7 +189,7 @@ configuration:
   enabled: true
   # Force init will merge the current configuration file with the default configuration on every start
   # This is useful when you want to ensure that the configuration file is always up to date
-  forceInit: false
+  forceInit: true
   # List of trusted proxies in the format of CIDR notation in a case of using a reverse proxy
   # Here is the list of the most common private IP ranges, use your list of possible trusted proxies, usually, it's the IP of the reverse proxy
   trusted_proxies:
@@ -272,7 +282,7 @@ configuration:
       runAsUser: 0
     command: ["/bin/sh", "-c"]
     args:
-    - /bin/sh /mnt/init/init.sh
+      - /bin/sh /mnt/init/init.sh
     # env:
     # - name: FORCE_INIT
     #   valueFrom:
@@ -311,7 +321,8 @@ persistence:
   matchExpressions: {}
 
 # if you need any additional volumes, you can define them here
-additionalVolumes: []
+additionalVolumes:
+  []
   # - name: custom-components
   #   emptyDir: {}
 
@@ -321,7 +332,8 @@ additionalVolumes: []
   #     type: CharDevice
   #   name: usb
 # if you need any additional volume mounts, you can define them here
-additionalMounts: []
+additionalMounts:
+  []
   # - mountPath: /config/custom_components/panasonic_cc
   #   name: custom-components
 
@@ -361,7 +373,8 @@ readinessProbe:
   periodSeconds: 10
   successThreshold: 1
   timeoutSeconds: 1
-startupProbe: {}
+startupProbe:
+  {}
   # initialDelaySeconds: 1
   # periodSeconds: 5
   # timeoutSeconds: 1
@@ -378,7 +391,8 @@ serviceMonitor:
   scrapeInterval: 30s
   labels: {}
   # Bearer token authentication configuration
-  bearerToken: {}
+  bearerToken:
+    {}
     # Name of the secret containing the bearer token
     # secretName: ""
     # Key in the secret containing the bearer token
@@ -415,15 +429,12 @@ addons:
       # Ingress annotations
       annotations: {}
       # Ingress hosts configuration
-      hosts:
-        - host: chart-example.local
-          paths:
-            - path: /
-              pathType: ImplementationSpecific
+      hosts: {}
       # Ingress TLS configuration
       tls: []
     # if you need any additional volume mounts, you can define them here
-    additionalMounts: []
+    additionalMounts:
+      []
       # - mountPath: /home/coder/.ssh/id_rsa
       #   name: id-rsa
 
