@@ -12,3 +12,7 @@ providers:
   kubernetesIngress:
     enabled: true
     ingressClass: traefik-internal
+
+ingressRoute:
+  dashboard:
+    enabled: true
