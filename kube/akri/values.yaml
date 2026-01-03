@@ -701,19 +701,20 @@ opcua:
 udev:
   configuration:
     # enabled defines whether to load a udev configuration
-    enabled: false
+    enabled: true
     # name is the Kubernetes resource name that will be created for this
     # udev configuration
-    name: akri-udev
+    name: zigbee
     # brokerProperties is a map of properties that will be passed to any instances
     # created as a result of applying this udev configuration
     brokerProperties: {}
     discoveryDetails:
       # groupRecursive defines whether to group discovered parent/children under the same instance
-      groupRecursive: false
+      groupRecursive: true 
       # udevRules is the list of udev rules used to find instances created as a result of
       # applying this udev configuration
       udevRules:
+        - 'ATTRS{product}=="Sonoff Zigbee 3.0 USB Dongle Plus V2"'
       # permissions is the list of Cgroups permissions of the device
       # combination of r (read), w (write), m (modify)
       permissions: rwm
