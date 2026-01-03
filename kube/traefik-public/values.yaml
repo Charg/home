@@ -11,4 +11,4 @@ providers:
     ingressClass: traefik-public
   kubernetesIngress:
     enabled: true
-    ingressClass: treafik-public
+    ingressClass: traefik-public
