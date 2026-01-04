@@ -65,6 +65,11 @@ spec:
             chart: external-dns
             targetRevision: 1.19.0
             namespace: external-dns
+          - name: intel-operator
+            repoURL: https://intel.github.io/helm-charts
+            chart: intel-device-plugins-operator
+            targetRevision: 0.34.1
+            namespace: intel-operator
   template:
     metadata:
       name: "{{ .name }}"
