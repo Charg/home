@@ -4,7 +4,7 @@
     lfs.enable = true;
 
     settings = {
-        aliases = {
+        alias = {
           a = "add -p";
           ch = "diff --cached";
           fixup = "commit --amend -C HEAD";
