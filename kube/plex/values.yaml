@@ -186,9 +186,6 @@ extraVolumeMounts:
   - name: plex-transcode
     mountPath: /transcode_custom
 
-  - name: hw-quick-sync
-    mountPath: /dev/dri
-
 # Optionally specify additional volumes for the pod.
 # extraVolumes: []
 extraVolumes:
@@ -200,10 +197,6 @@ extraVolumes:
     emptyDir:
       medium: Memory
       sizeLimit: 20Gi
-
-  - name: hw-quick-sync
-    hostPath:
-      path: /dev/dri
 
 extraContainers: []
 # extraContainers:
