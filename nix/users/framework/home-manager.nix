@@ -25,6 +25,7 @@ in
     ../../programs/git/hm.nix
     ../../programs/gpg/hm.nix
     ../../programs/neovim/hm.nix
+    ../../programs/podman/hm.nix
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix
     ../../programs/tmux/hm.nix
