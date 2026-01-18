@@ -52,7 +52,7 @@ pms:
     memory: 2Gi
   limits:
     cpu: 6000m
-    memory: 8Gi
+    memory: 22Gi
 
 # A basic image that will convert the configmap to a file in the rclone config volume
 # this is ignored if rclone is not enabled
@@ -183,6 +183,9 @@ extraVolumeMounts:
   - name: plex-media
     mountPath: /media
 
+  - name: plex-transcode
+    mountPath: /transcode_custom
+
   - name: hw-quick-sync
     mountPath: /dev/dri
 
@@ -192,6 +195,11 @@ extraVolumes:
   - name: plex-media
     persistentVolumeClaim:
       claimName: plex-media
+
+  - name: plex-transcode
+    emptyDir:
+      medium: Memory
+      sizeLimit: 20Gi
 
   - name: hw-quick-sync
     hostPath:
