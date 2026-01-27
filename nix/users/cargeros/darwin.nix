@@ -13,8 +13,6 @@
     };
     brews = [
       "jfrog-cli"
-      "podman-compose"
-      "podman"
     ];
     caskArgs = {
       appdir = "~/Applications";
@@ -22,21 +20,18 @@
     };
     casks  = [
       "amethyst"
-      "deskflow"
       "elgato-wave-link"
       "firefox"
       "flameshot"
       "ghostty"
       "google-chrome"
       "intellij-idea-ce"
-      "podman-desktop"
       "raycast"
       "secretive"
       "slack"
       "vagrant"
       "virtualbox"
       "zoom"
-      "zulu@17"
     ];
     taps = [
       "deskflow/homebrew-tap"
