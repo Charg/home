@@ -8,7 +8,6 @@
   pkgs.crane # Tools for interacting with remote images and registries including crane and gcrane
   pkgs.dig
   pkgs.dive # Tool for exploring each layer in a docker image
-  pkgs.dockle # Container Image Linter for Security
   pkgs.file
   pkgs.grype # Vulnerability scanner for container images and filesystems
   pkgs.htop

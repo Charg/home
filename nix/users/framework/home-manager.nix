@@ -84,6 +84,7 @@ in
       # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
 
       # Misc
+      pkgs.dockle # Container Image Linter for Security, Helping build the Best-Practice Docker Image, Easy to start
       pkgs.wl-clipboard
     ])
 
