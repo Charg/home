@@ -176,10 +176,6 @@
   # Recommended at https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13
   services.power-profiles-daemon.enable = true;
 
-  services.cloudflare-warp = {
-    enable = true;
-  };
-
   nix = {
     # package = pkgs.nixVersions.latest;
     extraOptions = ''
