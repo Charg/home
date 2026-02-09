@@ -71,6 +71,7 @@ in
       pkgs.slack
       pkgs.spotify
       pkgs.zoom-us
+      pkgs.antigravity
 
       # Kube
       pkgs.kubectl
@@ -86,6 +87,7 @@ in
       # Misc
       pkgs.dockle # Container Image Linter for Security, Helping build the Best-Practice Docker Image, Easy to start
       pkgs.wl-clipboard
+      pkgs.popsicle
     ])
 
     # WSL Packages
