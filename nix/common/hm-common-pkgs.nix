@@ -19,6 +19,7 @@
   pkgs.nixfmt-rfc-style
   pkgs.nnn
   pkgs.nodejs
+  pkgs.opencode
   pkgs.python313
   pkgs.ripgrep
   pkgs.sqlite
