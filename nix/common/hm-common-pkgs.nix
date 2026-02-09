@@ -37,5 +37,6 @@
   pkgs.wireguard-tools
 
   # Desktop Apps
+  pkgs.anytype # Create notes, tasks, databases, and chats that only you can access
   pkgs.bitwarden-desktop
 ]
