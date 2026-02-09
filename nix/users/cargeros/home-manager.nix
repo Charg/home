@@ -22,6 +22,7 @@ in
     ../../programs/fzf/hm.nix
     ../../programs/ghostty/hm.nix
     ../../programs/git/hm.nix
+    ../../programs/gpg/hm.nix
     ../../programs/neovim/hm.nix
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix
