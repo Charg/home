@@ -9,6 +9,7 @@
   pkgs.dig
   pkgs.dive # Tool for exploring each layer in a docker image
   pkgs.file
+  pkgs.gh # Github CLI tools
   pkgs.grype # Vulnerability scanner for container images and filesystems
   pkgs.htop
   pkgs.jq
