@@ -41,7 +41,7 @@ spec:
           - name: technitium-dnsserver
             repoURL: https://charts.obeone.cloud
             chart: technitium-dnsserver
-            targetRevision: 1.7.2
+            targetRevision: 1.8.0
             namespace: default
           - name: traefik-crds
             repoURL: https://traefik.github.io/charts
