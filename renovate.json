@@ -7,7 +7,7 @@
     "enabled": true
   },
   "nix": {
-    "enabled": false
+    "enabled": true
   },
   "extends": [
     "config:best-practices"
