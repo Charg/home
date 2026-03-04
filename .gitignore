@@ -1,2 +1,13 @@
+# Ignore build outputs from performing a nix-build or `nix build` command
 result
+result-*
+
+# Ignore automatically generated direnv output
+.direnv
+
+# nixos wsl tar
 nixos-wsl.tar.gz
+
+# OS trash
+.DS_Store
+.DS_Store?
