@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "nix": {
+    "enabled": true
+  },
+  "pre-commit": {
+    "enabled": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^kube/app-of-apps/application_set_apps\\.yaml$"
+      ],
+      "matchStrings": [
+        "name:\\s*node-feature-discovery[\\s\\S]*?repoURL:\\s*oci://(?<namespace>\\S+)\\s*\\n\\s*chart:\\s*(?<packageName>node-feature-discovery)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "docker",
+      "packageNameTemplate": "{{namespace}}/{{packageName}}"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^kube/app-of-apps/application_set_apps\\.yaml$"
+      ],
+      "matchStrings": [
+        "repoURL:\\s*(?<registryUrl>https?://\\S+)\\s*\\n\\s*chart:\\s*(?<packageName>\\S+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "helm",
+      "versioningTemplate": "helm"
+    }
+  ]
+}
