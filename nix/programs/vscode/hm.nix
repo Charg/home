@@ -18,14 +18,15 @@
           github.copilot
           github.copilot-chat
 
-          # Languages
+          # Language
+          blueglassblock.better-json5
           golang.go
           hashicorp.terraform
           jnoortheen.nix-ide
-          redhat.vscode-yaml
+          ms-pyright.pyright
           ms-python.python
           ms-python.vscode-pylance
-          ms-pyright.pyright
+          redhat.vscode-yaml
 
           # Tools
           mkhl.direnv
