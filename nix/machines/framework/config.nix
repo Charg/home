@@ -26,11 +26,11 @@
   networking.hostName = "framework13";
   networking.wireguard.enable = true;
 
-  networking.firewall.allowedTCPPorts = [ 
+  networking.firewall.allowedTCPPorts = [
     24800 # DeskFlow
   ];
 
-  networking.firewall.allowedUDPPorts = [ 
+  networking.firewall.allowedUDPPorts = [
     24800 # DeskFlow
     51820 # WireGuard
   ];

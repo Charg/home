@@ -43,7 +43,7 @@ def get_yaml_diff(original: dict[str, Any], updated: dict[str, Any]) -> dict[str
                 diff[key] = nested_diff
         elif original[key] != value:
             diff[key] = value
-            
+
     return diff
 
 

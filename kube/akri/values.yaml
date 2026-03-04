@@ -63,10 +63,10 @@ controller:
     readOnlyRootFilesystem: true
     capabilities:
       drop: ["ALL"]
-  # onlyOnControlPlane dictates whether the Akri Controller will only run on nodes with 
+  # onlyOnControlPlane dictates whether the Akri Controller will only run on nodes with
   # the label with (key, value) of ("node-role.kubernetes.io/master", "")
   onlyOnControlPlane: false
-  # allowOnControlPlane dictates whether a toleration will be added to allow to Akri Controller 
+  # allowOnControlPlane dictates whether a toleration will be added to allow to Akri Controller
   # to run on the control plane node
   allowOnControlPlane: true
   # nodeSelectors is the array of nodeSelectors used to target nodes for the Akri Controller to run on
@@ -146,7 +146,7 @@ custom:
     # capacity is the capacity for any instances created as a result of
     # applying this custom configuration
     capacity: 1
-    # discoveryDetails is the string of discovery details that is 
+    # discoveryDetails is the string of discovery details that is
     # passed to a Discovery Handler which can parse it into an expected format.
     discoveryDetails: ""
     brokerPod:
@@ -168,11 +168,11 @@ custom:
         memoryLimit: 24Mi
         # cpuLimit defines the maximum amount of CPU this Pod can consume.
         cpuLimit: 24m
-    brokerJob: 
+    brokerJob:
       # container used by custom
       image:
         # repository is the custom broker container reference
-        repository: 
+        repository:
         # tag is the custom broker image tag
         tag: latest
         # pullPolicy is the custom pull policy
@@ -233,7 +233,7 @@ custom:
       # protocol is the service protocol of the instance service
       protocol: TCP
   # discovery defines a set of values for a custom discovery handler DaemonSet
-  discovery: 
+  discovery:
     # enabled defines whether discovery handler pods will be deployed in a slim Agent scenario
     enabled: false
     # name is the Kubernetes resource name that will be created for this
@@ -308,11 +308,11 @@ debugEcho:
         memoryLimit: 30Mi
         # cpuLimit defines the maximum amount of CPU this Pod can consume.
         cpuLimit: 29m
-    brokerJob: 
+    brokerJob:
       # container used by debugEcho
       image:
         # repository is the debugEcho broker container reference
-        repository: 
+        repository:
         # tag is the debugEcho broker image tag
         tag: latest
         # pullPolicy is the debugEcho pull policy
@@ -373,7 +373,7 @@ debugEcho:
       # protocol is the service protocol of the instance service
       protocol: TCP
   # discovery defines a set of values for a debugEcho discovery handler DaemonSet
-  discovery: 
+  discovery:
     # enabled defines whether discovery handler pods will be deployed in a slim Agent scenario
     enabled: false
     image:
@@ -430,7 +430,7 @@ onvif:
         items: []
       discoveryTimeoutSeconds: 1
     # discoveryProperties is a map of properties fthat will be passed to discovery handler,
-    # the properties can be direct specified or read from Secret or ConfigMap 
+    # the properties can be direct specified or read from Secret or ConfigMap
     discoveryProperties:
     # capacity is the capacity for any instances created as a result of
     # applying this onvif configuration
@@ -454,11 +454,11 @@ onvif:
         memoryLimit: 400Mi
         # cpuLimit defines the maximum amount of CPU this Pod can consume.
         cpuLimit: 2800m
-    brokerJob: 
+    brokerJob:
       # container used by onvif
       image:
         # repository is the onvif broker container reference
-        repository: 
+        repository:
         # tag is the onvif broker image tag
         tag: latest
         # pullPolicy is the onvif pull policy
@@ -523,7 +523,7 @@ onvif:
       # protocol is the service protocol of the instance service
       protocol: TCP
     # discovery defines a set of values for a onvif discovery handler DaemonSet
-  discovery: 
+  discovery:
     # enabled defines whether discovery handler pods will be deployed in a slim Agent scenario
     enabled: false
     image:
@@ -574,8 +574,8 @@ opcua:
       applicationNames:
         action: Exclude
         items: []
-    # mountCertificates determines whether to mount into the broker pods k8s Secrets 
-    # containing OPC UA client credentials for connecting to OPC UA severs with the 
+    # mountCertificates determines whether to mount into the broker pods k8s Secrets
+    # containing OPC UA client credentials for connecting to OPC UA severs with the
     # same signing certificate authority.
     # If set to false, the brokers will attempt to make an insecure connection with the servers.
     mountCertificates: false
@@ -601,11 +601,11 @@ opcua:
         memoryLimit: 200Mi
         # cpuLimit defines the maximum amount of CPU this Pod can consume.
         cpuLimit: 30m
-    brokerJob: 
+    brokerJob:
       # container used by opcua
       image:
         # repository is the opcua broker container reference
-        repository: 
+        repository:
         # tag is the opcua broker image tag
         tag: latest
         # pullPolicy is the opcua pull policy
@@ -666,7 +666,7 @@ opcua:
       # protocol is the service protocol of the instance service
       protocol: TCP
   # discovery defines a set of values for a opcua discovery handler DaemonSet
-  discovery: 
+  discovery:
     # enabled defines whether discovery handler pods will be deployed in a slim Agent scenario
     enabled: false
     image:
@@ -710,7 +710,7 @@ udev:
     brokerProperties: {}
     discoveryDetails:
       # groupRecursive defines whether to group discovered parent/children under the same instance
-      groupRecursive: true 
+      groupRecursive: true
       # udevRules is the list of udev rules used to find instances created as a result of
       # applying this udev configuration
       udevRules:
@@ -741,11 +741,11 @@ udev:
         # cpuLimit defines the maximum amount of CPU this Pod can consume.
         cpuLimit: 29m
       securityContext: {}
-    brokerJob: 
+    brokerJob:
       # container used by udev
       image:
         # repository is the udev broker container reference
-        repository: 
+        repository:
         # tag is the udev broker image tag
         tag: latest
         # pullPolicy is the udev pull policy
@@ -806,7 +806,7 @@ udev:
       # protocol is the service protocol of the instance service
       protocol: TCP
   # discovery defines a set of values for a udev discovery handler DaemonSet
-  discovery: 
+  discovery:
     # enabled defines whether discovery handler pods will be deployed in a slim Agent scenario
     enabled: true
     image:
@@ -826,7 +826,7 @@ udev:
     # nodeSelectors is the array of nodeSelectors used to target nodes for the discovery handler to run on
     # This can be set from the helm command line using `--set udev.discovery.nodeSelectors.label="value"`
     nodeSelectors: {}
-    host: 
+    host:
       # udev is the node path of udev, usually at `/run/udev`
       udev: /run/udev
     resources:
@@ -870,10 +870,10 @@ webhookConfiguration:
     tag: v1.1.1
     # pullPolicy is the webhook-certgen pull policy
     pullPolicy: IfNotPresent
-  # onlyOnControlPlane dictates whether the Akri Webhook will only run on nodes with 
+  # onlyOnControlPlane dictates whether the Akri Webhook will only run on nodes with
   # the label with (key, value) of ("node-role.kubernetes.io/master", "")
   onlyOnControlPlane: false
-  # allowOnControlPlane dictates whether a toleration will be added to allow to Akri Webhook 
+  # allowOnControlPlane dictates whether a toleration will be added to allow to Akri Webhook
   # to run on the control plane node
   allowOnControlPlane: true
   # nodeSelectors is the array of nodeSelectors used to target nodes for the Akri Webhook to run on
@@ -890,4 +890,3 @@ webhookConfiguration:
     memoryLimit: 100Mi
     # cpuLimit defines the maximum amount of CPU this Pod can consume.
     cpuLimit: 26m
-

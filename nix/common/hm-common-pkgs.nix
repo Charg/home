@@ -20,6 +20,7 @@
   pkgs.nnn
   pkgs.nodejs
   pkgs.opencode
+  pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
   pkgs.python313
   pkgs.ripgrep
   pkgs.sqlite
