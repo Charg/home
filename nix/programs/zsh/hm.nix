@@ -71,7 +71,15 @@
       zstyle ':zshzoo:magic-enter' command 'ls -alh'
       zstyle ':zshzoo:magic-enter' git-command 'git status'
 
+      #
+      # PATH
+      #
       export PATH="$HOME/.local/bin:$PATH"
+
+      #
+      # Mise
+      #
+      eval "$(mise activate zsh)"
     '';
 
     shellAliases = {
