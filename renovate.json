@@ -19,11 +19,10 @@
         "^kube/app-of-apps/application_set_apps\\.yaml$"
       ],
       "matchStrings": [
-        "name:\\s*node-feature-discovery[\\s\\S]*?chart:\\s*(?<packageName>node-feature-discovery)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)"
+        "name:\\s*node-feature-discovery[\\s\\S]*?repoURL:\\s*oci://(?<namespace>\\S+)\\s*\\n\\s*chart:\\s*(?<packageName>node-feature-discovery)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)"
       ],
-      "registryUrlTemplate": "oci://registry.k8s.io/nfd/charts",
-      "datasourceTemplate": "helm",
-      "versioningTemplate": "helm"
+      "datasourceTemplate": "docker",
+      "packageNameTemplate": "{{namespace}}/{{packageName}}"
     },
     {
       "customType": "regex",
