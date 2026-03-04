@@ -139,7 +139,7 @@ CMD ["node", "dist/main.js"]
     - Place frequently changing instructions (e.g., `COPY . .`) *after* less frequently changing ones (e.g., `RUN npm ci`).
     - Combine `RUN` commands where possible to minimize layers (e.g., `RUN apt-get update && apt-get install -y ...`).
     - Clean up temporary files in the same `RUN` command (`rm -rf /var/lib/apt/lists/*`).
-    - Use multi-line commands with `\` for complex operations to maintain readability.
+    - Use `RUN <<EOF` for readability of multi-line commands
 - **Example (Advanced Layer Optimization):**
 ```dockerfile
 # BAD: Multiple layers, inefficient caching
@@ -157,6 +157,23 @@ RUN apt-get update && \
     pip3 install flask && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# BEST: Optimized layers with caching
+FROM ubuntu:22.04
+RUN <<EOF
+    rm -f /etc/apt/apt.conf.d/docker-clean
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+EOF
+
+RUN --mount=type=cache,target=/var/cache/apt,id=apt-${OS_CODENAME},sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,id=apt-lists-${OS_CODENAME},sharing=locked \
+    <<EOF
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        git \
+        ca-certificates \
+        curl
+EOF
 ```
 
 ### **4. Use `.dockerignore` Effectively**
@@ -311,6 +328,56 @@ ENV APP_VERSION=$BUILD_VERSION
 
 # The application should validate required env vars at startup
 CMD ["node", "dist/main.js"]
+```
+
+### **7. Use buildkit features**
+- **Principle:** BuildKit is a modern, high-performance build engine that provides significant improvements over the legacy builder, focusing on performance, security, and advanced capabilities. BuildKit has been the default build system since Docker Engine version 23.0
+- **Guidance for Copilot:**
+    - Set `# syntax=docker/dockerfile:1` at the top of the Dockerfile to use the latest stable features
+    - Use `RUN` heredocs for multi-line scripts: `RUN <<EOF`
+    - Create images in a way that supports multiarch builds: `docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7`
+    - Avoid and callout commons build argument and variable scoping issues
+    - Always practice good supply chain security by generating sboms and provenance attestation
+- **Example:**
+```
+# syntax=docker/dockerfile:1
+
+# 1. Use specific base image tags for cache stability
+FROM node:20.11.0-alpine AS builder
+
+# 2. Order instructions from least to most frequently changed
+WORKDIR /app
+
+# 3. Copy dependency files first for better layer caching
+COPY package.json package-lock.json ./
+
+# 4. Use cache mounts for package managers
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --prefer-offline
+
+# 5. Copy source code after dependencies
+COPY . .
+
+# 6. Use cache mounts for build artifacts
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build
+
+# 7. Use minimal final image
+FROM node:20.11.0-alpine AS production
+
+# 8. Create non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+WORKDIR /app
+
+# 9. Copy only necessary files from builder
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/package.json ./
+
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
 ```
 
 ## Container Security Best Practices
