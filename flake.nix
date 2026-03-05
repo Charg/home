@@ -51,6 +51,19 @@
             };
           });
         })
+
+        (
+          final: prev:
+          let
+            unstable = import inputs.nixpkgs-unstable {
+              system = final.system;
+              config.allowUnfree = true;
+            };
+          in
+          {
+            opencode = unstable.opencode;
+          }
+        )
       ];
 
       mkSystem = import ./nix/lib/mksystem.nix {
