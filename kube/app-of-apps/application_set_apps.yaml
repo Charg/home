@@ -51,13 +51,13 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 38.0.2
+            targetRevision: 39.0.4
             namespace: traefik-internal
             helm_skip_crds: true
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 38.0.2
+            targetRevision: 39.0.4
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
