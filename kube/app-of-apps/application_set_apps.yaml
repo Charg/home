@@ -30,7 +30,7 @@ spec:
           - name: plex
             repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
             chart: plex-media-server
-            targetRevision: 1.4.0
+            targetRevision: 1.5.0
             namespace: default
             auto_sync: false
           - name: metallb
