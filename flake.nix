@@ -64,6 +64,19 @@
             opencode = unstable.opencode;
           }
         )
+
+        (
+          final: prev:
+          let
+            unstable = import inputs.nixpkgs-unstable {
+              system = final.system;
+              config.allowUnfree = true;
+            };
+          in
+          {
+            mise = unstable.mise;
+          }
+        )
       ];
 
       mkSystem = import ./nix/lib/mksystem.nix {
