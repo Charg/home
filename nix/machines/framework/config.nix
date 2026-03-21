@@ -176,6 +176,10 @@
   # Recommended at https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13
   services.power-profiles-daemon.enable = true;
 
+  # https://github.com/nix-community/nix-ld
+  # Run unpatched dynamic binaries on NixOS0
+  programs.nix-ld.enable = true;
+
   nix = {
     # package = pkgs.nixVersions.latest;
     extraOptions = ''
