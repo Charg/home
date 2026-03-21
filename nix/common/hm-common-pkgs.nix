@@ -13,6 +13,7 @@
   pkgs.grype # Vulnerability scanner for container images and filesystems
   pkgs.htop
   pkgs.jq
+  pkgs.just # Handy way to save and run project-specific commands
   pkgs.kube-prompt
   pkgs.lsof
   pkgs.minikube
