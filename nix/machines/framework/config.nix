@@ -168,6 +168,14 @@
   # Recommended at https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13
   services.power-profiles-daemon.enable = true;
 
+  fonts.packages = with pkgs; [
+    inter
+    jetbrains-mono
+    noto-fonts
+    noto-fonts-cjk-sans
+    noto-fonts-color-emoji
+  ];
+
   # https://github.com/nix-community/nix-ld
   # Run unpatched dynamic binaries on NixOS0
   programs.nix-ld.enable = true;
