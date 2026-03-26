@@ -20,7 +20,7 @@ spec:
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
             chart: home-assistant
-            targetRevision: 0.3.47
+            targetRevision: 0.3.51
             namespace: default
           - name: akri
             repoURL: https://project-akri.github.io/akri/
