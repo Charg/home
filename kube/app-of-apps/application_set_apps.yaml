@@ -15,7 +15,7 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.4.10
+            targetRevision: 9.4.16
             namespace: argocd
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
