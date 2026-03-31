@@ -17,6 +17,11 @@
       clipboard-write = "allow";
       copy-on-select = "clipboard";
       mouse-hide-while-typing = true;
+      font-feature = [
+        "-calt"
+        "-liga"
+        "-dlig"
+      ];
     };
   };
 }
