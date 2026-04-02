@@ -71,28 +71,108 @@ function awsp() {
 }
 
 function awssh() {
-    # This function connects you to an EC2 instance based on the supplied instance information.
-    #
-    # ARGS:
-    # $1 == AWS instance identifier
-    # $2 == SSH username [optional]
+    local identifier=""
+    local username=""
+    local ssh_key=""
+    local aws_result=""
 
-    if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
-    then
-        echo "Usage: awssh instance_id"
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                echo "Usage: awssh [-u username] [-i /path/to/key] <instance-id-or-name>"
+                return 0
+                ;;
+            -u|--user)
+                username="$2"
+                shift 2
+                ;;
+            -i|--key)
+                ssh_key="$2"
+                shift 2
+                ;;
+            -*)
+                echo "ERROR: Unknown option $1"
+                echo "Usage: awssh [-u username] [-i /path/to/key] <instance-id-or-name>"
+                return 1
+                ;;
+            *)
+                if [[ -z "${identifier}" ]]; then
+                    identifier="$1"
+                elif [[ -z "${username}" ]]; then
+                    # Fallback for old positional usage: awssh <id> <username>
+                    username="$1"
+                else
+                    echo "ERROR: Unexpected argument '$1'"
+                    return 1
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    if [[ -z "${identifier}" ]]; then
+        echo "Usage: awssh [-u username] [-i /path/to/key] <instance-id-or-name>"
         return 1
     fi
 
-    if [[ "${1}" =~ "i-.*" ]]; then
-        echo "LOOKUP: ${1}!"
-        SSH_IP_ADDR=$(aws ec2 describe-instances --instance-ids "${1}" --query 'Reservations[].Instances[].PrivateIpAddress' --output=text)
-        echo "${SSH_IP_ADDR}"
+    if [[ "${identifier}" =~ ^i- ]]; then
+        echo "LOOKUP: Instance ID ${identifier}..."
+        aws_result=$(aws ec2 describe-instances \
+            --instance-ids "${identifier}" \
+            --filters "Name=instance-state-name,Values=running" \
+            --query 'Reservations[].Instances[].[InstanceId, PrivateIpAddress]' \
+            --output text)
+    else
+        echo "LOOKUP: Name tag ${identifier}..."
+        aws_result=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=${identifier}" "Name=instance-state-name,Values=running" \
+            --query 'Reservations[].Instances[].[InstanceId, PrivateIpAddress]' \
+            --output text)
     fi
 
-    if ! [[ -z "${SSH_IP_ADDR}" ]]; then
-        ssh "${SSH_IP_ADDR}"
+    local instance_count
+    instance_count=$(echo "${aws_result}" | grep -c "^i-")
+    local ssh_ip_addr=""
+
+    if [[ ${instance_count} -gt 1 ]]; then
+        if command -v fzf >/dev/null 2>&1; then
+            local selected_instance
+            selected_instance=$(echo "${aws_result}" | fzf --prompt="Multiple instances found. Select one> " --height=10 --layout=reverse)
+
+            if [[ -z "${selected_instance}" ]]; then
+                echo "Aborted."
+                return 1
+            fi
+
+            ssh_ip_addr=$(echo "${selected_instance}" | awk '{print $2}')
+        else
+            echo "WARNING: Multiple instances found, but 'fzf' is not installed."
+            echo "Defaulting to the first instance."
+            ssh_ip_addr=$(echo "${aws_result}" | head -n 1 | awk '{print $2}')
+        fi
+    elif [[ ${instance_count} -eq 1 ]]; then
+        ssh_ip_addr=$(echo "${aws_result}" | awk '{print $2}')
+    fi
+
+    if [[ -n "${ssh_ip_addr}" ]]; then
+        local ssh_cmd=("ssh")
+
+        if [[ -n "${ssh_key}" ]]; then
+            ssh_cmd+=("-i" "${ssh_key}")
+        fi
+
+        local target="${ssh_ip_addr}"
+        if [[ -n "${username}" ]]; then
+            target="${username}@${ssh_ip_addr}"
+        fi
+
+        ssh_cmd+=("${target}")
+
+        echo "CONNECTING: ${target}"
+
+        "${ssh_cmd[@]}"
     else
-        echo "ERROR: SSH address not set"
+        echo "ERROR: No running instance found for '${identifier}'"
         return 1
     fi
 }
