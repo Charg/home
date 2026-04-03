@@ -9,6 +9,7 @@
 let
   # for whatever reason, we need to create a shell script for this to work as a shortcut
   # https://github.com/flameshot-org/flameshot/issues/3326#issuecomment-1788440850
+  flameshot-gui-copy = pkgs.writeShellScriptBin "flameshot-gui-copy" "${pkgs.flameshot}/bin/flameshot gui --raw | wl-copy";
   flameshot-gui = pkgs.writeShellScriptBin "flameshot-gui" "${pkgs.flameshot}/bin/flameshot gui";
 in
 
@@ -124,17 +125,24 @@ in
 
       # Terminal
       custom-keybindings = [
-        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot-copy/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae/"
       ];
     };
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot" = {
-      binding = "<control>Print";
+      binding = "Print";
       # command="${pkgs.flameshot}/bin/flameshot gui";
       command = "${flameshot-gui}/bin/flameshot-gui";
-      name = "flameshot";
+      name = "Flameshot";
+    };
+
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot-copy" = {
+      binding = "<Control>Print";
+      command = "${flameshot-gui-copy}/bin/flameshot-gui-copy";
+      name = "Flameshot Copy";
     };
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/ghost" = {
