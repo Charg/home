@@ -90,6 +90,7 @@ in
       pkgs.dockle # Container Image Linter for Security, Helping build the Best-Practice Docker Image, Easy to start
       pkgs.wl-clipboard
       pkgs.popsicle
+      pkgs.nixos-anywhere
     ])
 
     # WSL Packages

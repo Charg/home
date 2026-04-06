@@ -9,6 +9,11 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -16,6 +21,11 @@
 
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    colmena = {
+      url = "github:zhaofengli/colmena";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -33,51 +43,13 @@
       self,
       nixpkgs,
       nixos-hardware,
+      disko,
       home-manager,
       darwin,
       ...
     }@inputs:
     let
-
-      overlays = [
-        (final: prev: {
-          tmux = prev.tmux.overrideAttrs (oldAttrs: rec {
-            version = "3.6a";
-            src = prev.fetchFromGitHub {
-              owner = "tmux";
-              repo = "tmux";
-              rev = version;
-              hash = "sha256-VwOyR9YYhA/uyVRJbspNrKkJWJGYFFktwPnnwnIJ97s=";
-            };
-          });
-        })
-
-        (
-          final: prev:
-          let
-            unstable = import inputs.nixpkgs-unstable {
-              system = final.system;
-              config.allowUnfree = true;
-            };
-          in
-          {
-            opencode = unstable.opencode;
-          }
-        )
-
-        (
-          final: prev:
-          let
-            unstable = import inputs.nixpkgs-unstable {
-              system = final.system;
-              config.allowUnfree = true;
-            };
-          in
-          {
-            mise = unstable.mise;
-          }
-        )
-      ];
+      overlays = import ./nix/lib/overlays.nix { inherit inputs; };
 
       mkSystem = import ./nix/lib/mksystem.nix {
         inherit nixpkgs inputs overlays;
@@ -98,10 +70,27 @@
         wsl = true;
       };
 
+      # Colmena managed machine
+      nixosConfigurations.nuc01 = mkSystem "nuc01" {
+        system = "x86_64-linux";
+        user = "nixos";
+        wsl = false;
+      };
+
+      nixosConfigurations.iso = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        # specialArgs = { inherit inputs outputs; };
+        modules = [
+          (nixpkgs + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
+          ./nix/machines/iso/config.nix
+        ];
+      };
+
       darwinConfigurations.mbp-work-1 = mkSystem "mbp-work-1" {
         system = "aarch64-darwin";
         user = "cargeros";
         darwin = true;
       };
+
     };
 }
