@@ -9,6 +9,82 @@ function gfmm() {
 }
 
 #
+# Vault
+#
+vault-edit() {
+    local VAULT_PATH=$1
+    local TMP_DIR
+    local ORIG_FILE EDIT_FILE CONFIRM
+
+    if [[ -z "$VAULT_PATH" ]]; then
+        echo "Usage: vault-edit <vault-path>"
+        return 1
+    fi
+
+    for cmd in vault jq vim diff; do
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "Error: Required dependency '$cmd' is not installed."
+            return 1
+        fi
+    done
+
+    if [[ -d /dev/shm ]]; then
+        TMP_DIR=$(mktemp -d /dev/shm/vault-edit.XXXXXXXX)
+    else
+        TMP_DIR=$(mktemp -d -t vault-edit.XXXXXXXX)
+    fi
+
+    {
+        ORIG_FILE="$TMP_DIR/orig.json"
+        EDIT_FILE="$TMP_DIR/edit.json"
+
+        echo "--- Fetching secret from $VAULT_PATH ---"
+
+        if ! vault kv get -format=json "$VAULT_PATH" | jq -S '.data.data // .data' > "$ORIG_FILE"; then
+            echo "Error: Could not find secret or Vault error."
+            return 1
+        fi
+
+        chmod 600 "$ORIG_FILE"
+        cp "$ORIG_FILE" "$EDIT_FILE"
+
+        vim -c 'set syntax=json' "$EDIT_FILE"
+
+        if diff -q "$ORIG_FILE" "$EDIT_FILE" > /dev/null; then
+            echo "No changes detected. Exiting."
+            return 0
+        fi
+
+        echo -e "\n--- Proposed Changes ---"
+        diff --color=always -u "$ORIG_FILE" "$EDIT_FILE" || true
+        echo -e "\n------------------------"
+
+        # Prompt
+        echo -n "Apply these changes to Vault? (y/N): "
+        read -r CONFIRM
+
+        # In Zsh, we can check the confirmation logic simply
+        if [[ "$CONFIRM" == [Yy]* ]]; then
+            echo "Updating Vault..."
+            if vault kv put "$VAULT_PATH" @"$EDIT_FILE" > /dev/null; then
+                echo "Successfully updated $VAULT_PATH"
+            else
+                echo "Error: Failed to update Vault."
+                return 1
+            fi
+        else
+            echo "Update aborted."
+        fi
+    } always {
+        # This part runs no matter what happened in the block above
+        if [[ -d "$TMP_DIR" ]]; then
+            rm -rf "$TMP_DIR"
+        fi
+    }
+}
+
+
+#
 # Kubernetes
 #
 
