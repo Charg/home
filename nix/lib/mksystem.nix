@@ -37,8 +37,6 @@ let
     { nixpkgs.overlays = overlays; }
     { nixpkgs.config.allowUnfree = true; }
 
-    inputs.disko.nixosModules.disko
-
     machineConfig
     userOSConfig
     homeManagerModules.home-manager
@@ -67,11 +65,14 @@ let
     }
 
   ]
+  ++ lib.optionals (!isDarwin) [
+    inputs.disko.nixosModules.disko
+  ]
   ++ lib.optionals isWSL [
     inputs.nixos-wsl.nixosModules.wsl
   ]
   ++ lib.optionals isDarwin [
-    inputs.darwin.nixosModules.darwin
+    inputs.darwin.darwinModules.simple
   ];
 in
 # Return either the list of modules or the result of calling darwinSystem/nixosSystem with those modules.
