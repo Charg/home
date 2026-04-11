@@ -1,7 +1,7 @@
 # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
 
 global:
-  domain: argo.packet.fail
+  domain: argo-nuc01.packet.fail
 configs:
   params:
     server.insecure: true
@@ -13,6 +13,6 @@ server:
     enabled: true
     annotations:
       cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
-      external-dns.alpha.kubernetes.io/hostname: plex.packet.fail
+      external-dns.alpha.kubernetes.io/hostname: argo-nuc01.packet.fail
     ingressClassName: traefik-internal
     tls: true
