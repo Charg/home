@@ -1,0 +1,20 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: ov-postgres
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17-pgvector
+
+  bootstrap:
+    initdb:
+      database: openveto
+      owner: veto
+      secret:
+        name: postgres-credentials
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS vector;
+
+  storage:
+    size: 10Gi

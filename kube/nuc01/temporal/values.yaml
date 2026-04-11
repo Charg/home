@@ -1,0 +1,53 @@
+# source: https://github.com/temporalio/helm-charts/blob/main/charts/temporal/values.yaml
+
+cassandra:
+  enabled: false
+
+mysql:
+  enabled: false
+
+postgresql:
+  enabled: true
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+
+server:
+  replicaCount: 1
+
+  frontend:
+    replicaCount: 1
+
+  history:
+    replicaCount: 1
+
+  matching:
+    replicaCount: 1
+
+  worker:
+    replicaCount: 1
+
+web:
+  enabled: true
+  replicaCount: 1
+  ingress:
+    enabled: true
+    className: traefik-internal
+    annotations:
+      cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+      external-dns.alpha.kubernetes.io/hostname: temporal-nuc01.packet.fail
+    hosts:
+      - host: temporal-nuc01.packet.fail
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: temporal-nuc01-tls
+        hosts:
+          - temporal-nuc01.packet.fail
