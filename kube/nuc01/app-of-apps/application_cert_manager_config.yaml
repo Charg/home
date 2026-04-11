@@ -10,6 +10,7 @@ spec:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/cert-manager-config
     targetRevision: main
+    plugin: {}
   destination:
     namespace: cert-manager
     server: https://kubernetes.default.svc
