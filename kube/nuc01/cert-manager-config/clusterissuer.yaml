@@ -1,0 +1,17 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: lets-encrypt-packet-fail
+spec:
+  acme:
+    email: chris@syn.sh
+    privateKeySecretRef:
+      name: lets-encrypt-packet-fail
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              key: api-token
+              name: cert-manager-dns-cloudflare
