@@ -5,6 +5,14 @@ ingressClass:
   isDefaultClass: false
   name: traefik-public
 
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
 providers:
   kubernetesCRD:
     enabled: true

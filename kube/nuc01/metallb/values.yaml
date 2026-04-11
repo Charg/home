@@ -1,1 +1,19 @@
 # source: https://github.com/metallb/metallb/blob/main/charts/metallb/values.yaml
+
+controller:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+speaker:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi

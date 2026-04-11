@@ -13,6 +13,14 @@ providers:
     enabled: true
     ingressClass: traefik-internal
 
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
 ingressRoute:
   dashboard:
     enabled: true
