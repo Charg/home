@@ -4,17 +4,21 @@ kind: Cluster
 metadata:
   name: ov-postgres
 spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
   instances: 1
-  imageName: ghcr.io/cloudnative-pg/postgresql:17-pgvector
 
   bootstrap:
     initdb:
-      database: openveto
       owner: veto
       secret:
         name: postgres-credentials
-      postInitSQL:
-        - CREATE EXTENSION IF NOT EXISTS vector;
+
+  postgresql:
+    extensions:
+    - name: pgvector
+      image:
+        # renovate: suite=trixie-pgdg depName=postgresql-18-pgvector
+        reference: ghcr.io/cloudnative-pg/pgvector:0.8.2-18-trixie
 
   storage:
-    size: 10Gi
+    size: 100Gi

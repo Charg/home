@@ -1,0 +1,13 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: cluster-ov-postgres
+spec:
+  name: openveto
+  owner: veto
+  cluster:
+    name: ov-postgres
+  extensions:
+  - name: vector
+    # renovate: suite=trixie-pgdg depName=postgresql-18-pgvector extractVersion=^(?<version>\d+\.\d+\.\d+)
+    version: '0.8.2'
