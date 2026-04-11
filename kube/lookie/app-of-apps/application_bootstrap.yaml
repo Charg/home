@@ -18,5 +18,5 @@ spec:
     server: https://kubernetes.default.svc
   sources:
     - repoURL: https://github.com/Charg/home.git
-      path: kube/app-of-apps
+      path: kube/lookie/app-of-apps
       targetRevision: main

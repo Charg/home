@@ -1,0 +1,18 @@
+# https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
+
+global:
+  domain: argo.packet.fail
+configs:
+  params:
+    server.insecure: true
+  repositories:
+    home-repo:
+      url: https://github.com/Charg/home.git
+server:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+      external-dns.alpha.kubernetes.io/hostname: plex.packet.fail
+    ingressClassName: traefik-internal
+    tls: true

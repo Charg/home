@@ -1,0 +1,90 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - name: argocd
+            repoURL: https://argoproj.github.io/argo-helm
+            chart: argo-cd
+            targetRevision: 9.4.16
+            namespace: argocd
+          - name: metallb
+            repoURL: https://metallb.github.io/metallb
+            chart: metallb
+            targetRevision: 0.15.3
+            namespace: default
+          - name: traefik-crds
+            repoURL: https://traefik.github.io/charts
+            chart: traefik-crds
+            targetRevision: 1.14.0
+            namespace: traefik-crds
+          - name: traefik-internal
+            repoURL: https://traefik.github.io/charts
+            chart: traefik
+            targetRevision: 38.0.2
+            namespace: traefik-internal
+            helm_skip_crds: true
+          - name: traefik-public
+            repoURL: https://traefik.github.io/charts
+            chart: traefik
+            targetRevision: 38.0.2
+            namespace: traefik-public
+            helm_skip_crds: true
+          - name: external-dns
+            repoURL: https://kubernetes-sigs.github.io/external-dns/
+            chart: external-dns
+            targetRevision: 1.20.0
+            namespace: external-dns
+          - name: cert-manager
+            repoURL: https://charts.jetstack.io
+            chart: cert-manager
+            targetRevision: v1.20.0
+            namespace: cert-manager
+  template:
+    metadata:
+      name: "{{ .name }}"
+    spec:
+      project: default
+      destination:
+        namespace: "{{ .namespace }}"
+        server: https://kubernetes.default.svc
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .targetRevision }}"
+          helm:
+            valueFiles:
+              - "$values/kube/nuc01/{{ .name }}/values.yaml"
+        - repoURL: https://github.com/Charg/home.git
+          targetRevision: main
+          ref: values
+  templatePatch: |
+    spec:
+      sources:
+        - repoURL: "{{ .repoURL }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .targetRevision }}"
+          helm:
+            skipCrds: {{ dig "helm_skip_crds" "false" . }}
+            valueFiles:
+              - "$values/kube/nuc01/{{ .name }}/values.yaml"
+        - repoURL: https://github.com/Charg/home.git
+          targetRevision: main
+          ref: values
+      syncPolicy:
+        automated:
+          enabled: {{ dig "auto_sync" "true" . }}
+          prune: {{ dig "prune" "true" . }}
+          selfHeal: {{ dig "selfHeal" "true" . }}
+        syncOptions:
+          - CreateNamespace={{ dig "createNamespace" "true" . }}
+          - ServerSideApply={{ dig "serverSideApply" "true" . }}

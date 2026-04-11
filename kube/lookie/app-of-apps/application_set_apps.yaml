@@ -94,7 +94,7 @@ spec:
           targetRevision: "{{ .targetRevision }}"
           helm:
             valueFiles:
-              - "$values/kube/{{ .name }}/values.yaml"
+              - "$values/kube/lookie/{{ .name }}/values.yaml"
         - repoURL: https://github.com/Charg/home.git
           targetRevision: main
           ref: values
@@ -107,7 +107,7 @@ spec:
           helm:
             skipCrds: {{ dig "helm_skip_crds" "false" . }}
             valueFiles:
-              - "$values/kube/{{ .name }}/values.yaml"
+              - "$values/kube/lookie/{{ .name }}/values.yaml"
         - repoURL: https://github.com/Charg/home.git
           targetRevision: main
           ref: values
