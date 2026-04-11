@@ -15,28 +15,22 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.4.16
+            targetRevision: 9.5.0
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
             targetRevision: 0.15.3
             namespace: default
-          - name: traefik-crds
-            repoURL: https://traefik.github.io/charts
-            chart: traefik-crds
-            targetRevision: 1.14.0
-            namespace: traefik-crds
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 38.0.2
+            targetRevision: 39.0.7
             namespace: traefik-internal
-            helm_skip_crds: true
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 38.0.2
+            targetRevision: 39.0.7
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
