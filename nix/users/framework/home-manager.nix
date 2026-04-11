@@ -58,6 +58,7 @@ in
       pkgs.feh # image viewer
       pkgs.kooha # screen recorder
       pkgs.satty
+      pkgs.slack
       pkgs.synology-drive-client
       pkgs.vlc
       pkgs.zathura # PDF Reader
