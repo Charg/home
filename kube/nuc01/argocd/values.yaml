@@ -46,7 +46,7 @@ repoServer:
       args:
         - |
           set -e
-          SOPS_VERSION=v3.9.4
+          SOPS_VERSION=v3.12.2
           ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
           wget -qO /custom-tools/sops "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}"
           chmod +x /custom-tools/sops
