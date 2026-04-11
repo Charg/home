@@ -9,5 +9,6 @@ spec:
     name: ov-postgres
   extensions:
   - name: vector
+    ensure: present
     # renovate: suite=trixie-pgdg depName=postgresql-18-pgvector extractVersion=^(?<version>\d+\.\d+\.\d+)
     version: '0.8.2'
