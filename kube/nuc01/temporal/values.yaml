@@ -78,10 +78,7 @@ web:
       cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
       external-dns.alpha.kubernetes.io/hostname: temporal-nuc01.packet.fail
     hosts:
-      - host: temporal-nuc01.packet.fail
-        paths:
-          - path: /
-            pathType: Prefix
+      - "temporal-nuc01.packet.fail/"
     tls:
       - secretName: temporal-nuc01-tls
         hosts:
