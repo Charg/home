@@ -4,6 +4,7 @@
 
 [
   # CLI Tools
+  pkgs.age
   pkgs.bottom
   pkgs.crane # Tools for interacting with remote images and registries including crane and gcrane
   pkgs.dig
@@ -26,6 +27,7 @@
   pkgs.python313
   pkgs.ripgrep
   pkgs.sqlite
+  pkgs.sops
   pkgs.tmux
   pkgs.trivy # Simple and comprehensive vulnerability scanner for containers, suitable for CI
   pkgs.unzip
