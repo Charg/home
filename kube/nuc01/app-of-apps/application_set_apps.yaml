@@ -63,11 +63,11 @@ spec:
             chart: kube-prometheus-stack
             targetRevision: 83.4.0
             namespace: monitoring
-          # - name: opentelemetry-collector
-          #   repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
-          #   chart: opentelemetry-collector
-          #   targetRevision: 0.150.0
-          #   namespace: monitoring
+          - name: opentelemetry-collector
+            repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+            chart: opentelemetry-collector
+            targetRevision: 0.150.0
+            namespace: monitoring
           # - name: tempo
           #   repoURL: https://grafana.github.io/helm-charts
           #   chart: tempo
