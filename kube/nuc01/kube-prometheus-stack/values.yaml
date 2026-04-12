@@ -101,6 +101,9 @@ prometheusOperator:
       enabled: false
     certManager:
       enabled: true
+      issuerRef:
+        name: selfsigned
+        kind: ClusterIssuer
   resources:
     requests:
       cpu: 50m
