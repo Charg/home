@@ -68,11 +68,11 @@ spec:
             chart: opentelemetry-collector
             targetRevision: 0.150.0
             namespace: monitoring
-          # - name: tempo
-          #   repoURL: https://grafana.github.io/helm-charts
-          #   chart: tempo
-          #   targetRevision: 1.24.4
-          #   namespace: monitoring
+          - name: tempo
+            repoURL: https://grafana.github.io/helm-charts
+            chart: tempo
+            targetRevision: 1.24.4
+            namespace: monitoring
   template:
     metadata:
       name: "{{ .name }}"
