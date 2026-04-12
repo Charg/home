@@ -14,6 +14,7 @@ server:
             driverName: postgres12
             databaseName: temporal
             connectAddr: temporal-postgres-rw:5432
+            connectProtocol: tcp
             user: temporal
             existingSecret: temporal-postgres-credentials
             secretKey: password
@@ -28,6 +29,7 @@ server:
             driverName: postgres12
             databaseName: temporal_visibility
             connectAddr: temporal-postgres-rw:5432
+            connectProtocol: tcp
             user: temporal
             existingSecret: temporal-postgres-credentials
             secretKey: password
