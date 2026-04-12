@@ -1,0 +1,28 @@
+# source: https://github.com/grafana/helm-charts/blob/main/charts/tempo/values.yaml
+
+tempo:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  retention: 48h
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+    processor:
+      service_graphs:
+        wait: 10s
+        max_items: 10000
+      span_metrics:
+        enable_target_info: true
+
+persistence:
+  enabled: true
+  storageClassName: local-path
+  size: 5Gi
+
+tempoQuery:
+  enabled: false
