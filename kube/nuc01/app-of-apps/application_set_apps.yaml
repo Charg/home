@@ -58,21 +58,21 @@ spec:
             chart: temporal
             targetRevision: 1.0.0
             namespace: ov
-          - name: kube-prometheus-stack
-            repoURL: https://prometheus-community.github.io/helm-charts
-            chart: kube-prometheus-stack
-            targetRevision: 83.4.0
-            namespace: monitoring
-          - name: opentelemetry-collector
-            repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
-            chart: opentelemetry-collector
-            targetRevision: 0.150.0
-            namespace: monitoring
-          - name: tempo
-            repoURL: https://grafana.github.io/helm-charts
-            chart: tempo
-            targetRevision: 1.24.4
-            namespace: monitoring
+          # - name: kube-prometheus-stack
+          #   repoURL: https://prometheus-community.github.io/helm-charts
+          #   chart: kube-prometheus-stack
+          #   targetRevision: 83.4.0
+          #   namespace: monitoring
+          # - name: opentelemetry-collector
+          #   repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
+          #   chart: opentelemetry-collector
+          #   targetRevision: 0.150.0
+          #   namespace: monitoring
+          # - name: tempo
+          #   repoURL: https://grafana.github.io/helm-charts
+          #   chart: tempo
+          #   targetRevision: 1.24.4
+          #   namespace: monitoring
   template:
     metadata:
       name: "{{ .name }}"
