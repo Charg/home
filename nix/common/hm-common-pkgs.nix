@@ -23,6 +23,7 @@
   pkgs.nixfmt-rfc-style
   pkgs.nnn
   pkgs.nodejs
+  pkgs.openssl
   pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
   pkgs.python313
   pkgs.ripgrep
