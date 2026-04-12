@@ -96,6 +96,11 @@ kubeStateMetrics:
   enabled: true
 
 prometheusOperator:
+  admissionWebhooks:
+    patch:
+      enabled: false
+    certManager:
+      enabled: true
   resources:
     requests:
       cpu: 50m
