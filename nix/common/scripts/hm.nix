@@ -11,5 +11,9 @@
       source = ./gen_yaml_patch.py;
       executable = true;
     };
+    ".local/bin/decode-saml" = {
+      source = ./decode-saml.py;
+      executable = true;
+    };
   };
 }
