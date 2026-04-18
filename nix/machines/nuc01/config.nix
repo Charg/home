@@ -27,6 +27,12 @@
     "flakes"
   ];
 
+  # Increase maximum socket receive/send buffer sizes to 8MB
+  boot.kernel.sysctl = {
+    "net.core.rmem_max" = 8388608;
+    "net.core.wmem_max" = 8388608;
+  };
+
   boot.kernelParams = [ "ip=dhcp" ];
   boot.initrd.network.enable = true;
   boot.initrd.network.ssh = {
