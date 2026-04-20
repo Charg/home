@@ -63,9 +63,6 @@ in
       pkgs.vlc
       pkgs.zathura # PDF Reader
 
-      # Productivity
-      pkgs.deskflow # mouse/keyboard sharing
-
       # Electron Apps
       pkgs.anytype
       pkgs.bitwarden-desktop
@@ -92,6 +89,7 @@ in
       pkgs.wl-clipboard
       pkgs.popsicle
       pkgs.nixos-anywhere
+      pkgs.sysstat
     ])
 
     # WSL Packages
