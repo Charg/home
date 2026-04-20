@@ -1,6 +1,12 @@
 # source: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
 
 grafana:
+  initChownData:
+    enabled: false
+  securityContext:
+    fsGroup: 472
+    runAsUser: 472
+    runAsGroup: 472
   adminUser: admin
   admin:
     existingSecret: grafana-admin-credentials
