@@ -63,7 +63,7 @@ repoServer:
   extraContainers:
     - name: sops-cmp
       command: [/var/run/argocd/argocd-cmp-server]
-      image: quay.io/argoproj/argocd:v3.3.7@sha256:31f494ef5ad17b8dfd4e03fbae79c57cfadede325ed16a1794ee9ce20ca5d759
+      image: quay.io/argoproj/argocd:v3.3.9@sha256:fd8a938f3ec64bfa272d17c20a56b548a97711b92bd5b0a80a485e81bc724969
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
