@@ -8,6 +8,9 @@ in
   # GNOME
   #
   services.udev.packages = [ pkgs.gnome-settings-daemon ];
+  services.gnome = {
+      gcr-ssh-agent.enable = false;
+  };
 
   services.desktopManager.gnome.enable = true;
   services.displayManager.gdm = {
