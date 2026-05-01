@@ -14,3 +14,11 @@ repos:
     rev: v8.30.1
     hooks:
       - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: nixfmt
+        name: nixfmt
+        entry: nixfmt
+        language: system
+        files: ^nix/.*\.nix$
