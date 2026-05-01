@@ -10,11 +10,11 @@
     settings = {
         autoupdate = false;
         share = "disabled";
-        model = "github-copilot/claude-opus-4.6";
+        model = "github-copilot/claude-sonnet-4.6";
         small_model = "github-copilot/gpt-5.4-mini";
         agent = {
             plan = {
-                model = "github-copilot/claude-sonnet-4.6";
+                model = "github-copilot/gpt-5.4";
             };
 
             summary = {
@@ -26,7 +26,7 @@
             };
 
             compaction = {
-                model = "github-copilot/gpt-5-mini";
+                model = "github-copilot/gpt-5.4-mini";
             };
 
             free = {
