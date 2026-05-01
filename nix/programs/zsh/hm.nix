@@ -3,6 +3,7 @@
   pkgs,
   lib,
   currentSystemName,
+  currentSystemUser,
   isDarwin,
   isWSL,
   ...
@@ -175,6 +176,7 @@
       nixg = "sudo nix-collect-garbage -d";
       nixrs = "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName} --option cores 6 --option max-jobs 6";
       nixrt = "nixos-rebuild test --flake ~/code/home#${currentSystemName}";
+      nixhm = "home-manager switch --flake ~/code/home#${currentSystemUser}@${currentSystemName}";
       # rebuild nix and clear the comp cache (command completion)
       nixdr = "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;";
       nixfc = "nix flake check ~/code/home";
