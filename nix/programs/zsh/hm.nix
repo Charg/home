@@ -11,8 +11,10 @@
 {
   programs.zsh = {
     enable = true;
+
     autocd = true;
     autosuggestion.enable = true;
+    enableCompletion = false;
     syntaxHighlighting.enable = true;
 
     dirHashes = {
@@ -28,27 +30,59 @@
       size = 99999;
     };
 
-    initContent = ''
-      # Enable vim mode. This works better than the home manager setting.
-      bindkey -v
-
+    initExtraFirst = ''
       # https://scottspence.com/posts/speeding-up-my-zsh-shell
       DISABLE_AUTO_UPDATE="true"
       DISABLE_MAGIC_FUNCTIONS="true"
       DISABLE_COMPFIX="true"
 
       #
+      # compinit caching
+      # speeds up terminal loads on nix. only rebuild the compinit cache daily
+      #
+
+      local ZCDUMP="$HOME/.zcompdump"
+
+      # Load compinit
+      autoload -Uz compinit
+
+      # Enable extendedglob to allow the (#q...) filter
+      setopt EXTENDED_GLOB
+
+      if [[ -n $ZCDUMP(#qN.m-1) ]]; then
+        # Load
+        compinit -C -d "$ZCDUMP"
+      else
+        # Rebuild
+        compinit -d "$ZCDUMP"
+      fi
+
+      unsetopt EXTENDED_GLOB
+
+      # Compile zcompdump in background if it's not compiled or older than the dump
+      if [[ ! "$ZCDUMP.zwc" -nt "$ZCDUMP" ]]; then
+        zcompile "$ZCDUMP" &!
+      fi
+    '';
+
+    initContent = ''
+      # Enable vim mode. This works better than the home manager setting.
+      bindkey -v
+
+      #
       # MacOs
       #
       if [[ $(uname) == 'Darwin' ]]; then
-        if [[ -d /opt/homebrew ]]; then
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-        fi
+        export HOMEBREW_PREFIX="/opt/homebrew";
+        export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
+        export HOMEBREW_REPOSITORY="/opt/homebrew/Library";
+        export PATH="/opt/homebrew/bin:/opt/homebrew/sbin''${PATH+:$PATH}";
+        export MANPATH="/opt/homebrew/share/man''${MANPATH+:$MANPATH}";
+        export INFOPATH="/opt/homebrew/share/info''${INFOPATH+:$INFOPATH}";
 
-      # Set secretive as ssh agent
-      if [[ -e $HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh ]]
-        then
-          export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
+        # Set secretive as ssh agent
+        if [[ -e $HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh ]]; then
+            export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
         fi
       fi
 
@@ -95,6 +129,7 @@
       rg = "rg -i";
       shut = "sudo shutdown -h now";
       weather = "curl https://wttr.in/sf";
+      comp-refresh = "rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump; echo 'Completion cache rebuilt!'";
 
       #
       # AWS
@@ -140,7 +175,8 @@
       nixg = "sudo nix-collect-garbage -d";
       nixrs = "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName} --option cores 6 --option max-jobs 6";
       nixrt = "nixos-rebuild test --flake ~/code/home#${currentSystemName}";
-      nixdr = "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName}";
+      # rebuild nix and clear the comp cache (command completion)
+      nixdr = "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;";
       nixfc = "nix flake check ~/code/home";
     };
 

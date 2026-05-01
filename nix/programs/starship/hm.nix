@@ -8,12 +8,15 @@
       direnv.disabled = false;
       terraform.disabled = false;
 
+      # 100 ms timeout
+      command_timeout = 100;
+
       kubernetes.disabled = false;
       kubernetes = {
         contexts = [
           {
-            context_pattern = "prod";
-            style = "red";
+            context_pattern = ".*prod.*";
+            style = "bold red";
           }
         ];
       };

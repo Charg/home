@@ -20,8 +20,8 @@
       set -s set-clipboard on
 
       # Ensure tmux loads the correct shell
-      set -gu default-command
       set -g default-shell "$SHELL"
+      set -g default-command "$SHELL"
 
       # Ensure SSH variables are updated when a new client connects
       set-option -g update-environment "SSH_CLIENT SSH_TTY"
