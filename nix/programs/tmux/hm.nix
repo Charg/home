@@ -24,7 +24,8 @@
       set -g default-command "$SHELL"
 
       # Ensure SSH variables are updated when a new client connects
-      set-option -g update-environment "SSH_CLIENT SSH_TTY"
+      # Include SSH_AUTH_SOCK so tmux sessions receive the active agent socket
+      set-option -g update-environment "SSH_CLIENT SSH_TTY SSH_AUTH_SOCK"
 
       set -g base-index 1
       set -g pane-base-index 1

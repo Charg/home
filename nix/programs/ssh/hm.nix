@@ -31,6 +31,11 @@
     enable = isLinux;
   };
 
+  # ensure GUI apps and services know about the the ssh-agent socket
+  systemd.user.sessionVariables = {
+    SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
+  };
+
   home.file.".ssh/config.d/.keep".text = "# Managed by Home Manager";
   home.file.".ssh/sockets/.keep".text = "# Managed by Home Manager";
 }
