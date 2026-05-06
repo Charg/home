@@ -69,7 +69,7 @@
         name: cfg:
         mkSystem name {
           inherit (cfg) system user;
-          darwin = cfg.darwin or false;
+          darwin = isDarwin cfg;
           wsl = cfg.wsl or false;
         };
 
