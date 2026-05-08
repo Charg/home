@@ -17,6 +17,7 @@ in
 {
   imports = [
     ../../common/hm-common.nix
+    ../../programs/claude-code/hm.nix
     ../../programs/delta/hm.nix
     ../../programs/direnv/hm.nix
     ../../programs/eza/hm.nix
