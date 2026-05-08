@@ -143,8 +143,8 @@
       gca = "git commit --ammend";
       gcb = "git checkout -b";
       gch = "git ch";
-      gcm = "git commit";
-      gcmm = "git commit --message";
+      gcm = "git commit --message";
+      gcmm = "git commit";
       gco = "git checkout";
       gfm = "git pull";
       git_show_tag_by_date = "git log --tags --simplify-by-decoration --pretty='format:%ai %d'";
