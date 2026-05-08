@@ -81,10 +81,7 @@
         export MANPATH="/opt/homebrew/share/man''${MANPATH+:$MANPATH}";
         export INFOPATH="/opt/homebrew/share/info''${INFOPATH+:$INFOPATH}";
 
-        # Set secretive as ssh agent
-        if [[ -e $HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh ]]; then
-            export SSH_AUTH_SOCK="$HOME/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh"
-        fi
+
       fi
 
       # TODO: Use SOPS to import these
@@ -143,17 +140,17 @@
       ga = "git add";
       gap = "git add --patch";
       gbls = "git branch -l --sort=-committerdate --format='%(authordate:short) %(color:yellow)%(refname:short) %(color:blue)%(subject)%(color:reset)  (%(color:green)%(committerdate:relative)%(color:reset))'";
-      gca  = "git commit --ammend";
-      gcb  = "git checkout -b";
-      gch  = "git ch";
-      gcm  = "git commit";
+      gca = "git commit --ammend";
+      gcb = "git checkout -b";
+      gch = "git ch";
+      gcm = "git commit";
       gcmm = "git commit --message";
-      gco  = "git checkout";
-      gfm  = "git pull";
+      gco = "git checkout";
+      gfm = "git pull";
       git_show_tag_by_date = "git log --tags --simplify-by-decoration --pretty='format:%ai %d'";
-      gp  = "git push";
+      gp = "git push";
       gpb = "git pushb";
-      gs  = "git stash";
+      gs = "git stash";
       gtr = "cd $(git rev-parse --show-cdup)";
 
       #
