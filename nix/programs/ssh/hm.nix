@@ -14,7 +14,7 @@
       "*" = {
         addKeysToAgent = "yes";
         controlMaster = "auto";
-        controlPath = "~/.ssh/sockets/%r@%k_%C";
+        controlPath = "~/.ssh/sockets/%C";
         controlPersist = "10m";
         forwardAgent = false;
         identitiesOnly = true;
@@ -22,7 +22,7 @@
 
       "github.com" = {
         controlMaster = "auto";
-        controlPath = "~/.ssh/sockets/%r@%k_%C";
+        controlPath = "~/.ssh/sockets/%C";
         controlPersist = "10m";
         hostname = "github.com";
         identitiesOnly = true;
