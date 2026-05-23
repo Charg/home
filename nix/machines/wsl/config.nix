@@ -14,10 +14,7 @@
   ];
 
   # https://nix-community.github.io/NixOS-WSL/how-to/vscode.html#option-1-set-up-nix-ld
-  programs.nix-ld = {
-    enable = true;
-    package = pkgs.nix-ld;
-  };
+  programs.nix-ld.enable = true;
 
   nix = {
     package = pkgs.nixVersions.latest;
