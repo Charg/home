@@ -20,6 +20,7 @@
   pkgs.minikube
   pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
+  pkgs.nixd # Nix LSP
   pkgs.nixfmt-rfc-style
   pkgs.nnn
   pkgs.nodejs
