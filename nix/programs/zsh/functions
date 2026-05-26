@@ -126,7 +126,12 @@ function kbnn() {
       local _NAMESPACE=$1
       kubectl config set-context --current --namespace="${_NAMESPACE}"
     else
-      echo "Usage: kbnn NAMESPACE"
+      local _NAMESPACE=$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | fzf --prompt="Select namespace> " --height=10 --layout=reverse)
+      if [[ -z "${_NAMESPACE}" ]]; then
+        echo "Aborted."
+        return 1
+      fi
+      kubectl config set-context --current --namespace="${_NAMESPACE}"
     fi
 }
 
@@ -137,12 +142,18 @@ function kbnn() {
 function awsp() {
     # Switch AWS profile for the current shell
 
-    if ([[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]) || [[ ! "${1}" ]]
-    then
-        >&2 echo "Usage: awsp PROFILE_NAME"
-	return 1
-    else
+    if [[ "${1}" ]] && [[ "${1}" = "--help" || "{1}" = "help" || "${1}" = "-h" ]]; then
+        >&2 echo "Usage: awsp [PROFILE_NAME]"
+        return 1
+    elif [[ "${1}" ]]; then
         export AWS_PROFILE="${1}"
+    else
+        local _PROFILE=$(aws configure list-profiles | fzf --prompt="Select AWS profile> " --height=10 --layout=reverse)
+        if [[ -z "${_PROFILE}" ]]; then
+            echo "Aborted."
+            return 1
+        fi
+        export AWS_PROFILE="${_PROFILE}"
     fi
 }
 
