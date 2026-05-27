@@ -31,7 +31,7 @@
       size = 99999;
     };
 
-    initExtraFirst = ''
+    initContent = lib.mkBefore ''
       # https://scottspence.com/posts/speeding-up-my-zsh-shell
       DISABLE_AUTO_UPDATE="true"
       DISABLE_MAGIC_FUNCTIONS="true"
@@ -64,9 +64,7 @@
       if [[ ! "$ZCDUMP.zwc" -nt "$ZCDUMP" ]]; then
         zcompile "$ZCDUMP" &!
       fi
-    '';
 
-    initContent = ''
       # Enable vim mode. This works better than the home manager setting.
       bindkey -v
 
@@ -173,11 +171,13 @@
       # Nix
       #
       nixg = "sudo nix-collect-garbage -d";
-      nixrs = "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName} --option cores 6 --option max-jobs 6";
+      nixrs =
+        if isDarwin then
+          "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
+        else
+          "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName} --option cores 6 --option max-jobs 6";
       nixrt = "nixos-rebuild test --flake ~/code/home#${currentSystemName}";
       nixhm = "home-manager switch --flake ~/code/home#${currentSystemUser}@${currentSystemName}";
-      # rebuild nix and clear the comp cache (command completion)
-      nixdr = "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;";
       nixfc = "nix flake check ~/code/home";
     };
 
@@ -213,11 +213,11 @@
   home.file = {
     ".zsh_functions".source = ../../programs/zsh/functions;
     ".local/share/zplugins/magic-enter".source = builtins.fetchGit {
-      url = "git@github.com:zshzoo/magic-enter.git";
+      url = "https://github.com/zshzoo/magic-enter.git";
       rev = "b5a7d0a55abab268ebd94969e2df6ea867fa2cd5";
     };
     ".local/share/zplugins/fzf-tab".source = builtins.fetchGit {
-      url = "git@github.com:Aloxaf/fzf-tab.git";
+      url = "https://github.com/Aloxaf/fzf-tab.git";
       rev = "fc6f0dcb2d5e41a4a685bfe9af2f2393dc39f689";
     };
   };
