@@ -12,13 +12,14 @@
       upgrade = true;
     };
     brews = [
+      "awscli"
       "jfrog-cli"
     ];
     caskArgs = {
       appdir = "~/Applications";
       require_sha = true;
     };
-    casks  = [
+    casks = [
       "amethyst"
       "elgato-wave-link"
       "firefox"
@@ -26,11 +27,18 @@
       "ghostty"
       "google-chrome"
       "intellij-idea-ce"
+      "podman-desktop"
       "raycast"
       "secretive"
       "slack"
       "vagrant"
       "virtualbox"
+      {
+        name = "zulu@21";
+        args = {
+          require_sha = false;
+        };
+      }
       "zoom"
     ];
     taps = [
