@@ -6,6 +6,11 @@
   labels: [
     'dependencies',
   ],
+  timezone: 'America/Los_Angeles',
+  // Monday-only branch creation
+  schedule: [
+    '* * * * 1',
+  ],
   lockFileMaintenance: {
     enabled: true,
   },
@@ -15,6 +20,18 @@
   "pre-commit": {
     enabled: true,
   },
+  packageRules: [
+    {
+      matchFileNames: ['kube/nuc01/app-of-apps/application_set_apps.yaml'],
+      groupName: 'nuc01 cluster updates',
+      groupSlug: 'nuc01-cluster',
+    },
+    {
+      matchFileNames: ['kube/lookie/app-of-apps/application_set_apps.yaml'],
+      groupName: 'lookie cluster updates',
+      groupSlug: 'lookie-cluster',
+    },
+  ],
   customManagers: [
     {
       customType: 'regex',
