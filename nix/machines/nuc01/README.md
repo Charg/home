@@ -56,7 +56,7 @@ cleanup() {
 trap cleanup EXIT
 
 install -d -m755 "$temp/etc/ssh"
-ssh-keygen -t ed25519 -N "" -f "$temp/etc/ssh/ssh/ssh_host_ed25519_key"
+ssh-keygen -t ed25519 -N "" -f "$temp/etc/ssh/ssh_host_ed25519_key"
 cp "$temp/etc/ssh/ssh_host_ed25519_key" ~/keys/
 chmod 600 "$temp/etc/ssh/ssh_host_ed25519_key"
 

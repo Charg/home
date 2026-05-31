@@ -9,6 +9,10 @@
     (modulesPath + "/installer/scan/not-detected.nix")
     ./disk-config.nix
   ];
+
+  # Intel NIC
+  boot.initrd.availableKernelModules = [ "e1000e" ];
+
   boot.loader.grub = {
     devices = [ "nodev" ];
     efiSupport = true;
