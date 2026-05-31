@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: ghcr-charts-repo-creds
+    namespace: argocd
+    labels:
+        argocd.argoproj.io/secret-type: repo-creds
+type: Opaque
+stringData:
+    type: ENC[AES256_GCM,data:CmNaRw==,iv:96WHreVvQl0IGLF9NbFL/gpxe4t16LmbDIgO7a4zsTM=,tag:/mqhZIFXyn7hitmUkNkAPA==,type:str]
+    url: ENC[AES256_GCM,data:piVEDFOAq8xiL6y1LoyDWDo+o6U=,iv:aHbhE/BPJATbgvQRxdN8SCRn1548v5DIutbBe9VoKCo=,tag:vd5rcFLntn7wDXXU3sLudQ==,type:str]
+    enableOCI: ENC[AES256_GCM,data:zbS4aQ==,iv:qfJdQ+Nih7kpaCYpF/9Ciq0Pkk4e+3yc0EGGmTc+q4g=,tag:O4DEMmztmHtV1kP2tiN/mg==,type:str]
+    username: ENC[AES256_GCM,data:8u+GB/axRCo=,iv:JUSZjmVNI17wwsgWaz9Jc+TkIJPdG/guBal6hMn88NY=,tag:P+UqiDsStJP8AjLb5Ep2cw==,type:str]
+    password: ENC[AES256_GCM,data:CXnHVil4WQ7bPF8PC/EHzmOKZT8hTnY3gaSX8Ux7t7dIc4ljXFgYWw==,iv:omahxvx1J7vvhAiLmoVm2hnmWTpseHp3IfK+/BWppk8=,tag:h4VGbaLHxkSVpBcuX84Eow==,type:str]
+sops:
+    age:
+        - recipient: age1pq1m8fee0mfkh6fzw635qffd33y99fmjrr80k2r4zv7wkfguegp0lgv836ryfypgmdnjvxq243lvh7ftfx2wr6azz7t6mqhqsxdxse3hysqk3a63vlllpjha6j4rn729gnzhfjn2qy89dp0ce5k0wq5ed7fpn5msnkhegp8qeyelxxgxtlnea6cg7sd2jche7zcl2jsrnjfqgrwhj4xveyg7w4ffv4e3rrref5mg47n6gqxqfyxacft89dqp668vmvx6jnuxvne4na5haxs3z3zxlsqvxqqaksvjk3xlhegr4n6smd63t8l5e7x8t2pf68nq2l2z89cqk2c3h9277gj6mlvr94h9tfk5fzkktyqtjy66fuxvhj2xgqfydwsne5gn02e0rp80rd2nw4akwz3p7cuxkfhq2nuhlh9j6wqxandlcehrznnmeyun4wew83lezdu9fm484u50ql8vtpfdv8ckgmp3tyfk4gkvl9qc0dnglqj3jqvgjgjegqq6hlcdhj748mtayrcrjmgjevcfkzf2jnzzn6m4jkn26ev7ggcnqrj9nwvvngntp2ef6pj3w5ta0ufz5yetzhaskjztc2glxjtelr29nym5rdyg4yl8z33tsngxvgy5wm9kaa43xm2ax7xsu6mnqzvemxlw0n7nz4afuus87p9kvavxh8j0vvtsgjd2ejq5g38eny6j7u5p36unyw78v4m37azgln2ys3ltvnluzyg77cmlyzh7qypdqmx08zd7g43qz4lza69qa2qgwmajs85wwcc0uqc50c2tr7kxmsuryemqqew48qqvccx67u6csj0c8wrwj0a8e6q33svsq5jd0tf53t0k6rhfeah2kkpj68rwk0x4dwc8rrxl4p956u8t285cypwtqa7eqad77el926hqn05jdnjsxzdm3d2t9f3rg6ju73gp4xxgaf642atgxefhztzg9an9cj4pstk39jlkjplfz3m5rwt87skxjyrg48a8a9k497zfpjtpufejzfqjc9umpd6mrwrgjaxqqa243n3hq3vu7tyk663p5sepehdc99m7e3ulumrjt7psw7edgkdg6htjdntq4upzp9jf90s2pu74w7375m67cgenzj5ms3r4hlvjxe5tyzem69wmx26quuesdyzke9vnwgl2dpnwxv2t0m95tvswu4gnqnvdfejsjy68mhxr4c7ez5rhtr4cf5f8s25acvp0u0e328j8g8gs79607qnev08flf7c4as7ctepqd0z23gxjphhddtr90mpdn85ypvrxyklw3rqp5udp5zkc6n4vt3q72qcayhzvfj4299zajnsskz7t3u272evzn3s8ldcy54q4tmeg325z5h3glyz6g4fjkvduwvcldq2wccydej5umv8g8ks8r9st9xyeup36ys3jh9pw067k590tusp4qn8vq45kcak8xrztr9h9n8ms4msatzctcgkppgsj2xk4vkjrmgvgn2dr7syaugkfc44u5p6w4557q033nnuvtp03r9sfzxeuf4y8azwdgsu5zkkuj2evc5eu62cvtwsmte02pc47a7nhxqyuanctqk2rm5z5yy2xm0gx2zgl3uwmkznscuw0z8d9d6k8g4hh9xrgl293y0qx5ng3uz5uvpxv95hmzl9xf3uz4mn6c5w6a5c8538u6mz060rdh3pz3z565ze9n6e7l2tnyt8yzvyzdh8evxez2xfwv6skmsdjsl8gc0cynth82etff89vmc2f0ez5905rkgtzzenrx4zvnchspveffk0d2tj6fpg86h5qp0seh04p6uer7z0ljuj08tv0yr6fdmaezgwvtewreytgmmn7anm0sy4vm8t665rxuvl9q24pqmrxypuaas97cj0za9c8vtdknkcmu9aj8z8hr0v4m39rc8y9e946ncfrzngq37y5ux
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IG1sa2VtNzY4eDI1NTE5IDA0UTZmMG1H
+            MmFQOUJBejllcHBKZ3c3cHVxd0U4d0NaNFBjVk5SMk0yb0xmek1tRjlianhFdjFZ
+            enVXbHkxMGl0YVh5bTZ6b29aZkJmL0t5Q2ZpWmlmcXh2MXMvQ1BwYmhxZEQ0alh6
+            cDlSNUFxZVU2SVRsSGs3Vzg5MkdYamtBYkswL2syU21rNWV2WC9rS3FoeW9GV2cx
+            ajYwTHRzRWwrRGxmeW9lN0JuU01wc01NRGkrdEV0WENJY1JxaEFYKzlWQ3JXRTBL
+            VzM0R2NPbHB2Q0hOVDcvUXY4KzFpMWFBZmxXeWIzMDNHZXFFM1U2SWtjaVpVdWJn
+            MGhRRG1TYTBLaWdJUDA2UGFkRi8wc3hyK2hZRTBjU3lDZjRKUEhKUEFGejVScVhX
+            NVFTVEc4NDhEd0hldUl6WHlUSEZrbVcvbVpoWml2NVhtZytSeEdXNERpU1YxbEho
+            OC9IbVJGN3BDem9UOTZiVS9XRHNNQ1ZiOTMycERURGxINDhJa2JHWjZid1FpczRi
+            ajZPU3YzRVBlS2NrZXpkWTZIMUpoeG9EV3JwSXpHbnBBNjk0Z1VsNzBJR1BWckRw
+            d0pkTTZpa1Y0MEtrMEd2WHcrN3c4Tmk5am42elYxTElTRnFDdkpuYVFaeFBydngy
+            VTN6VEcrT1pDWHJldDdIaUlvSkxrOWNlZjZ2blhXRFZlU1VJWFJMM1NsZjI3VUpI
+            WE9ma08wUDZTSjJ4dkswS2IyZFJROWg1cngyc2ozSXcrZTVjWlVScFRrUkVxTi8y
+            Tms0NFdaOHU0M1hxSW52U3BQK2dpczg4dFFYR09iWVpMc09KdzBpeEo1YlhQTFdJ
+            aEpEVFVoWXA4OStOcEt4d3JsR0RQZXdqOHJuL1hSSWRFVm5Ock9CYS92cFJUbGtO
+            WVhsQzVBNU5pNHZDenlpK2Jjb1FwbTR6YmZtVlAybHpDRGlLRjFmZFJNVUgyRTZo
+            NXFaek9mYWhidHBWZ2JDTzRqYk9sd05lU3pzdXVTOUpSeDBJZ3ZjTXgvRUpaeFNz
+            VG9PUlNuTi82TGVicWdkOUJySno0RGlYZ3NaR0EzemtlcTcwUGx3YU53NVA1a3hT
+            bmpqN1VFWGNJZ3VweHVFb2tSM2E4blFHVEVEekc0eC81RGJMcjBCbXNVSFdnSkQz
+            OWxjNk5BM096dzdmcjEwcjY5b21aV2FRTzF1eVMxR09VcEdBeDJuK0pMRnNyMDBR
+            WDlZT2N6Tnpkd0VCUk82WTFjRmhNbFUzU1JtRy9OUE0yd0JNZU4vYzdpR3ZnRDdo
+            WERzcnlwdnNLUkhiQmIrWFJRRjJpNHBPSUtFYnY5cE14bWo5eUpCaVFWNFdJZ2xs
+            OXllY3ZhcThsaEkxdW01T0dSUjlmcHI1Q0pWbHU4RnBXaklqYW5iakxDWTFmZFdY
+            Yksxd3VRbWE1TytGN2tOaGtjL0kweEJIdTh4YVNDc2ZkOFpWMUcxUU1YK2JHenlT
+            RVhLL2t5MEd1Ujh1T0tOa1FCdmNtR0phcXVDKzFERWcyYUZSVkg3Q0FuYXhkZ1c4
+            MmNNL0ZEdXFqbUpERVV1YU9GU2Y5TGxhU2p2aUR2WWIwdkRWYnFPWUV5RkYrY21E
+            TWNtbHlvTHIzcmxMQjM4eGVZenZOZWM1eEdTVnNWQ2szTVo2S3lUMTFiNmlValV4
+            ZUxvaHVjZm9TQmJGb1ZoZ1BocnZhc3pHTnc2d2tpNmphTVlMdXJlSHJuOUhEVVJR
+            MkNLUkp4YTRSZzhSTCtaZnY5clg2YkpsMVpMMGtHOTB1ZWhCYzhNTEd1VkZFSmJG
+            TEdDa2pwaDRCbGRQMEZIcXkzQzBCZW1NQmJuNG9jTER5ZUkvQnM0clVnTDl6U08v
+            SXZRbmFLOEowbEpaYWhrQWFHd0huOEo4RnNXNzhiK3pEbFNyVGJtaHV1KytEcWVY
+            ZkdSZG1za1d1bEJqSFVwV3IyRXlWSndKVlZ0ZC94VXZWK25JQVFnaCszbTZZUQpD
+            dEZNRjVPQ3M5ajVhYzU5bld4VnlTdWlIVHpVK1dVQjdDQlMweDI1ZC9ZCi0tLSBL
+            bWh6L0RBd215VjMrZXdGemVIL2dvay9Sd1RDeHIrc1ZqTjZyWUdNNmFJClRpCgLh
+            Y/mmEwy1ZbrYTty3xbOTsE531gEmrR2abqvRrLo022d1cQghbkYDgQc2KyIc8Vck
+            UTt1kiCIUFK/59g=
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-05-31T04:33:40Z"
+    mac: ENC[AES256_GCM,data:ZrWt+5aI+UhoIIpuFuYYBrzXVrmugaX1M/Ygz/jmVLvtU8SwMP/8AdKlhWR+y553lYt4jzzYIBoDoLD1NMaXlUjk+v01qkzj95B01+oKimqPrkIiLJc3SuT1FF6HaTJBZiYWt60gCg0xUaZi3cs4nqyQ5uTO6o0vxqvE5DxDaXE=,iv:1c12ZpGPQ22IKKmwV7J56vDdFVl7j81VdfHbs0Gv5UQ=,tag:aAfaLYJKV8QNcwy/+t/ijA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.12.1
