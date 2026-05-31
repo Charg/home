@@ -2,17 +2,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: temporal-postgres
+  name: ac-postgres
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/Charg/home.git
-    path: kube/nuc01/temporal-postgres
+    path: kube/nuc01/ac-postgres
     targetRevision: main
     plugin: {}
   destination:
-    namespace: temporal
+    namespace: ac
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:

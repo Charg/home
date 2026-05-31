@@ -39,6 +39,14 @@ server:
             maxIdleConns: 20
             maxConnLifetime: 1h
 
+    namespaces:
+      create: true
+      namespace:
+        - name: ov
+          retention: 3d
+        - name: ac
+          retention: 3d
+
   frontend:
     replicaCount: 1
     resources:
