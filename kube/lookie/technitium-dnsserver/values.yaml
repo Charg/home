@@ -2,7 +2,7 @@
 
 image:
   repository: technitium/dns-server
-  tag: latest@sha256:60d258760304e22d5dad362f487aa3c3f2e04b97b24467cbfa1caa402f096ecf # 14.3.0
+  tag: latest@sha256:99c250f0ee494f2f31e09a76d83f8213bc4c5d6f106b0895cd5f327518469c48 # 14.3.0
 
 persistence:
   config:
