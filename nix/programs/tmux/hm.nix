@@ -31,13 +31,22 @@
       set -g pane-base-index 1
 
       set -g status-keys vi
-      set -g renumber-windows on	      # auto renumber windows when a window is closed
+      set -g renumber-windows on	          # auto renumber windows when a window is closed
       set -sg escape-time 10                  # Set the escape-time to 10ms. Allows quick escapes when using vim in tmux
       setw -g mode-keys vi
       setw -g mouse on
       setw -g monitor-activity on
       set-window-option -g allow-rename off   # Dont auto rename window sessions after a command is run
       set-option -g visual-activity on        # Enable window notifications
+
+      # Allow apps inside tmux to send raw escape sequences (needed for Claude's desktop notifications) (LLM Harness)
+      set -g allow-passthrough on
+
+      # Enable support for extended keys (needed for tmux to recognize Shift+Enter as a distinct key) (LLM Harness)
+      set -s extended-keys on
+
+      # Inform tmux that xterm-compatible terminals support these extended key protocols (LLM Harness)
+      set -as terminal-features 'xterm*:extkeys'
 
       # remove key bindings
       unbind %      # Split screen
