@@ -44,6 +44,9 @@ let
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
       home-manager.users.${user} = userHMConfig;
+      home-manager.sharedModules = [
+        inputs.sops-nix.homeManagerModules.sops
+      ];
       home-manager.extraSpecialArgs = {
         currentSystemName = name;
         currentSystemUser = user;

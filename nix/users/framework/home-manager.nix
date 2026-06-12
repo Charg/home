@@ -28,6 +28,7 @@ in
     ../../programs/git/hm.nix
     ../../programs/gpg/hm.nix
     ../../programs/neovim/hm.nix
+    ../../programs/litellm/hm.nix
     ../../programs/opencode/hm.nix
     ../../programs/podman/hm.nix
     ../../programs/ssh/hm.nix

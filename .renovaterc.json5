@@ -22,6 +22,12 @@
   },
   packageRules: [
     {
+      matchFileNames: ['nix/programs/litellm/docker-compose.yaml'],
+      pinDigests: true,
+      groupName: 'litellm compose images',
+      groupSlug: 'litellm-compose',
+    },
+    {
       matchFileNames: ['kube/nuc01/app-of-apps/application_set_apps.yaml'],
       groupName: 'nuc01 cluster updates',
       groupSlug: 'nuc01-cluster',
