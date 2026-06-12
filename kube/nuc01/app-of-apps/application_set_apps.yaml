@@ -15,22 +15,22 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.5.0
+            targetRevision: 9.5.21
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
-            targetRevision: 0.15.3
+            targetRevision: 0.16.1
             namespace: default
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 39.0.7
+            targetRevision: 39.0.9
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 39.0.7
+            targetRevision: 39.0.9
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
@@ -46,7 +46,7 @@ spec:
           - name: cloudnativepg
             repoURL: https://cloudnative-pg.github.io/charts
             chart: cloudnative-pg
-            targetRevision: 0.28.2
+            targetRevision: 0.28.3
             namespace: cnpg-system
           - name: redis-operator
             repoURL: https://ot-container-kit.github.io/helm-charts/
@@ -66,7 +66,7 @@ spec:
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
             chart: opentelemetry-collector
-            targetRevision: 0.153.0
+            targetRevision: 0.158.1
             namespace: monitoring
           - name: tempo
             repoURL: https://grafana.github.io/helm-charts
