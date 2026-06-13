@@ -25,12 +25,12 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 39.0.7
+            targetRevision: 40.3.0
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 39.0.7
+            targetRevision: 40.3.0
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
@@ -61,7 +61,7 @@ spec:
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
-            targetRevision: 84.5.0
+            targetRevision: 86.2.3
             namespace: monitoring
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
