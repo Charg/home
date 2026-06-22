@@ -55,6 +55,11 @@
     };
   };
 
+  # Disable autosuspend for Elgato Wave XLR to prevent USB drops (-110 errors)
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0fd9", ATTR{idProduct}=="007d", ATTR{power/control}="on"
+  '';
+
   #
   # System
   #
@@ -162,7 +167,15 @@
   # A simple daemon allowing you to update some devices' firmware
   # https://github.com/fwup-home/fwup
   # https://nixos.wiki/wiki/Fwupd
-  services.fwupd.enable = true;
+  services.fwupd = {
+    enable = true;
+    daemonSettings = {
+      DisabledPlugins = [
+        "dfu"
+        "fastboot"
+      ];
+    };
+  };
 
   # Enable power-profiles-daemon, a DBus daemon
   # Recommended at https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13
