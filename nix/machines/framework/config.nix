@@ -427,6 +427,9 @@
   # Used for YubiKey related operations.
   services.pcscd.enable = true;
 
+  # Enable thunderbold
+  services.hardware.bolt.enable = true;
+
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   services.pipewire = {
