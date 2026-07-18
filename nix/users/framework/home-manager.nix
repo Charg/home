@@ -34,7 +34,7 @@ in
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix
     ../../programs/tmux/hm.nix
-    (import ../../programs/vicinae/hm.nix { inherit inputs; })
+    ../../programs/vicinae/hm.nix
     ../../programs/vscode/hm.nix
     ../../programs/zoxide/hm.nix
     ../../programs/zsh/hm.nix

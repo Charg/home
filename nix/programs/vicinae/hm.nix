@@ -1,12 +1,6 @@
-{ inputs, ... }:
-
 {
-  imports = [
-    inputs.vicinae.homeManagerModules.default
-  ];
-
-  services.vicinae = {
+  programs.vicinae = {
     enable = true;
-    # autoStart = true;
+    systemd.enable = true;
   };
 }
