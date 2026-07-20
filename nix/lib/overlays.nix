@@ -31,4 +31,5 @@ in
 
   (unstableOverlay "opencode")
   (unstableOverlay "mise")
+  (unstableOverlay "claude-code")
 ]
