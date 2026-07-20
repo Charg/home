@@ -35,7 +35,10 @@ let
 
   modules = [
     { nixpkgs.overlays = overlays; }
-    { nixpkgs.config.allowUnfree = true; }
+    {
+      nixpkgs.config.allowUnfree = true;
+      nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
+    }
 
     machineConfig
     userOSConfig

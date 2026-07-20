@@ -45,8 +45,8 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
       WorkingDirectory = composeDir;
-      ExecStart = "${pkgs.docker}/bin/docker compose up -d --remove-orphans";
-      ExecStop = "${pkgs.docker}/bin/docker compose down";
+      ExecStart = "${pkgs.docker_29}/bin/docker compose up -d --remove-orphans";
+      ExecStop = "${pkgs.docker_29}/bin/docker compose down";
       Restart = "on-failure";
       RestartSec = "10s";
     };
