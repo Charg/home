@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ac-rustfs
+  namespace: ac
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ac-rustfs
+  template:
+    metadata:
+      labels:
+        app: ac-rustfs
+    spec:
+      containers:
+        - name: rustfs
+          image: rustfs/rustfs:latest
+          ports:
+            - containerPort: 9000
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: access-key
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: secret-key
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rustfs-data
