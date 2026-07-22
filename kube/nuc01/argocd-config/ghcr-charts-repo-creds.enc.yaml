@@ -4,7 +4,7 @@ metadata:
     name: ghcr-charts-repo-creds
     namespace: argocd
     labels:
-        argocd.argoproj.io/secret-type: repo-creds
+        argocd.argoproj.io/secret-type: repository
 type: Opaque
 stringData:
     type: ENC[AES256_GCM,data:CmNaRw==,iv:96WHreVvQl0IGLF9NbFL/gpxe4t16LmbDIgO7a4zsTM=,tag:/mqhZIFXyn7hitmUkNkAPA==,type:str]
