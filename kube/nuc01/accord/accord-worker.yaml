@@ -1,0 +1,37 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: accord-worker
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: oci://ghcr.io/charg/charts
+    chart: accord
+    targetRevision: 0.2.0
+    helm:
+      valuesObject:
+        image:
+          tag: 0.2.0
+        imagePullSecrets:
+          - name: ghcr-pull-creds
+        existingSecret: accord-env
+        migrations:
+          enabled: false
+        web:
+          enabled: false
+        worker:
+          enabled: true
+  destination:
+    namespace: ac
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
