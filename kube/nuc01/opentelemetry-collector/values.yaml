@@ -35,7 +35,11 @@ config:
       tls:
         insecure: true
     otlphttp/prometheus:
-      endpoint: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:4318
+      endpoint: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp
+      tls:
+        insecure: true
+    otlphttp/loki:
+      endpoint: http://loki.monitoring.svc.cluster.local:3100/otlp
       tls:
         insecure: true
 
@@ -55,6 +59,13 @@ config:
           - batch
         exporters:
           - otlphttp/prometheus
+      logs:
+        receivers:
+          - otlp
+        processors:
+          - batch
+        exporters:
+          - otlphttp/loki
 
 ports:
   otlp:

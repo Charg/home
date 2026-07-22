@@ -46,6 +46,14 @@ grafana:
         tracesToMetricsEnabled: true
         tracesToMetrics:
           datasourceUid: prometheus
+        tracesToLogsV2:
+          datasourceUid: loki
+    - name: Loki
+      type: loki
+      uid: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+      isDefault: false
   sidecar:
     dashboards:
       enabled: true
@@ -72,6 +80,13 @@ prometheus:
         cpu: 500m
         memory: 1536Mi
     enableRemoteWriteReceiver: true
+    enableOTLPReceiver: true
+    otlp:
+      promoteResourceAttributes:
+        - service.name
+        - service.namespace
+        - service.instance.id
+        - deployment.environment.name
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
 
