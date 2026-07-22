@@ -15,12 +15,12 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.4.16
+            targetRevision: 9.7.1
             namespace: argocd
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
             chart: home-assistant
-            targetRevision: 0.3.61
+            targetRevision: 0.3.71
             namespace: default
           - name: akri
             repoURL: https://project-akri.github.io/akri/
@@ -30,23 +30,23 @@ spec:
           - name: plex
             repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
             chart: plex-media-server
-            targetRevision: 1.5.0
+            targetRevision: 1.6.0
             namespace: default
             auto_sync: false
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
-            targetRevision: 0.15.3
+            targetRevision: 0.16.1
             namespace: default
           - name: technitium-dnsserver
             repoURL: https://charts.obeone.cloud
             chart: technitium-dnsserver
-            targetRevision: 1.10.0
+            targetRevision: 1.13.0
             namespace: default
           - name: traefik-crds
             repoURL: https://traefik.github.io/charts
             chart: traefik-crds
-            targetRevision: 1.14.0
+            targetRevision: 1.18.0
             namespace: traefik-crds
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
@@ -68,12 +68,12 @@ spec:
           - name: intel-operator
             repoURL: https://intel.github.io/helm-charts
             chart: intel-device-plugins-operator
-            targetRevision: 0.35.0
+            targetRevision: 0.36.0
             namespace: intel-operator
           - name: intel-operator-gpu
             repoURL: https://intel.github.io/helm-charts
             chart: intel-device-plugins-gpu
-            targetRevision: 0.35.0
+            targetRevision: 0.36.0
             namespace: intel-operator
           - name: node-feature-discovery
             repoURL: registry.k8s.io/nfd/charts
