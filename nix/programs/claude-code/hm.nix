@@ -8,6 +8,8 @@
   programs.claude-code = {
     enable = true;
 
+    skillsDir = ../../common/skills;
+
     settings = {
       permissions.defaultMode = "auto";
       model = "sonnet";
