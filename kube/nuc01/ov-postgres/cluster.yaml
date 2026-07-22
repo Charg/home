@@ -4,7 +4,7 @@ kind: Cluster
 metadata:
   name: ov-postgres
 spec:
-  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
   instances: 1
 
   bootstrap:
@@ -12,13 +12,6 @@ spec:
       owner: veto
       secret:
         name: postgres-credentials
-
-  postgresql:
-    extensions:
-    - name: pgvector
-      image:
-        # renovate: suite=trixie-pgdg depName=postgresql-18-pgvector
-        reference: ghcr.io/cloudnative-pg/pgvector:0.8.2-18-trixie
 
   storage:
     size: 100Gi
