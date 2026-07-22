@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://ghcr.io/charg/charts
+    repoURL: ghcr.io/charg/charts
     chart: accord
     targetRevision: 0.2.0
     helm:
