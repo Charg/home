@@ -73,6 +73,11 @@ spec:
             chart: tempo
             targetRevision: 1.24.4
             namespace: monitoring
+          - name: loki
+            repoURL: https://grafana.github.io/helm-charts
+            chart: loki
+            targetRevision: 6.55.0
+            namespace: monitoring
   template:
     metadata:
       name: "{{ .name }}"
