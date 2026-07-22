@@ -10,6 +10,7 @@ stringData:
     REDIS_URL: ENC[AES256_GCM,data:HbhEpxG+GxSHfpK/Eop0KrETYIF1itC2eTP7bMpzdrjejjtxlGxeb36KAlPvB1cuQylwrXFFvVDZxvHdIv2Ps5sImlwVtdl8HupfZXJLq3QidcMyLk1dnPyO,iv:qLQBPXn+0fOceeLQMKJdp2JW5VKYtEssFFW6bHsrIsE=,tag:xKgrr9MP8sGgLQ991DURSA==,type:str]
     DJANGO_ALLOWED_HOSTS: ENC[AES256_GCM,data:gUqIcIEnwYtDHMc=,iv:sLoeutClpe4cUBV2oCXexSzbFV4Bd4BkeA892ErCRaQ=,tag:T7ZlLWm+uHITa8eekPVdxg==,type:str]
     DJANGO_ADMIN_URL: ENC[AES256_GCM,data:DQCcCEe0J+BSX+kOfuNU52vgufnt,iv:0QVA5P0SOU23y/VzR3VU9DLRLd72C9Lj19PiTbaSSpY=,tag:bl3dgcRUjOFyV8ZZmGKpYQ==,type:str]
+    DJANGO_CSRF_TRUSTED_ORIGINS: ENC[AES256_GCM,data:xxLa9OfZytSP15mT67JBXEgzjg==,iv:RcmG0bM+UsyscNnT5B4y4TraGRtacyrucqUWoJDjldk=,tag:6yL+OR48woRFNMMRxgwuIQ==,type:str]
     TEMPORAL_HOST: ENC[AES256_GCM,data:2pJ8oFzYNFadyWvjfXIZFGwZEj+sEFXTxaYXGyM0/c4hng0LIIpC5BXijBk=,iv:IZVrzfFLKT5uNSqfqKDQZcVhGsSFu2+fyQ6tLwX7nko=,tag:Vl3CfjgH97n/wiYgAivoDg==,type:str]
     TEMPORAL_NAMESPACE: ENC[AES256_GCM,data:9m4=,iv:9AlzRWoF+O3A8zBhx4DaNVurEv6Vnr4HIknKqiRjd9w=,tag:kCgrGy/VT1QkWocZjonsXA==,type:str]
     OBJECT_STORAGE_ENDPOINT: ENC[AES256_GCM,data:+jsaWgyM6d+6xhBz5BiNPWNAL66mSy51l/C5pTsRsirvesG9TYsUUNqD,iv:RdBZDtqzRQfrWyrntJ8NHsEsfSDzuC6CvSr99PJzYMk=,tag:WxG6K9QJy62oJOnzwuJEbQ==,type:str]
@@ -61,7 +62,7 @@ sops:
             nAcSZ+3/WTIDa9Z4JZvv1xPAloH9NTscXHm3T3qf7ZFryyiDIANVmLlhQU8Ww5fZ
             lwgJHL80RJfPQaI=
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-07-21T06:43:39Z"
-    mac: ENC[AES256_GCM,data:7SZKWhYNuVvqVhCruYPMBJsDGcKmxZ9mvXp9nQN5p9uNrtgfnxDT1zqN65iRbYQWmcEmxT6IT5IEVtnST6d8VncmeqKOr0K3oMaqajGvIRL/1vOguPKg7vdLdhG10FJs/vTcYJupK6vySNh1oVI30OPkjjeSoouWkgjYp9eKYtw=,iv:16U099hakh2ycqWEJ0E9QKYRQuMh5QlRV32rx/KAUp4=,tag:hYT6hiAVJMwj62gKsDwrNw==,type:str]
+    lastmodified: "2026-07-22T05:50:40Z"
+    mac: ENC[AES256_GCM,data:cJ2gafcODg/BxeopORdC3cPvCtBZRnoOgUiwnPHK4QVxMeyPMjOSIL9Q4TTx9jZ7toSgzFQ+2h9tjuknVPwqkifjP26Ww4g03qo0WBoEPnU/ZR6SMEObAK8NwAUyBAjT/C2LAdwyrZtSlkvBKe07/jaL8NPkzKLteOzRHxJpGHw=,iv:/4vQ/GTPa8yrFwAioLKWrG0WIiZEdGdyvCk6/belj3k=,tag:dUADevhqglpvVQ+h7SdzFQ==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.12.1
