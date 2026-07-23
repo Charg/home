@@ -15,7 +15,7 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.4.16
+            targetRevision: 10.2.1
             namespace: argocd
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
@@ -51,13 +51,13 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 38.0.2
+            targetRevision: 41.0.2
             namespace: traefik-internal
             helm_skip_crds: true
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 38.0.2
+            targetRevision: 41.0.2
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
