@@ -57,6 +57,13 @@ repoServer:
           ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
           wget -qO /custom-tools/sops "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}"
           chmod +x /custom-tools/sops
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 64Mi
       volumeMounts:
         - mountPath: /custom-tools
           name: custom-tools
@@ -67,6 +74,13 @@ repoServer:
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
       env:
         - name: SOPS_AGE_KEY_FILE
           value: /sops/age/key.txt

@@ -113,8 +113,26 @@ alertmanager:
 nodeExporter:
   enabled: true
 
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
 kubeStateMetrics:
   enabled: true
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 prometheusOperator:
   admissionWebhooks:

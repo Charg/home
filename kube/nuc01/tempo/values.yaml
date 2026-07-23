@@ -1,13 +1,20 @@
 # source: https://github.com/grafana/helm-charts/blob/main/charts/tempo/values.yaml
 
+global:
+  # keep ballast well under the memory limit (~25%) so GC pacing benefits don't
+  # eat the headroom needed for compaction/flush spikes - chart default of 1024Mi
+  # exceeded the old 512Mi limit outright, pinning the container at its ceiling
+  # and causing GC stalls that timed out the /ready liveness probe (exit 137).
+  memBallastSizeMbs: 256
+
 tempo:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 256Mi
     limits:
       cpu: 300m
-      memory: 512Mi
+      memory: 1Gi
   retention: 48h
   metricsGenerator:
     enabled: true
