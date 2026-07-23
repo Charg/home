@@ -6,7 +6,7 @@ metadata:
 type: Opaque
 stringData:
     DJANGO_SECRET_KEY: ENC[AES256_GCM,data:DKKZ0Kg7N2Wtm+2518naLh9r0Dz2GbR12TyhsIuPQ5YT2u4GFRQTswnwAmP3AskxuO4=,iv:hewLfM1KucLfK/3TzNWfZ07dt31yflQ22VQsci8L6fc=,tag:QrPtCeN86exsLaJHEnxonw==,type:str]
-    DATABASE_URL: ENC[AES256_GCM,data:SmxMKoVvSHshC/N57CE0gIjMaeiGH0xwgmyW7D1qwEBlo1IS4uuKdymSU+3jiY+TGuYL+7KDyoepoGJDw5R0flCdpOPoHNzUqHgF14xPYntDJw==,iv:oeOsN/SUsfSmEEIVUCJlgJATGmM9CxZqW2kc9fIVAkQ=,tag:Jv4ng0bOJzZUBb9V+pvHig==,type:str]
+    DATABASE_URL: ENC[AES256_GCM,data:rQK46skqQgGrV4+zHf+oVJsJCErNxiXPqcBRNb2DUQacVlO3GS4IoZJ75x8KhWdqPRcgWl5v8/tN1G37na4QYhtWdgtXsu1GKcXDXVDs+mKgY+IAP4w=,iv:4F+FgWR5/mP4ABDvoBqZSE6aE+eMBA2wd4D6JWq0GHI=,tag:ij9Iem1glKdpAuYBUtiECg==,type:str]
     REDIS_URL: ENC[AES256_GCM,data:HbhEpxG+GxSHfpK/Eop0KrETYIF1itC2eTP7bMpzdrjejjtxlGxeb36KAlPvB1cuQylwrXFFvVDZxvHdIv2Ps5sImlwVtdl8HupfZXJLq3QidcMyLk1dnPyO,iv:qLQBPXn+0fOceeLQMKJdp2JW5VKYtEssFFW6bHsrIsE=,tag:xKgrr9MP8sGgLQ991DURSA==,type:str]
     DJANGO_ALLOWED_HOSTS: ENC[AES256_GCM,data:gUqIcIEnwYtDHMc=,iv:sLoeutClpe4cUBV2oCXexSzbFV4Bd4BkeA892ErCRaQ=,tag:T7ZlLWm+uHITa8eekPVdxg==,type:str]
     DJANGO_ADMIN_URL: ENC[AES256_GCM,data:DQCcCEe0J+BSX+kOfuNU52vgufnt,iv:0QVA5P0SOU23y/VzR3VU9DLRLd72C9Lj19PiTbaSSpY=,tag:bl3dgcRUjOFyV8ZZmGKpYQ==,type:str]
@@ -66,7 +66,7 @@ sops:
             nAcSZ+3/WTIDa9Z4JZvv1xPAloH9NTscXHm3T3qf7ZFryyiDIANVmLlhQU8Ww5fZ
             lwgJHL80RJfPQaI=
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-07-22T16:37:49Z"
-    mac: ENC[AES256_GCM,data:v7w9PAgetFjgNlSOvOtk/peSHljsokbIB/8XQb4mh3jG/C+gY4B32205UeWw5F9d3mWOp37eq0N1g+TJ2fvBLkKYwEWSmYf2lAIzopvFlczhr7yCzBronOT9YbzAZnKF4v+wTdkkvgsr8RLtnAgc2Ss1ENm9+UFKYDf3tx6VhJw=,iv:WLkVfGzkLFnGd+KhPoU5/Atl1vl8vjrLpF5bvAvmdHY=,tag:RJaJk/BfzB2J8rM08ePJkg==,type:str]
+    lastmodified: "2026-07-23T01:20:47Z"
+    mac: ENC[AES256_GCM,data:w160Hpxu1BjrvBQYk/Lfscekzchgdvu+BvOnHvpfcqqLWdzM+Ifh+GjLFvx/qcB1gnP2fmMDkrsQGDzDSHJrbbGZzLy5sPUHv1I2iuD05DJWXA7pvJGm/lOTMkT8dI0OnfdnaQUbH1TM5HL7Gx6Ya9DwJL/JKPIdnC0naqjL6sE=,iv:57AxX1eeQ09DWdc5eASJleoV9Dux+tGhcs+wIfQR9JA=,tag:i2hW33skxkx7e8TciZBj+w==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.12.1
