@@ -59,6 +59,32 @@ grafana:
       enabled: true
     datasources:
       enabled: true
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      cloudnative-pg:
+        gnetId: 20417
+        revision: 4
+        datasource: Prometheus
+      temporal-server:
+        gnetId: 20528
+        revision: 2
+        datasource: Prometheus
+      cloudflared:
+        gnetId: 24874
+        revision: 4
+        datasource: Prometheus
 
 prometheus:
   prometheusSpec:

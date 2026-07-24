@@ -8,6 +8,8 @@ spec:
     name: ac-postgres
   instances: 1
   type: rw
+  monitoring:
+    enablePodMonitor: true
   pgbouncer:
     poolMode: transaction
     parameters:
