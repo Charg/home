@@ -1,0 +1,40 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ac-rustfs-create-buckets
+  namespace: ac
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: create-buckets
+          image: minio/mc:latest
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: access-key
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: secret-key
+            - name: MC_HOST_rustfs
+              value: "http://$(RUSTFS_ACCESS_KEY):$(RUSTFS_SECRET_KEY)@ac-rustfs.ac.svc.cluster.local:9000"
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              until mc ls rustfs >/dev/null 2>&1; do
+                echo "waiting for rustfs..."
+                sleep 2
+              done
+              mc mb --ignore-existing rustfs/accord

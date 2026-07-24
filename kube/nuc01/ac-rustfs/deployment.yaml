@@ -19,6 +19,7 @@ spec:
           image: rustfs/rustfs:latest
           ports:
             - containerPort: 9000
+            - containerPort: 9001
           env:
             - name: RUSTFS_ACCESS_KEY
               valueFrom:
@@ -32,6 +33,10 @@ spec:
                   key: secret-key
             - name: RUSTFS_OBS_ENDPOINT
               value: "http://opentelemetry-collector.monitoring.svc.cluster.local:4317"
+            - name: RUSTFS_CONSOLE_ENABLE
+              value: "true"
+            - name: RUSTFS_CONSOLE_ADDRESS
+              value: ":9001"
           volumeMounts:
             - name: data
               mountPath: /data
