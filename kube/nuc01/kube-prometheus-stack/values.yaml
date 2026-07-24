@@ -76,15 +76,21 @@ grafana:
       cloudnative-pg:
         gnetId: 20417
         revision: 4
-        datasource: Prometheus
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
       temporal-server:
         gnetId: 20528
         revision: 2
-        datasource: Prometheus
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
       cloudflared:
         gnetId: 24874
         revision: 4
-        datasource: Prometheus
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
 
 prometheus:
   prometheusSpec:

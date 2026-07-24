@@ -10,3 +10,6 @@ spec:
   podMetricsEndpoints:
     - port: metrics
       path: /metrics
+      relabelings:
+        - targetLabel: job
+          replacement: cloudflared-metrics
