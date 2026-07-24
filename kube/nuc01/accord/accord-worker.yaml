@@ -25,7 +25,7 @@ spec:
           enabled: false
         worker:
           enabled: true
-          replicaAcount: 2
+          replicaCount: 2
           resources:
             requests:
               cpu: 500m
