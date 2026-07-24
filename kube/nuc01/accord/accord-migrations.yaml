@@ -26,6 +26,7 @@ spec:
         migrations:
           enabled: true
           runId: 0.3.0
+          ttlSecondsAfterFinished: 0 # persist completed Job; no TTL GC -> no self-heal recreate loop
           resources:
             requests:
               cpu: 100m
