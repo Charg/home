@@ -15,22 +15,22 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.5.0
+            targetRevision: 9.7.1
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
-            targetRevision: 0.15.3
+            targetRevision: 0.16.1
             namespace: default
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.0.0
+            targetRevision: 41.0.2
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.0.0
+            targetRevision: 41.0.2
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
@@ -41,32 +41,32 @@ spec:
           - name: cert-manager
             repoURL: https://charts.jetstack.io
             chart: cert-manager
-            targetRevision: v1.20.2
+            targetRevision: v1.21.0
             namespace: cert-manager
           - name: cloudnativepg
             repoURL: https://cloudnative-pg.github.io/charts
             chart: cloudnative-pg
-            targetRevision: 0.28.2
+            targetRevision: 0.29.0
             namespace: cnpg-system
           - name: redis-operator
             repoURL: https://ot-container-kit.github.io/helm-charts/
             chart: redis-operator
-            targetRevision: 0.24.0
+            targetRevision: 0.25.0
             namespace: ov
           - name: temporal
             repoURL: https://go.temporal.io/helm-charts
             chart: temporal
-            targetRevision: 1.2.0
+            targetRevision: 1.6.0
             namespace: temporal
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
-            targetRevision: 87.1.0
+            targetRevision: 87.19.1
             namespace: monitoring
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
             chart: opentelemetry-collector
-            targetRevision: 0.153.0
+            targetRevision: 0.165.0
             namespace: monitoring
           - name: tempo
             repoURL: https://grafana.github.io/helm-charts
