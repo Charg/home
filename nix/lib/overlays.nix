@@ -29,7 +29,8 @@ in
     });
   })
 
-  (unstableOverlay "opencode")
-  (unstableOverlay "mise")
   (unstableOverlay "claude-code")
+  (unstableOverlay "mise")
+  (unstableOverlay "opencode")
+  (unstableOverlay "prek")
 ]
