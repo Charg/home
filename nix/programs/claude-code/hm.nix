@@ -12,8 +12,8 @@
 
     settings = {
       permissions.defaultMode = "auto";
-      model = "sonnet";
-      effortLevel = "high";
+      model = "opusplan";
+      effortLevel = "xhigh";
       tui = "fullscreen";
       skipAutoPermissionPrompt = true;
 
