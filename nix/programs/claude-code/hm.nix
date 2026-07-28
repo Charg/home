@@ -11,16 +11,23 @@
     skillsDir = ../../common/skills;
 
     settings = {
-      permissions.defaultMode = "auto";
+      autoCompactEnabled = true;
+      effortLevel = "auto";
       model = "opusplan";
-      effortLevel = "xhigh";
-      tui = "fullscreen";
+      permissions.defaultMode = "auto";
+      preferredNotifChannel = "ghostty";
       skipAutoPermissionPrompt = true;
+      tui = "fullscreen";
+
+      env = {
+        CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      };
 
       statusLine = {
         type = "command";
         command = "${config.home.homeDirectory}/.claude/scripts/statusline.sh";
       };
+
       subagentStatusLine = {
         type = "command";
         command = "${config.home.homeDirectory}/.claude/scripts/subagent-statusline.sh";

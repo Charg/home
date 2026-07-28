@@ -93,6 +93,7 @@ in
       pkgs.popsicle
       pkgs.nixos-anywhere
       pkgs.sysstat
+      pkgs.libnotify # Provide notify-send which can be used to CLI tools to create notifications
     ])
 
     # WSL Packages
