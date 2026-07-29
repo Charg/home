@@ -22,6 +22,7 @@
 
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+        DISABLE_AUTOUPDATER = "1";
 
         # Treats a 1M context model as if it only had 300K tokens
         # Compact at 100% of 300K tokens
