@@ -173,7 +173,7 @@
       nixg = "sudo nix-collect-garbage -d";
       nixrs =
         if isDarwin then
-          "sudo darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
+          "sudo NIX_SSL_CERT_FILE=/etc/nix/macos-keychain.crt SSL_CERT_FILE=/etc/nix/macos-keychain.crt darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
         else
           "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName} --option cores 6 --option max-jobs 6";
       nixrt = "nixos-rebuild test --flake ~/code/home#${currentSystemName}";
