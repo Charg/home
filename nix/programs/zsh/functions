@@ -304,6 +304,114 @@ function pyclean() {
 }
 
 #
+# Git Worktree (wtp)
+#
+
+# Only define anything if wtp is actually installed
+if (( $+commands[wtp] )); then
+
+    # Shell completion and cd/add wrapper from: wtp shell-init zsh
+    (( $+functions[compdef] )) && compdef _wtp wtp
+
+    _wtp() {
+        local -a opts
+        local current
+        current=${words[-1]}
+        if [[ "$current" == "-"* ]]; then
+            opts=("${(@f)$(env WTP_SHELL_COMPLETION=1 ${words[@]:0:#words[@]-1} ${current} --generate-shell-completion)}")
+        else
+            opts=("${(@f)$(env WTP_SHELL_COMPLETION=1 ${words[@]:0:#words[@]-1} --generate-shell-completion)}")
+        fi
+
+        if [[ "${opts[1]}" != "" ]]; then
+            _describe 'values' opts
+        else
+            _files
+        fi
+    }
+
+    wtp() {
+        for arg in "$@"; do
+            if [[ "$arg" == "--generate-shell-completion" ]]; then
+                command wtp "$@"
+                return $?
+            fi
+        done
+        if [[ "$1" == "cd" ]]; then
+            local target_dir
+            if [[ -z "$2" ]]; then
+                target_dir=$(command wtp cd 2>/dev/null)
+            else
+                target_dir=$(command wtp cd "$2" 2>/dev/null)
+            fi
+            if [[ $? -eq 0 && -n "$target_dir" ]]; then
+                cd "$target_dir"
+            else
+                if [[ -z "$2" ]]; then
+                    command wtp cd
+                else
+                    command wtp cd "$2"
+                fi
+            fi
+        elif [[ "$1" == "add" ]]; then
+            for arg in "$@"; do
+                if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+                    command wtp "$@"
+                    return $?
+                fi
+            done
+
+            if [[ ! -t 1 ]]; then
+                command wtp "$@"
+                return $?
+            fi
+
+            local target_dir
+            target_dir=$(command wtp "$@" --quiet)
+            local wtp_status=$?
+            if [[ $wtp_status -eq 0 && -n "$target_dir" ]]; then
+                cd "$target_dir" || return $?
+            fi
+            return $wtp_status
+        else
+            command wtp "$@"
+        fi
+    }
+
+    _wtp_worktree_picker() {
+      (( $+commands[fzf] )) || { echo "fzf is not installed." >&2; return 1; }
+      (( $+commands[wtp] )) || { echo "wtp is not installed." >&2; return 1; }
+
+      local selected
+      selected=$(command wtp list 2>/dev/null \
+        | fzf --height 40% --reverse --header-lines=2 --prompt "Select worktree > ")
+      [[ -n "$selected" ]] || return
+
+      local branch
+      branch=$(echo "$selected" | awk '{print $2}')
+      [[ -n "$branch" ]] || return
+
+      local target
+      target=$(command wtp cd "$branch" 2>/dev/null) || return
+      [[ -n "$target" ]] && cd "$target"
+    }
+
+    _chpwd_wtp_worktree() {
+      [[ -d .bare && -d .bare/refs ]] || return
+      _wtp_worktree_picker
+    }
+
+    # Picker is useless without fzf
+    if (( $+commands[fzf] )); then
+        autoload -U add-zsh-hook
+        add-zsh-hook chpwd _chpwd_wtp_worktree
+
+        alias gw="_wtp_worktree_picker"
+    fi
+
+fi
+
+#
 # Help
 #
 
