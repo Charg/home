@@ -30,6 +30,7 @@ in
   })
 
   (unstableOverlay "claude-code")
+  (unstableOverlay "herdr")
   (unstableOverlay "mise")
   (unstableOverlay "opencode")
   (unstableOverlay "prek")
