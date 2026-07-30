@@ -32,12 +32,12 @@
 
       statusLine = {
         type = "command";
-        command = "${config.home.homeDirectory}/.claude/scripts/statusline.sh";
+        command = "~/.claude/scripts/statusline.sh";
       };
 
       subagentStatusLine = {
         type = "command";
-        command = "${config.home.homeDirectory}/.claude/scripts/subagent-statusline.sh";
+        command = "~/.claude/scripts/subagent-statusline.sh";
       };
     };
   };
