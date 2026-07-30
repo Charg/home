@@ -11,11 +11,11 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: accord
-    targetRevision: 0.5.0
+    targetRevision: 0.5.1
     helm:
       valuesObject:
         image:
-          tag: 0.5.0
+          tag: 0.5.1
         imagePullSecrets:
           - name: ghcr-pull-creds
         existingSecret: accord-env
@@ -25,7 +25,7 @@ spec:
           enabled: false
         migrations:
           enabled: true
-          runId: 0.5.0
+          runId: 0.5.1
           ttlSecondsAfterFinished: 0 # persist completed Job; no TTL GC -> no self-heal recreate loop
           resources:
             requests:
