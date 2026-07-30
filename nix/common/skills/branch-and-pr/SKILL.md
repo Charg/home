@@ -33,6 +33,8 @@ naming. E.g. `fix: null-pointer on checkout`, not `Fix null pointer`.
    Report test status honestly.
 3. Show the draft and wait for approval before creating anything (publishing
    is a one-way door).
-4. `gh pr create --base main --title "..." --body-file <path> --draft` —
+4. Create a label if it does not exist:
+   `gh label create "🤖 agent" --description "Agent Authored" --color #C4C4C4`
+4. `gh pr create --label "🤖 agent" --base main --title "..." --body-file <path> --draft` —
    default to `--draft` unless the user wants it ready for review.
 5. Return the PR URL.
