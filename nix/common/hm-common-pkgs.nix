@@ -47,4 +47,5 @@
   # pkgs.anytype # Create notes, tasks, databases, and chats that only you can access
   pkgs.bitwarden-desktop
   pkgs.dbeaver-bin
+  pkgs.herdr
 ]
