@@ -19,10 +19,16 @@ spec:
   monitoring:
     enablePodMonitor: true
 
+  postgresql:
+    parameters:
+      max_connections: "50"
+      max_parallel_workers: "2"
+      effective_cache_size: "3GB"
+
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 500m
+      memory: 4Gi
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 4Gi
