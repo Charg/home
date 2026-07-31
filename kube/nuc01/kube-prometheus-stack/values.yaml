@@ -91,6 +91,156 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: prometheus
+      ac-postgres-slow-queries:
+        json: |-
+          {
+            "title": "ac-postgres Slow Queries",
+            "uid": "ac-postgres-slow-queries",
+            "tags": ["postgresql", "ac-postgres", "cnpg"],
+            "timezone": "browser",
+            "schemaVersion": 39,
+            "version": 1,
+            "refresh": "30s",
+            "time": { "from": "now-6h", "to": "now" },
+            "panels": [
+              {
+                "id": 1,
+                "title": "Mean Execution Time by Query (top 10)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+                "fieldConfig": {
+                  "defaults": { "unit": "s" },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+                  "tooltip": { "mode": "multi" }
+                },
+                "targets": [
+                  {
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "topk(10, cnpg_pg_stat_statements_mean_exec_seconds)",
+                    "legendFormat": "{{query}}",
+                    "refId": "A"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "title": "Time Spent Executing, by Query (top 10, rate)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+                "fieldConfig": {
+                  "defaults": { "unit": "percentunit" },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+                  "tooltip": { "mode": "multi" }
+                },
+                "targets": [
+                  {
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "topk(10, rate(cnpg_pg_stat_statements_total_exec_seconds[5m]))",
+                    "legendFormat": "{{query}}",
+                    "refId": "A"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "title": "Query Call Rate (top 10)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+                "fieldConfig": {
+                  "defaults": { "unit": "reqps" },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+                  "tooltip": { "mode": "multi" }
+                },
+                "targets": [
+                  {
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "topk(10, rate(cnpg_pg_stat_statements_calls[5m]))",
+                    "legendFormat": "{{query}}",
+                    "refId": "A"
+                  }
+                ]
+              },
+              {
+                "id": 4,
+                "title": "Rows Returned/Affected Rate (top 10)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+                "fieldConfig": {
+                  "defaults": { "unit": "short" },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+                  "tooltip": { "mode": "multi" }
+                },
+                "targets": [
+                  {
+                    "datasource": { "type": "prometheus", "uid": "prometheus" },
+                    "expr": "topk(10, rate(cnpg_pg_stat_statements_rows[5m]))",
+                    "legendFormat": "{{query}}",
+                    "refId": "A"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "title": "Slow Query Log Rate (>= 250ms)",
+                "type": "timeseries",
+                "datasource": { "type": "loki", "uid": "loki" },
+                "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+                "fieldConfig": {
+                  "defaults": { "unit": "short" },
+                  "overrides": []
+                },
+                "options": {
+                  "legend": { "displayMode": "list", "placement": "bottom" },
+                  "tooltip": { "mode": "multi" }
+                },
+                "targets": [
+                  {
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "sum(rate({namespace=\"ac\", pod=~\"ac-postgres-[0-9]+\"} |= \"duration:\" [1m]))",
+                    "legendFormat": "slow queries/sec",
+                    "refId": "A"
+                  }
+                ]
+              },
+              {
+                "id": 6,
+                "title": "Slow Query Log Lines",
+                "type": "logs",
+                "datasource": { "type": "loki", "uid": "loki" },
+                "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 },
+                "options": {
+                  "showTime": true,
+                  "sortOrder": "Descending",
+                  "enableLogDetails": true,
+                  "dedupStrategy": "none",
+                  "wrapLogMessage": true
+                },
+                "targets": [
+                  {
+                    "datasource": { "type": "loki", "uid": "loki" },
+                    "expr": "{namespace=\"ac\", pod=~\"ac-postgres-[0-9]+\"} |= \"duration:\"",
+                    "refId": "A"
+                  }
+                ]
+              }
+            ]
+          }
 
 prometheus:
   prometheusSpec:
