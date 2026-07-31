@@ -11,11 +11,11 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: accord
-    targetRevision: 0.6.2
+    targetRevision: 0.6.3
     helm:
       valuesObject:
         image:
-          tag: 0.6.2
+          tag: 0.6.3
         imagePullSecrets:
           - name: ghcr-pull-creds
         existingSecret: accord-env
