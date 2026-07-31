@@ -19,6 +19,8 @@ spec:
   monitoring:
     enablePodMonitor: true
     customQueriesConfigMap:
+      - name: cnpg-default-monitoring
+        key: queries
       - name: ac-postgres-custom-queries
         key: queries.yaml
 
