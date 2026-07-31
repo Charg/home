@@ -78,6 +78,11 @@ spec:
             chart: loki
             targetRevision: 6.55.0
             namespace: monitoring
+          - name: alloy
+            repoURL: https://grafana.github.io/helm-charts
+            chart: alloy
+            targetRevision: 1.11.0
+            namespace: monitoring
   template:
     metadata:
       name: "{{ .name }}"
