@@ -39,9 +39,10 @@
   pkgs.zoxide
 
   # Network Tools
+  pkgs.ipcalc
   pkgs.nmap
-  pkgs.wireshark
   pkgs.wireguard-tools
+  pkgs.wireshark
 
   # Desktop Apps
   # pkgs.anytype # Create notes, tasks, databases, and chats that only you can access
