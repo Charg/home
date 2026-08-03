@@ -27,6 +27,7 @@ in
     ../../programs/ghostty/hm.nix
     ../../programs/git/hm.nix
     ../../programs/gpg/hm.nix
+    ../../programs/herdr/hm.nix
     ../../programs/neovim/hm.nix
     ../../programs/litellm/hm.nix
     ../../programs/opencode/hm.nix
