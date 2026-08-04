@@ -17,7 +17,7 @@
       permissions.defaultMode = "auto";
       preferredNotifChannel = "ghostty";
       skipAutoPermissionPrompt = true;
-      teammateMode = "tmux";
+      teammateMode = "in-process";
       tui = "fullscreen";
 
       env = {
