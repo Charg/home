@@ -1,6 +1,6 @@
 services:
   litellm:
-    image: docker.litellm.ai/berriai/litellm:main-stable@sha256:8f3517476b8293ccc1c3b0da7940d8dabbfe64b013454113f5a3cb68265c439b
+    image: docker.litellm.ai/berriai/litellm:main-stable@sha256:af806882b7a6ced41658db5b6a7e98ed7b9b51d03b935e0417bf1c8552d688af
     ports:
       - "44000:4000"
     environment:
@@ -21,7 +21,7 @@ services:
       start_period: 40s
 
   db:
-    image: postgres:16@sha256:0b08171b5cdbf3214c42dbde17883ccfbf494b5e018d837ffe3fee91a3aec5c2
+    image: postgres:16@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b
     restart: unless-stopped
     environment:
       POSTGRES_DB: litellm
