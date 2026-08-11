@@ -5,6 +5,43 @@
   ...
 }:
 
+let
+  netcheck = pkgs.callPackage ../../packages/netcheck { docker = pkgs.docker_29; };
+
+  # Runs as root via the NetworkManager dispatcher. Notify-only: tearing down a
+  # compose stack mid-flight is worse than the address collision.
+  netcheckDispatcher = pkgs.writeShellScript "netcheck-dispatcher" ''
+    set -euo pipefail
+
+    interface="$1"
+    action="$2"
+
+    case "$action" in
+      up | dhcp4-change) ;;
+      *) exit 0 ;;
+    esac
+
+    if ! output=$(${netcheck}/bin/netcheck --json 2>&1); then
+      summary=$(echo "$output" | ${pkgs.jq}/bin/jq -r '
+        (.fatal[]? | "FATAL: gateway \(.gateway) on \(.gateway_interface) is inside \(.local_subnet) (\(.owner))"),
+        (.conflicts[]? | "CONFLICT: \(.uplink_subnet) on \(.uplink_interface) overlaps \(.local_subnet) (\(.owner))")
+      ' 2>/dev/null || true)
+
+      ${pkgs.util-linux}/bin/logger -t netcheck "network conflict detected on $interface ($action): $summary"
+
+      if [ -n "''${summary:-}" ]; then
+        ${pkgs.sudo}/bin/sudo -u framework \
+          DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+          ${pkgs.libnotify}/bin/notify-send \
+          -u critical \
+          "Network conflict on $interface" \
+          "$summary" || true
+      fi
+    fi
+
+    exit 0
+  '';
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -29,6 +66,32 @@
   networking.firewall.allowedUDPPorts = [
     51820 # WireGuard
   ];
+
+  # Docker, Virtualbox, Podman, etc creates a NetworkManager connection profile for every bridge/veth
+  # they own. Let them manage their own interfaces instead.
+  networking.networkmanager.unmanaged = [
+    "interface-name:docker*"
+    "interface-name:br-*"
+    "interface-name:veth*"
+    "interface-name:vboxnet*"
+  ];
+
+  # Desktop notification (and journal log) when joining a network whose uplink
+  # subnet overlaps a local Docker/Podman/VirtualBox network. See nix/packages/netcheck.
+  networking.networkmanager.dispatcherScripts = [
+    {
+      type = "basic";
+      source = netcheckDispatcher;
+    }
+  ];
+
+  environment.systemPackages = [ netcheck ];
+
+  # Name my AV Access ethernet adapter
+  systemd.network.links."10-av-eth" = {
+    matchConfig.MACAddress = "34:1b:22:85:cb:3f";
+    linkConfig.Name = "aveth0";
+  };
 
   #
   # Hardware
@@ -406,6 +469,23 @@
 
   virtualisation.docker.enable = true;
   virtualisation.docker.package = pkgs.docker_29;
+  virtualisation.docker.daemon.settings = {
+    # Stay out of every RFC1918 range that airline/hotel DHCP hands out. 198.18.0.0/15
+    # is IANA-reserved for RFC 2544 benchmarking and essentially never appears on
+    # real-world networks, unlike 172.16/12, 10/8, and 192.168/16.
+    default-address-pools = [
+      {
+        base = "198.18.0.0/16";
+        size = 24;
+      }
+      {
+        base = "10.200.0.0/13";
+        size = 24;
+      }
+    ];
+  };
+  # Weekly `docker system prune -f` which clears out networks, images, and stopped containers
+  virtualisation.docker.autoPrune.enable = true;
   virtualisation = {
     podman = {
       enable = true;
@@ -414,11 +494,36 @@
       # dockerCompat = true;
 
       # Required for containers under podman-compose to be able to talk to each other.
-      defaultNetwork.settings.dns_enabled = true;
+      defaultNetwork.settings = {
+        dns_enabled = true;
+        subnets = [
+          {
+            subnet = "198.19.0.0/24";
+            gateway = "198.19.0.1";
+          }
+        ];
+      };
     };
+  };
+  virtualisation.containers.containersConf.settings.network = {
+    default_subnet = "198.19.0.0/24";
+    default_subnet_pools = [
+      {
+        base = "198.19.64.0/18";
+        size = 24;
+      }
+    ];
   };
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.host.enableExtensionPack = true;
+
+  # VirtualBox's built-in host-only allowlist (192.168.56.0/21) collides with the
+  # same private ranges hotel/office Wi-Fi hands out. Restrict it to the same
+  # IANA-reserved range used for the Docker/Podman pools above.
+  environment.etc."vbox/networks.conf".text = ''
+    * 198.19.128.0/21
+    * fe80::/64
+  '';
 
   security.sudo.wheelNeedsPassword = false;
   # Pipewire - allows to use the realtime scheduler for increased performance.
