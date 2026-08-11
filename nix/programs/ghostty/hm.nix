@@ -23,6 +23,13 @@
         "-liga"
         "-dlig"
       ];
+      # MacOs Only
+      window-step-resize = false;
+      window-padding-balance = false;
+      # Disable GTK Client-Side Decorations (Essential for Tiling WMs)
+      window-decoration = false;
+      # Prevent Ghostty from drawing the cell-size overlay on layout updates
+      resize-overlay = "never";
     };
   };
 }
