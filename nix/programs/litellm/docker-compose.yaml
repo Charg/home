@@ -21,7 +21,7 @@ services:
       start_period: 40s
 
   db:
-    image: postgres:16@sha256:0b08171b5cdbf3214c42dbde17883ccfbf494b5e018d837ffe3fee91a3aec5c2
+    image: postgres:18@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
     restart: unless-stopped
     environment:
       POSTGRES_DB: litellm
