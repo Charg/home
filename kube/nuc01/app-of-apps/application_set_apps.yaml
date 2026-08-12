@@ -15,7 +15,7 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 9.5.0
+            targetRevision: 10.3.2
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
@@ -61,7 +61,7 @@ spec:
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
-            targetRevision: 87.1.0
+            targetRevision: 88.3.0
             namespace: monitoring
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
@@ -76,7 +76,7 @@ spec:
           - name: loki
             repoURL: https://grafana.github.io/helm-charts
             chart: loki
-            targetRevision: 6.55.0
+            targetRevision: 7.3.0
             namespace: monitoring
           - name: alloy
             repoURL: https://grafana.github.io/helm-charts
