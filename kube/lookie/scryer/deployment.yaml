@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scryer
+  namespace: default
+  labels:
+    app.kubernetes.io/name: scryer
+spec:
+  replicas: 1
+  # SQLite on a RWO volume must never have two writers at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scryer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: scryer
+    spec:
+      containers:
+        - name: scryer
+          image: ghcr.io/scryer-media/scryer:0.18.9@sha256:559941c27cbac75f39862bd965b318e60f104f89e3a2915ca4f73d15e30dbaf4
+          env:
+            - name: SCRYER_BIND
+              value: 0.0.0.0:8080
+            # Required: qBittorrent writes everything on the shared /data
+            # volume as root:root with UMASK=0. Scryer's image defaults to
+            # 1000:1000 and would not be able to import without this.
+            - name: PUID
+              value: "0"
+            - name: PGID
+              value: "0"
+            - name: UMASK
+              value: "0"
+            - name: TZ
+              value: America/Los_Angeles
+            - name: SCRYER_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: scryer-encryption-key
+                  key: encryption-key
+            # Seed settings only; inert once changed in the UI.
+            - name: SCRYER_MOVIES_PATH
+              value: /data/Movies
+            - name: SCRYER_SERIES_PATH
+              value: /data/TV
+            # SCRYER_AUTH_ENABLED is intentionally NOT set yet. A fresh
+            # install creates an admin account with no password and form
+            # login disabled. Set an admin password in Settings > Users
+            # first (Phase C, step 1), THEN add SCRYER_AUTH_ENABLED=true
+            # here as its own commit (Phase C, step 2).
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: scryer-config
+              mountPath: /config
+            # Same mount path qBittorrent uses for /data - this is what
+            # lets Scryer do atomic-move/hardlink imports with zero remote
+            # path mapping between the download client and the library.
+            - name: plex-media
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: scryer-config
+          persistentVolumeClaim:
+            claimName: scryer-config
+        - name: plex-media
+          persistentVolumeClaim:
+            claimName: plex-media
