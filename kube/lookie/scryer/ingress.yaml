@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: scryer-internal
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: scryer.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: scryer.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: scryer
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - scryer.packet.fail
+      secretName: scryer-tls
