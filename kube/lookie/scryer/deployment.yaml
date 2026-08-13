@@ -46,11 +46,8 @@ spec:
               value: /data/Movies
             - name: SCRYER_SERIES_PATH
               value: /data/TV
-            # SCRYER_AUTH_ENABLED is intentionally NOT set yet. A fresh
-            # install creates an admin account with no password and form
-            # login disabled. Set an admin password in Settings > Users
-            # first (Phase C, step 1), THEN add SCRYER_AUTH_ENABLED=true
-            # here as its own commit (Phase C, step 2).
+            - name: SCRYER_AUTH_ENABLED
+              value: "true"
           ports:
             - name: http
               containerPort: 8080
