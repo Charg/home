@@ -28,6 +28,7 @@ in
     ../../programs/herdr/hm.nix
     ../../programs/neovim/hm.nix
     ../../programs/opencode/hm.nix
+    ../../programs/ripgrep/hm.nix
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix
     ../../programs/tmux/hm.nix

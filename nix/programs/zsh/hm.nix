@@ -122,7 +122,7 @@
       llr = "eza -lasnew";
       py = "python3";
       reboot = "sudo reboot";
-      rg = "rg -i";
+      rga = "rg -uu --no-ignore-files";
       shut = "sudo shutdown -h now";
       weather = "curl https://wttr.in/sf";
       comp-refresh = "rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump; echo 'Completion cache rebuilt!'";

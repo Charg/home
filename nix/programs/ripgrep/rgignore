@@ -1,0 +1,29 @@
+# Git / VCS
+.git/
+.hg/
+.svn/
+
+# OS & IDEs
+.DS_Store
+.idea/
+.vscode/
+
+# Python
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# JS / Node
+node_modules/
+.next/
+.nuxt/
+.turbo/
+.cache/
+
+# General Build & Infra
+target/
+.gradle/
+.terraform/

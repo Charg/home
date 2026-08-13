@@ -32,6 +32,7 @@ in
     ../../programs/litellm/hm.nix
     ../../programs/opencode/hm.nix
     ../../programs/podman/hm.nix
+    ../../programs/ripgrep/hm.nix
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix
     ../../programs/tmux/hm.nix
