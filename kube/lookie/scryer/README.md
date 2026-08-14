@@ -49,8 +49,15 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
 4. **Libraries** — Movies root `/data/Movies`, Series root `/data/TV`. By design, Scryer
    only manages new acquisitions here — the existing ~470 titles keep their release names
    and are not bulk-imported or renamed.
-5. **Indexers** — install `torznab` (and `nyaa` for anime) from the plugin catalog and
-   add trackers.
+5. **Indexers** — install the `torznab` plugin (and `nyaa` for anime — Prowlarr doesn't
+   cover that as cleanly) from the plugin catalog. As of `kube/lookie/prowlarr/`, add
+   trackers here as Prowlarr-backed Torznab feeds rather than direct-to-tracker: for each
+   indexer configured in Prowlarr, add a Scryer `torznab` entry pointing at
+   `http://prowlarr.default.svc.cluster.local:9696/<indexerid>/api`, API key from the
+   `prowlarr-api-key` secret (`<indexerid>` is Prowlarr's numeric ID for that indexer,
+   visible in its Torznab feed URL). Prowlarr owns the tracker definitions and login
+   flows now — see `kube/lookie/prowlarr/README.md` — which is what fixes trackers that
+   were returning HTML login/interstitial pages instead of caps XML.
 6. **Proxy** — Settings → Indexers → **Indexer proxies** (Beta) → **Connect indexer
    proxy**:
    - **Provider**: `Trawl`.
