@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prowlarr-internal
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: prowlarr.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: prowlarr.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prowlarr
+                port:
+                  number: 9696
+  tls:
+    - hosts:
+        - prowlarr.packet.fail
+      secretName: prowlarr-tls
