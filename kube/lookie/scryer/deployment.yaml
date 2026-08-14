@@ -60,13 +60,17 @@ spec:
             # path mapping between the download client and the library.
             - name: plex-media
               mountPath: /data
+          # 0.18.11 OOMKilled in a crashloop under the previous 1Gi limit,
+          # dying ~8s in while rehydrating its five wasmtime plugin modules
+          # and starting the background workers. 0.18.9 fit in 1Gi; keep an
+          # eye on this across future bumps.
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 512Mi
             limits:
               cpu: 1000m
-              memory: 1Gi
+              memory: 2Gi
           readinessProbe:
             httpGet:
               path: /
