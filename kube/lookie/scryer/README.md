@@ -51,6 +51,13 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    and are not bulk-imported or renamed.
 5. **Indexers** — install `torznab` (and `nyaa` for anime) from the plugin catalog and
    add trackers.
+6. **Proxy** — Settings → Indexers → **Indexer proxies** (Beta) → **Connect indexer
+   proxy**:
+   - **Provider**: `Trawl`.
+   - **Base URL**: `http://trawl.default.svc.cluster.local:8191` (base URL only —
+     Scryer appends `/v1` itself).
+   - **Timeout**: `60` seconds (valid range 1–180).
+   - **Enabled**: checked, then **Test**.
 
 ## Secrets NOT in git
 
