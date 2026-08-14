@@ -113,6 +113,8 @@ spec:
               value: wireguard
             - name: LAN_NETWORK
               value: 10.42.0.0/24,10.43.0.0/16
+            - name: VPN_OUTPUT_PORTS
+              value: "9696"
             - name: NAME_SERVERS
               value: 1.1.1.1
             - name: STRICT_PORT_FORWARD
