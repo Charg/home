@@ -6,18 +6,7 @@ Turnstile, reCAPTCHA, hCaptcha, GeeTest). No upstream Helm chart or Kubernetes
 manifests exist upstream, so this is a plain-manifest app (same pattern as
 `kube/lookie/scryer/` and `kube/lookie/qbittorrent/`).
 
-Deployed so Scryer can route the indexers that sit behind a challenge wall (nyaa,
-1337x) through a solver instead of failing outright.
-
-## Why Scryer, specifically, and not FlareSolverr generically
-
-Trawl exposes a FlareSolverr-compatible `POST /v1` endpoint, but Scryer does not
-support FlareSolverr as a protocol - its `IndexerProxyProviderType` enum has exactly
-two variants, `Byparr` and `Trawl`, and rejects anything else. Trawl is one of two
-providers Scryer ships a dedicated code path for, right down to provider-specific
-`maxTimeout` unit handling (Byparr: seconds, Trawl: milliseconds) and provider-named
-error strings. Picking "Byparr" in Scryer's UI for this instance would silently send
-timeouts 1000x too small - always select **Trawl**.
+Deployed for Scryer to use as a proxy.
 
 ## ⚠️ No `plugin: {}` on this app's Argo CD Application
 
@@ -40,11 +29,7 @@ No PVC. Two things could have needed one and neither does:
 ## MITM proxy stays off
 
 Trawl also offers a challenge-bypassing HTTP/HTTPS forward proxy (port 8192,
-`MITM_PROXY_ENABLED`) for clients like Prowlarr that re-fetch pages with their own
-HTTP client and need the connection fingerprint, not just the cookie. Scryer has no
-forward-proxy concept at all - its only solver transport is `POST <base_url>/v1` -
-and no hook to install a custom CA into its container. Enabling the MITM proxy here
-would be unused surface area, so it's left off (the default).
+`MITM_PROXY_ENABLED`). It's not used by Scryer, so it's left off (the default).
 
 ## Image pinning
 
@@ -57,8 +42,7 @@ releases - pin an explicit semver tag and digest, and bump deliberately.
 ## First-run configuration (manual, one-time)
 
 Nothing to configure on Trawl itself - it's stateless beyond the Redis cache. All
-setup happens on the Scryer side; see the "Indexer proxies" step in
-`kube/lookie/scryer/README.md`.
+setup happens on the Scryer side; see `kube/lookie/scryer/README.md`.
 
 ## Secrets
 

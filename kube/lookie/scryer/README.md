@@ -51,23 +51,13 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    and are not bulk-imported or renamed.
 5. **Indexers** — install `torznab` (and `nyaa` for anime) from the plugin catalog and
    add trackers.
-6. **Indexer proxies (challenge solving)** — for indexers behind a Cloudflare/CAPTCHA
-   wall (nyaa, 1337x), Settings → Indexers → **Indexer proxies** (Beta) → **Connect
-   indexer proxy**:
-   - **Provider**: `Trawl` — not `Byparr`. Scryer sends `maxTimeout` in milliseconds
-     for the `Trawl` provider and seconds for `Byparr`; picking the wrong one silently
-     breaks the timeout. Immutable after creation — delete and recreate to change it.
+6. **Proxy** — Settings → Indexers → **Indexer proxies** (Beta) → **Connect indexer
+   proxy**:
+   - **Provider**: `Trawl`.
    - **Base URL**: `http://trawl.default.svc.cluster.local:8191` (base URL only —
      Scryer appends `/v1` itself).
    - **Timeout**: `60` seconds (valid range 1–180).
-   - **Enabled**: checked, then **Test** (probes `GET <base_url>/health`; a Trawl pod
-     that restarted in the last ~30s reports Unhealthy while its browser pool warms up
-     — retest rather than debugging).
-
-   Then attach the proxy **per indexer** (a nullable field on each indexer, not
-   Prowlarr-style tag matching) — edit `nyaa` and `1337x` and select the `trawl`
-   proxy; leave unchallenged indexers unset. See `kube/lookie/trawl/README.md` for
-   why Trawl and not FlareSolverr/Byparr.
+   - **Enabled**: checked, then **Test**.
 
 ## Secrets NOT in git
 
