@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: prowlarr
 spec:
   type: ClusterIP
+  clusterIP: 10.43.250.122
   selector:
     app.kubernetes.io/name: prowlarr
   ports:
