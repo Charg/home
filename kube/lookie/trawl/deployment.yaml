@@ -20,6 +20,42 @@ spec:
       labels:
         app.kubernetes.io/name: trawl
     spec:
+      # Native sidecar (restartPolicy: Always init container, GA since 1.29):
+      # blocks the trawl container from starting until redis's readinessProbe
+      # passes. Needed because Redis 8 bundles Bloom/Search/TimeSeries/ReJSON
+      # modules that take ~1.5-2s to load before it accepts connections - long
+      # enough to blow past trawl's 1000ms startup Redis-connect timeout when
+      # both containers start in parallel, permanently disabling Tier 2 cache
+      # for the pod's lifetime (trawl doesn't retry after the initial check).
+      initContainers:
+        - name: redis
+          image: redis:8.8.1-alpine@sha256:8096655e437712b07503796fb64d81359256cfcff0ab29d95a7da72863786efb
+          restartPolicy: Always
+          args:
+            - "--save"
+            - ""
+            - "--appendonly"
+            - "no"
+            - "--maxmemory"
+            - "128mb"
+            - "--maxmemory-policy"
+            - "allkeys-lru"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "-h", "localhost", "ping"]
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            failureThreshold: 10
       containers:
         - name: trawl
           image: ghcr.io/germondai/trawl:1.4.0@sha256:b8d81faa832f0417dbdeb2684c395a8405fb85739bbb89b19c019cdc3131814c
@@ -68,27 +104,6 @@ spec:
               port: 8191
             initialDelaySeconds: 120
             periodSeconds: 20
-        - name: redis
-          image: redis:8.8.1-alpine@sha256:8096655e437712b07503796fb64d81359256cfcff0ab29d95a7da72863786efb
-          args:
-            - "--save"
-            - ""
-            - "--appendonly"
-            - "no"
-            - "--maxmemory"
-            - "128mb"
-            - "--maxmemory-policy"
-            - "allkeys-lru"
-          volumeMounts:
-            - name: redis-data
-              mountPath: /data
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              cpu: 200m
-              memory: 256Mi
       volumes:
         # Replicates upstream's mandatory `shm_size: 1gb` - Firefox needs far more
         # than Kubernetes' 64Mi default /dev/shm.
