@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: trawl-internal
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: trawl.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: trawl.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: trawl
+                port:
+                  number: 8191
+  tls:
+    - hosts:
+        - trawl.packet.fail
+      secretName: trawl-tls

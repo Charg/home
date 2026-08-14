@@ -1,0 +1,102 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trawl
+  namespace: default
+  labels:
+    app.kubernetes.io/name: trawl
+spec:
+  replicas: 1
+  # The browser pool (~1-2GB warm) makes a second live pod expensive for no
+  # availability benefit on a single-node cluster - recreate instead of roll.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: trawl
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: trawl
+    spec:
+      containers:
+        - name: trawl
+          image: ghcr.io/germondai/trawl:1.4.0@sha256:b8d81faa832f0417dbdeb2684c395a8405fb85739bbb89b19c019cdc3131814c
+          env:
+            - name: BROWSER_POOL_SIZE
+              value: "2"
+            - name: BROWSER_CONTENT_PROCESSES
+              value: "2"
+            - name: TZ
+              value: America/Los_Angeles
+            # REDIS_URL intentionally unset: the default (redis://localhost:6379)
+            # already points at the sidecar below.
+            #
+            # MITM_PROXY_ENABLED intentionally unset (defaults to "false"). Scryer's
+            # only solver transport is POST <base_url>/v1 - it has no HTTP forward-proxy
+            # concept and no hook to install Trawl's CA - so the MITM proxy (:8192)
+            # would be dead weight here. See kube/lookie/trawl/README.md.
+          ports:
+            - name: http
+              containerPort: 8191
+              protocol: TCP
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 3Gi
+          # /health returns 503 while the browser pool warms up (15-30s typical,
+          # up to 90s) - fine for readiness, wrong for liveness.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8191
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 12
+          # / only confirms the API process is up and does not wait on the pool,
+          # so a transient pool stall can't restart-loop the pod.
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8191
+            initialDelaySeconds: 120
+            periodSeconds: 20
+        - name: redis
+          image: redis:8.8.1-alpine@sha256:8096655e437712b07503796fb64d81359256cfcff0ab29d95a7da72863786efb
+          args:
+            - "--save"
+            - ""
+            - "--appendonly"
+            - "no"
+            - "--maxmemory"
+            - "128mb"
+            - "--maxmemory-policy"
+            - "allkeys-lru"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        # Replicates upstream's mandatory `shm_size: 1gb` - Firefox needs far more
+        # than Kubernetes' 64Mi default /dev/shm.
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        # Pure session cache (30min TTL); losing it on pod restart is a
+        # performance hit, not a correctness issue.
+        - name: redis-data
+          emptyDir: {}
