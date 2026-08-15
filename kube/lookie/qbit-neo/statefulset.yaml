@@ -145,6 +145,17 @@ spec:
             # nameserver being kept is 127.0.0.1, the in-pod CoreDNS sidecar,
             # whose public upstream is DoT over this tunnel. Do not "fix" it.
             - { name: DNS_KEEP_NAMESERVER, value: "on" }
+            - { name: VPN_PORT_FORWARDING, value: "on" }
+            - { name: VPN_PORT_FORWARDING_PROVIDER, value: protonvpn }
+            # Only pick servers that actually support forwarding, otherwise
+            # server selection can land somewhere NAT-PMP is refused.
+            - { name: PORT_FORWARD_ONLY, value: "on" }
+            - { name: VPN_PORT_FORWARDING_STATUS_FILE, value: /gluetun/forwarded_port }
+            # gluetun splits this shell-style and then exec's it directly -
+            # there is no shell in between, so the interpreter has to be named
+            # explicitly rather than relying on the script's shebang.
+            - name: VPN_PORT_FORWARDING_UP_COMMAND
+              value: "/bin/sh /wrapper/port-up.sh {{PORTS}}"
             - { name: TZ, value: America/Los_Angeles }
           # startupProbe, NOT readinessProbe: Kubernetes gates the next
           # container on a sidecar having *started*, so a readinessProbe here
@@ -159,6 +170,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 36        # 3 minutes to first handshake
+          volumeMounts:
+            - { name: gluetun-run, mountPath: /gluetun }
+            - { name: scripts, mountPath: /wrapper, readOnly: true }
           resources:
             requests: { cpu: 50m, memory: 64Mi }
             limits: { memory: 192Mi }
@@ -176,6 +190,10 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
+          # Wraps the image's own entrypoint to resolve the forwarded port
+          # before qBittorrent launches - the hook cannot do it on a cold start,
+          # because it fires before this container exists.
+          command: [/bin/sh, /wrapper/port-seed.sh]
           env:
             - { name: TZ, value: America/Los_Angeles }
             - { name: UMASK, value: "0" }
@@ -184,10 +202,15 @@ spec:
           volumeMounts:
             - { name: media, mountPath: /config, subPath: qbit-neo-config }
             - { name: media, mountPath: /data }
+            - { name: gluetun-run, mountPath: /gluetun, readOnly: true }
+            - { name: scripts, mountPath: /wrapper, readOnly: true }
           readinessProbe:
             httpGet: { path: /, port: 8080 }
             initialDelaySeconds: 15
             periodSeconds: 10
+            # port-seed.sh waits up to 60s for the forwarded port before
+            # launching qBittorrent, so allow for that rather than flapping.
+            failureThreshold: 12
           resources:
             requests: { cpu: 200m, memory: 1Gi }
             # No CPU limit on purpose: throttling this container wrecks throughput.
@@ -202,3 +225,12 @@ spec:
         - name: coredns-config
           configMap:
             name: qbit-neo-coredns
+        # Carries gluetun's forwarded_port status file to qBittorrent. emptyDir,
+        # not the PVC: the mapping is valid only for the life of this tunnel, so
+        # persisting it across restarts would seed a stale port.
+        - name: gluetun-run
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: qbit-neo-scripts
+            defaultMode: 0755
