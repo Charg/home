@@ -21,9 +21,7 @@ spec:
         app.kubernetes.io/name: qbit-neo
         app.kubernetes.io/instance: qbit-neo
     spec:
-      # gluetun's wireguard needs this. It is the ONE unsafe sysctl lookie's
-      # kubelet allows (--kubelet-arg=allowed-unsafe-sysctls=
-      # net.ipv4.conf.all.src_valid_mark, set on the node, outside this repo).
+      # gluetun's wireguard needs this.
       # The pod is unschedulable without that node-level setting.
       securityContext:
         sysctls:
@@ -45,9 +43,6 @@ spec:
           args:
             - |
               set -eu
-              # NOTE: the config lives at /config/qBittorrent/qBittorrent.conf.
-              # There is no config/ subdirectory in this image, unlike the
-              # linuxserver-family layout the legacy qbittorrent app uses.
               mkdir -p /config/qBittorrent
               cp -f /seed/qBittorrent.conf /config/qBittorrent/qBittorrent.conf
           volumeMounts:
@@ -70,10 +65,6 @@ spec:
             - name: WIREGUARD_PRIVATE_KEY
               valueFrom:
                 secretKeyRef: { name: qbit-neo-wireguard, key: privatekey }
-            # Proton issues 10.2.0.2/32 for this credential, which is already
-            # gluetun's protonvpn default - no WIREGUARD_ADDRESSES needed.
-            # Switzerland because the credential was provisioned against a
-            # P2P-capable CH server and verified to port-forward there.
             - { name: SERVER_COUNTRIES, value: "Switzerland" }
             # WebUI must be reachable from Traefik and other pods; gluetun's
             # firewall DROPs inbound otherwise.
@@ -107,8 +98,8 @@ spec:
           image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
           securityContext:
             # The image defaults to uid 65534, but the shared plex-media tree
-            # (/data, /data/downloads, /config) is root-owned, so this has to
-            # be uid 0 to write to it. Root here is bounded: every capability
+            # is root-owned, so this has to be uid 0 to write to it.
+            # Root here is bounded: every capability
             # is dropped and privilege escalation is off. Only gluetun holds
             # NET_ADMIN, and nothing in this pod is privileged.
             runAsUser: 0
@@ -130,8 +121,7 @@ spec:
             periodSeconds: 10
           resources:
             requests: { cpu: 200m, memory: 1Gi }
-            # No CPU limit on purpose: throttling this container wrecks
-            # throughput.
+            # No CPU limit on purpose: throttling this container wrecks throughput.
             limits: { memory: 4Gi }
       volumes:
         - name: media
