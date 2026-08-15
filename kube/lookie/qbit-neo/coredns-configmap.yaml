@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qbit-neo-coredns
+  namespace: default
+data:
+  Corefile: |
+    # In-pod split-horizon resolver. Cluster names -> kube-dns; everything else
+    # -> DoT over the tunnel. Binds loopback only: every container in the pod
+    # shares one network namespace, so 127.0.0.1 is reachable from qBittorrent,
+    # and nothing outside the pod can query this.
+    #
+    # gluetun's own DNS server must stay OFF (DNS_SERVER=off). It binds wildcard
+    # :53 regardless of DNS_ADDRESS, so it would collide with this resolver.
+    # gluetun must also run with DNS_KEEP_NAMESERVER=on so it leaves the
+    # pod-shared /etc/resolv.conf alone - see the statefulset comment for why
+    # DNS_ADDRESS cannot be used for that instead.
+    #
+    # No `health` plugin on purpose: it defaults to :8080 and binds WILDCARD,
+    # which is qBittorrent's WebUI port in this shared namespace. Probing is
+    # done with tcpSocket on 53 instead - this image has no shell and no dig,
+    # so an exec probe is not possible either.
+    (common) {
+        errors
+        cache 30
+        bind 127.0.0.1
+    }
+
+    cluster.local:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    # Private reverse zones only - pod (10.42/16), service (10.43/16) and LAN
+    # (192.168.74/24) all live under these. Peer rDNS is public and must NOT
+    # come here, or every peer lookup would exit to the LAN off-tunnel. This is
+    # why in-addr.arpa is not forwarded wholesale.
+    10.in-addr.arpa:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    168.192.in-addr.arpa:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    .:53 {
+        import common
+        forward . tls://1.1.1.1 tls://1.0.0.1 {
+            tls_servername cloudflare-dns.com
+        }
+    }

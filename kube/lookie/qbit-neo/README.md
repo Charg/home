@@ -49,6 +49,70 @@ setting is load-bearing, not tidiness.
 tunnel's own health check depend on a resolver whose upstream depends on the tunnel — a
 circular wait that presents as a tunnel that never goes healthy.
 
+### Restarting the sidecar in place is safe — no wrapper needed
+
+A gluetun sidecar can restart without the pod being recreated (liveness blip, `kill 1`), and
+the pod's network namespace outlives it — so the restarted container finds its own tunnel
+interface and policy rules already present. On some gluetun versions that means it fails to
+re-add them, crashloops, and wedges the pod: dead, but not leaking, since qBittorrent keeps
+running behind a DROP-by-default firewall.
+
+**v3.41.3 does not do this.** Verified on this pod by killing PID 1 twice in a row — the
+second kill is the one that would trip over state left by the first. Both times gluetun
+returned to a healthy tunnel, with no `file exists` errors, no duplicated policy rules, and
+qBittorrent never restarting. It reconfigures the existing link and rules idempotently.
+
+So there is deliberately **no cleanup wrapper** here. If a future gluetun bump reintroduces
+the wedge, this is the first thing to re-test; the fix is a small ConfigMap-backed script
+set as the sidecar's `command` that deletes rule priorities 98–101 and the tunnel link, then
+`exec`s `/gluetun-entrypoint`.
+
+## Split-horizon DNS
+
+A CoreDNS sidecar on `127.0.0.1:53` sends cluster zones to kube-dns and everything else out
+over the tunnel by DoT. That gets both halves: `*.svc.cluster.local` resolves (which the
+legacy instance gave up entirely), while tracker and peer lookups stay encrypted and
+in-tunnel instead of leaking to the LAN and the ISP.
+
+It fails **closed** — with the tunnel down, external resolution fails rather than falling
+back to an off-tunnel path. Cluster names may still resolve; that is expected.
+
+Three constraints shape the implementation, each verified rather than assumed:
+
+- **`/etc/resolv.conf` is one file shared by every container in the pod**, not per-container.
+  gluetun rewrites it, so it has to be told not to — `DNS_KEEP_NAMESERVER=on`. The obvious
+  alternative, pointing `DNS_ADDRESS` at `127.0.0.1` so its rewrite is a no-op, **does not
+  work**: gluetun will not point resolv.conf at loopback when its own forwarder is off and
+  silently writes its bootstrap upstream (`nameserver 1.1.1.1`) instead.
+- **gluetun's own resolver binds wildcard `:53`**, not the address it is configured with, so
+  it cannot coexist with CoreDNS in one namespace and is switched off outright.
+- **Reverse zones are split deliberately.** Only `10.in-addr.arpa` and `168.192.in-addr.arpa`
+  go to kube-dns. Forwarding `in-addr.arpa` wholesale would send peer rDNS — public
+  addresses — to the cluster resolver and out to the LAN, which is the leak this is avoiding.
+
+It needs `NET_BIND_SERVICE` added back after `drop: [ALL]` to bind port 53, and the `health`
+plugin is omitted because it defaults to wildcard `:8080` and would collide with qBittorrent's
+WebUI in the shared namespace.
+
+### The CoreDNS sidecar deliberately has no probe
+
+Do not add one. Every kind is unusable here, and getting this wrong does not degrade the pod
+— it **wedges it**:
+
+- `tcpSocket` and `httpGet` are dialled by kubelet from the **node**, at the **pod IP**. This
+  resolver binds `127.0.0.1` only, so neither can ever connect — the same constraint that
+  makes gluetun's probe an `exec`.
+- `exec` has nothing to run: the image ships only the `/coredns` binary, with no shell, no
+  `dig` and no `nslookup`.
+
+A `startupProbe` that can never pass is worse than no probe at all, because on a **native
+sidecar** the containers listed after it never start — the pod sits in `Init:` forever rather
+than coming up degraded.
+
+Nothing races on this. gluetun reaches its servers by IP and health-checks an IP, so it needs
+no resolver at all; qBittorrent, which does, starts only after gluetun's own probe passes, by
+which point CoreDNS has been listening for minutes.
+
 ## Leak containment
 
 Two independent mechanisms, both required:
