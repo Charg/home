@@ -8,9 +8,6 @@ metadata:
     app.kubernetes.io/instance: qbit-neo
     app.kubernetes.io/name: qbit-neo
 spec:
-  # No pinned clusterIP. prowlarr's Service pins one only because the legacy
-  # qbittorrent instance allowlists that address in its own VPN firewall;
-  # nothing allowlists this app, so let the cluster assign.
   type: ClusterIP
   selector:
     app.kubernetes.io/instance: qbit-neo
