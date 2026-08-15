@@ -1,28 +1,8 @@
 # qbit-neo
 
-A second [qBittorrent](https://www.qbittorrent.org/) instance on lookie, running its
-traffic through a ProtonVPN WireGuard tunnel in a [gluetun](https://github.com/qdm12/gluetun)
-sidecar. Reachable at `https://qbit-neo.packet.fail`.
-
-## Why this exists alongside `qbittorrent`
-
-`kube/lookie/qbittorrent/` runs `binhex/arch-qbittorrentvpn`, which puts the VPN client and
-the torrent client in one **`privileged: true`** container. That is the whole reason for
-this app: the same job can be done with the tunnel in its own sidecar holding `NET_ADMIN`
-and nothing else, while the torrent client drops every capability.
-
-It also picks up two things the legacy instance cannot do:
-
-- **A forwarded port.** The legacy instance has none — there is no NAT-PMP client anywhere
-  in the cluster — so it takes no incoming peer connections at all and its seeding ratio is
-  permanently degraded.
-- **Cluster DNS.** The legacy instance points at a public resolver, so no
-  `*.svc.cluster.local` name resolves inside it and in-cluster integrations have to be
-  addressed by raw IP.
-
-The two run **side by side**, on independent Proton credentials and independent tunnels.
-Nothing consuming the legacy instance (Scryer, Prowlarr) has been cut over; that is a
-later, deliberate change.
+A second [qBittorrent](https://www.qbittorrent.org/) instance, running its
+traffic through a WireGuard tunnel in a [gluetun](https://github.com/qdm12/gluetun)
+sidecar.
 
 ## Node prerequisite, outside this repo
 
@@ -83,15 +63,6 @@ Two independent mechanisms, both required:
 
 Both pods mount the same RWX `plex-media` PVC, so the separation is by path:
 
-| | legacy `qbittorrent` | `qbit-neo` |
-|---|---|---|
-| `/config` | `subPath: qbittorrent-config` | `subPath: qbit-neo-config` |
-| default save path | `/data/downloads` | `/data/downloads-neo` |
-| temp path | `/data/downloads/incomplete` | `/data/downloads-neo/incomplete` |
-
-`/data` is mounted at the volume root in both, so each can see the other's files — the
-separation is a convention about what each *writes*, not an enforced boundary.
-
 `/data`, `/data/downloads` and `/config` on that volume are all owned by uid 0. That is why
 this pod pins `runAsUser: 0` even though the image would happily run as uid 65534: it
 cannot write to the shared tree otherwise. Root here is bounded — all capabilities dropped,
@@ -122,7 +93,7 @@ skip authentication entirely.
 
 ## Secrets
 
-- `qbit-neo-wireguard` — the Proton WireGuard **private key only**, as key `privatekey`.
+- `qbit-neo-wireguard` — the WireGuard **private key only**, as key `privatekey`.
 
   Deliberately not a `wg0.conf`. gluetun runs its own server selection against Proton's
   server list to find a port-forward-capable server; a mounted config file would override
