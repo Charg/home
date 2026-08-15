@@ -66,6 +66,13 @@ spec:
               valueFrom:
                 secretKeyRef: { name: qbit-neo-wireguard, key: privatekey }
             - { name: SERVER_COUNTRIES, value: "Switzerland" }
+            # gluetun names the tunnel tun0 by default. The seeded qBittorrent
+            # config binds its sockets to wg0, and qBittorrent treats a missing
+            # interface as "no binding" rather than an error - it logs "The
+            # configured network interface is invalid" and carries on listening
+            # anyway, which silently removes the leak containment. Renaming the
+            # interface here keeps the two in agreement.
+            - { name: VPN_INTERFACE, value: wg0 }
             # WebUI must be reachable from Traefik and other pods; gluetun's
             # firewall DROPs inbound otherwise.
             - { name: FIREWALL_INPUT_PORTS, value: "8080" }
