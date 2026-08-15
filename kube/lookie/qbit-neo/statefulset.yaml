@@ -84,7 +84,7 @@ spec:
             - { name: HTTP_CONTROL_SERVER_ADDRESS, value: "127.0.0.1:8000" }
             # An IP, not a hostname. A name here would make the tunnel's health
             # check wait on a resolver that is itself waiting on the tunnel.
-            - { name: HEALTH_TARGET_ADDRESS, value: "1.1.1.1:443" }
+            - { name: HEALTH_TARGET_ADDRESSES, value: "1.1.1.1:443" }
             - { name: TZ, value: America/Los_Angeles }
           # startupProbe, NOT readinessProbe: Kubernetes gates the next
           # container on a sidecar having *started*, so a readinessProbe here
