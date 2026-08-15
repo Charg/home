@@ -2,11 +2,62 @@
 
 image:
   repository: technitium/dns-server
-  tag: latest@sha256:3580381de00ba316748abced1ad0f942aff5a625993fa5dee22a902e26d2c524 # 14.3.0
+  tag: 15.4.0@sha256:df7d90ef0f7b6fff6916d291a7022cd902290cc31c3141d4158b6c375a641b41
+
+controller:
+  # local-path is hostPath-backed: a RollingUpdate would let old and new pods mount the
+  # same config dir on the same node at once, which risks corrupting dns.config.
+  strategy: Recreate
+
+# NOTE: DNS_SERVER_* env vars below are read ONLY when /etc/dns/dns.config does not yet
+# exist (i.e. once, on a fresh PVC). After first boot the web UI/API is authoritative and
+# these become inert - see README.md.
+env:
+  TZ: UTC
+  DNS_SERVER_DOMAIN: dns.packet.fail
+  # No DNS_SERVER_FORWARDERS - full recursion, so no third party sees the LAN's query
+  # stream and no upstream outage can break resolution.
+  DNS_SERVER_RECURSION: AllowOnlyForPrivateNetworks
+  DNS_SERVER_ENABLE_BLOCKING: "true"
+  DNS_SERVER_BLOCK_LIST_URLS: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts,https://small.oisd.nl"
+  DNS_SERVER_LOG_USING_LOCAL_TIME: "true"
+
+service:
+  main:
+    annotations:
+      # .21 is the IP MetalLB already dynamically assigned - pin it so a service
+      # recreation can't silently move the LAN's resolver to a different address.
+      metallb.io/loadBalancerIPs: 192.168.74.21
+    ports:
+      http:
+        primary: true
+      # UDM is the DHCP server; leaving this enabled on a LAN-facing VIP is a rogue-DHCP
+      # hazard for no benefit.
+      dhcp:
+        enabled: false
+
+ingress:
+  main:
+    enabled: true
+    ingressClassName: traefik-internal
+    annotations:
+      cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+      external-dns.alpha.kubernetes.io/hostname: dns.packet.fail
+    hosts:
+      - host: dns.packet.fail
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - dns.packet.fail
+        secretName: technitium-tls
 
 persistence:
   config:
     enabled: true
-    storageClass: local-storage
+    type: pvc
+    storageClass: local-path
+    accessMode: ReadWriteOnce
     size: 10Gi
     mountPath: /etc/dns
