@@ -20,6 +20,7 @@ All four digest-pinned; bump tag and digest together.
 |---|---|
 | tunnel | `ghcr.io/qdm12/gluetun:v3.41.3` |
 | torrent client | `ghcr.io/home-operations/qbittorrent:5.2.3` |
+| resolver | `registry.k8s.io/coredns/coredns:v1.14.6` |
 | config seed | `docker.io/library/busybox:1.38` |
 
 `ghcr.io/home-operations/qbittorrent` for the same reason Prowlarr uses that family: no
@@ -136,9 +137,17 @@ Details worth keeping in mind before editing them:
   entrypoint's log-symlink and stale-lockfile handling.
 - Failing to get a port is deliberately **not fatal** — qBittorrent still starts,
   outbound-only. Turning a degraded instance into a down one is the worse outcome.
-- `port-up.sh`'s retry budget (8 × 3s ≈ 24s) is bounded on purpose: gluetun runs the hook
-  **inline and blocks its own renewal loop** while it runs, and Proton's mapping expires in
-  under a minute. Do not raise the attempt count without cutting the sleep.
+- `port-up.sh`'s retry budget — 8 × (2s timeout + 3s sleep), so **40s worst case** — is
+  bounded on purpose: gluetun runs the hook **inline and blocks its own renewal loop** while
+  it runs, and Proton's mapping expires in under a minute. Do not raise the attempt count
+  without cutting the sleep or the timeout.
+- **Both scripts validate the port before using it**, and this is not defensive padding.
+  `{{PORTS}}` is a comma-separated *list* — Proton hands out one port today, but sending the
+  raw substitution would produce `json={"listen_port":1,2}`, which qBittorrent answers
+  `200 OK` to while silently discarding the field. Likewise, collapsing a multi-line status
+  file into one oversized integer gets accepted, wrapped to 32 bits, and leaves qBittorrent
+  with no listener at all — WebUI up, incoming connections dead. Both were reproduced
+  against the real images before the guards were added.
 - The API call is **unauthenticated**, which works because `WebUI\LocalHostAuth=false` lets
   a loopback caller in without a session, and every container here shares one network
   namespace.
@@ -219,7 +228,7 @@ rule in `.sops.yaml`, so no `.sops.yaml` change was needed.
 
 ## Flat directory, on purpose
 
-The SOPS CMP globs `find . -maxdepth 1 -type f -name '*.yaml'` and concatenates the results.
-Anything in a subdirectory is **silently ignored**, and any non-manifest `.yaml` left in
-here gets emitted as a manifest. Keep every manifest a flat `.yaml` in this directory, and
-keep this README a `.md`.
+The SOPS CMP globs `find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" \)` and
+concatenates the results. Anything in a subdirectory is **silently ignored**, and any
+non-manifest `.yaml` *or* `.yml` left in here gets emitted as a manifest. Keep every
+manifest a flat `.yaml` in this directory, and keep this README a `.md`.
