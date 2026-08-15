@@ -45,7 +45,7 @@ gluetun's control server is pinned to `127.0.0.1:8000` via `HTTP_CONTROL_SERVER_
 It defaults to wildcard and exposes tunnel control **with no authentication**, so that
 setting is load-bearing, not tidiness.
 
-`HEALTH_TARGET_ADDRESS` is an IP (`1.1.1.1:443`) on purpose. A hostname would make the
+`HEALTH_TARGET_ADDRESSES` is an IP (`1.1.1.1:443`) on purpose. A hostname would make the
 tunnel's own health check depend on a resolver whose upstream depends on the tunnel — a
 circular wait that presents as a tunnel that never goes healthy.
 
@@ -58,6 +58,12 @@ Two independent mechanisms, both required:
    qBittorrent's sockets to the tunnel interface. Without this, peer flows that are already
    established survive a tunnel teardown and fall back to the pod's normal route. Do not
    drop these keys to "simplify" — the firewall alone does not cover established flows.
+
+   These names have to agree with `VPN_INTERFACE` on the gluetun sidecar, which is why that
+   is set to `wg0` rather than left at gluetun's `tun0` default. **A mismatch fails open,
+   not closed**: qBittorrent logs `The configured network interface is invalid` and then
+   keeps listening unbound, so the containment silently disappears while everything still
+   looks healthy. If you change one, change the other.
 
 ## Storage, and not colliding with the legacy instance
 
