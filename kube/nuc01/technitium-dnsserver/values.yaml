@@ -1,0 +1,78 @@
+# source: https://github.com/obeone/charts/blob/main/charts/technitium-dnsserver/values.yaml
+
+image:
+  repository: technitium/dns-server
+  tag: 15.4.0@sha256:df7d90ef0f7b6fff6916d291a7022cd902290cc31c3141d4158b6c375a641b41
+
+controller:
+  # local-path is hostPath-backed: a RollingUpdate would let old and new pods mount the
+  # same config dir on the same node at once, which risks corrupting dns.config.
+  strategy: Recreate
+
+# NOTE: DNS_SERVER_* env vars below are read ONLY when /etc/dns/dns.config does not yet
+# exist (i.e. once, on a fresh PVC). After first boot the web UI/API is authoritative and
+# these become inert - see README.md.
+#
+# These MUST stay identical to kube/lookie/technitium-dnsserver/values.yaml (except
+# DNS_SERVER_DOMAIN) - the two resolvers are twins, and a client that gets a different
+# answer depending on which one DHCP handed it is worse than having one resolver.
+env:
+  TZ: UTC
+  DNS_SERVER_DOMAIN: dns-nuc01.packet.fail
+  # No DNS_SERVER_FORWARDERS - full recursion. Deliberately NOT forwarding to lookie's
+  # .21: that would rebuild the single point of failure this instance exists to remove.
+  DNS_SERVER_RECURSION: AllowOnlyForPrivateNetworks
+  DNS_SERVER_ENABLE_BLOCKING: "true"
+  DNS_SERVER_BLOCK_LIST_URLS: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts,https://small.oisd.nl"
+  DNS_SERVER_LOG_USING_LOCAL_TIME: "true"
+
+# Steady-state measured on lookie: 3m CPU / 99Mi. Headroom is for blocklist reload,
+# which parses ~4MB of hosts files into memory.
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+service:
+  main:
+    annotations:
+      # Pinned for the same reason as lookie's .21: once the UDM hands this out as a
+      # DNS server, a service recreation landing elsewhere is a silent DNS outage.
+      # .50/.51 are the two Traefiks; pool is 192.168.74.50-.69.
+      metallb.io/loadBalancerIPs: 192.168.74.52
+    ports:
+      http:
+        primary: true
+      # UDM is the DHCP server; leaving this enabled on a LAN-facing VIP is a rogue-DHCP
+      # hazard for no benefit.
+      dhcp:
+        enabled: false
+
+ingress:
+  main:
+    enabled: true
+    ingressClassName: traefik-internal
+    annotations:
+      cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+      external-dns.alpha.kubernetes.io/hostname: dns-nuc01.packet.fail
+    hosts:
+      - host: dns-nuc01.packet.fail
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - hosts:
+          - dns-nuc01.packet.fail
+        secretName: technitium-nuc01-tls
+
+persistence:
+  config:
+    enabled: true
+    type: pvc
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    mountPath: /etc/dns
