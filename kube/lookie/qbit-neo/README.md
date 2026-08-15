@@ -90,10 +90,28 @@ Three constraints shape the implementation, each verified rather than assumed:
   go to kube-dns. Forwarding `in-addr.arpa` wholesale would send peer rDNS — public
   addresses — to the cluster resolver and out to the LAN, which is the leak this is avoiding.
 
-The CoreDNS image ships only its own binary — no shell, no `dig` — so probing is `tcpSocket`
-on 53. It also needs `NET_BIND_SERVICE` added back after `drop: [ALL]` to bind port 53, and
-the `health` plugin is omitted because it defaults to wildcard `:8080` and would collide with
-qBittorrent's WebUI in the shared namespace.
+It needs `NET_BIND_SERVICE` added back after `drop: [ALL]` to bind port 53, and the `health`
+plugin is omitted because it defaults to wildcard `:8080` and would collide with qBittorrent's
+WebUI in the shared namespace.
+
+### The CoreDNS sidecar deliberately has no probe
+
+Do not add one. Every kind is unusable here, and getting this wrong does not degrade the pod
+— it **wedges it**:
+
+- `tcpSocket` and `httpGet` are dialled by kubelet from the **node**, at the **pod IP**. This
+  resolver binds `127.0.0.1` only, so neither can ever connect — the same constraint that
+  makes gluetun's probe an `exec`.
+- `exec` has nothing to run: the image ships only the `/coredns` binary, with no shell, no
+  `dig` and no `nslookup`.
+
+A `startupProbe` that can never pass is worse than no probe at all, because on a **native
+sidecar** the containers listed after it never start — the pod sits in `Init:` forever rather
+than coming up degraded.
+
+Nothing races on this. gluetun reaches its servers by IP and health-checks an IP, so it needs
+no resolver at all; qBittorrent, which does, starts only after gluetun's own probe passes, by
+which point CoreDNS has been listening for minutes.
 
 ## Leak containment
 

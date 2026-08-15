@@ -77,13 +77,22 @@ spec:
               add: [NET_BIND_SERVICE]
           volumeMounts:
             - { name: coredns-config, mountPath: /etc/coredns, readOnly: true }
-          # tcpSocket, not exec: the image ships only the /coredns binary - no
-          # shell, no dig, no nslookup - so there is nothing for an exec probe
-          # to run.
-          startupProbe:
-            tcpSocket: { port: 53 }
-            periodSeconds: 3
-            failureThreshold: 20
+          # NO PROBE ON PURPOSE, and it must stay that way unless something
+          # changes below. Every probe kind is unusable here:
+          #   - tcpSocket/httpGet are dialled by kubelet from the NODE, at the
+          #     pod IP. This resolver binds 127.0.0.1 only, so they can never
+          #     connect - the same reason gluetun's probe is an exec, one
+          #     container down.
+          #   - exec has nothing to run: the image ships only the /coredns
+          #     binary, no shell, no dig, no nslookup.
+          # A startupProbe that can never pass is worse than none at all: on a
+          # native sidecar it does not degrade the pod, it wedges it in Init
+          # forever, because the containers after it never start.
+          #
+          # Nothing actually races on this. gluetun reaches its servers by IP
+          # and health-checks an IP, so it needs no resolver; qBittorrent, which
+          # does, only starts once gluetun's own probe has passed - by which
+          # point CoreDNS has been listening for minutes.
           resources:
             requests: { cpu: 25m, memory: 32Mi }
             limits: { memory: 128Mi }
