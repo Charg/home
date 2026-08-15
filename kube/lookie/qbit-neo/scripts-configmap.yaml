@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qbit-neo-scripts
+  namespace: default
+data:
+  # Cold-start path. gluetun fires its port-changed hook ONCE, inline, when the
+  # mapping is first obtained - and with sidecar ordering that happens before
+  # this container exists, so the cold-start port cannot come from the hook.
+  # Read it from gluetun's status file instead and patch the git-seeded config
+  # before qBittorrent launches. port-up.sh below owns rotation only.
+  port-seed.sh: |
+    #!/bin/sh
+    set -u
+    PORT_FILE=/gluetun/forwarded_port
+    CONF=/config/qBittorrent/qBittorrent.conf
+
+    i=0
+    while [ ! -s "$PORT_FILE" ] && [ "$i" -lt 60 ]; do
+      sleep 1
+      i=$((i + 1))
+    done
+
+    if [ -s "$PORT_FILE" ]; then
+      PORT=$(tr -dc '0-9' < "$PORT_FILE")
+      if [ -n "$PORT" ]; then
+        # ^-anchored so this cannot also rewrite Session\SSL\Port.
+        if sed -i "s/^Session\\\\Port=.*/Session\\\\Port=${PORT}/" "$CONF"; then
+          echo "[port-seed] Session\\Port=${PORT}"
+        else
+          # sed -i writes a temp file alongside the target, so this is what a
+          # permissions or read-only-mount problem looks like. Worth saying out
+          # loud - the symptom otherwise is just an instance nobody can reach.
+          echo "[port-seed] FAILED to write ${CONF} - starting on the seeded placeholder" >&2
+        fi
+      fi
+    else
+      echo "[port-seed] no forwarded port after ${i}s - starting with the seeded placeholder" >&2
+    fi
+
+    # Not finding a port is deliberately NOT fatal: qBittorrent still starts,
+    # outbound-only. A hard failure here would turn a degraded instance into a
+    # down one.
+    #
+    # Reproduces the image's own entrypoint verbatim. catatonit is what reaps
+    # zombies as PID 1, and /entrypoint.sh handles the log symlink and stale
+    # lockfile - bypassing straight to qbittorrent-nox would lose both.
+    exec /usr/bin/catatonit -- /entrypoint.sh "$@"
+
+  # Rotation path. gluetun calls this inline on every port change and only logs
+  # failures - and it BLOCKS its own renewal loop while this runs. Proton's
+  # mapping expires in under a minute, so the total retry budget here has to
+  # stay well clear of that: 8 tries x 3s = ~24s. Do not raise the attempt
+  # count without cutting the sleep.
+  port-up.sh: |
+    #!/bin/sh
+    PORT="$1"
+    i=0
+    while [ "$i" -lt 8 ]; do
+      # Unauthenticated on purpose: WebUI\LocalHostAuth=false lets a loopback
+      # caller in without a session, and this is loopback within the pod's own
+      # network namespace.
+      if wget -q -O- --timeout=2 \
+          --post-data="json={\"listen_port\":${PORT}}" \
+          http://127.0.0.1:8080/api/v2/app/setPreferences >/dev/null 2>&1; then
+        echo "[port-up] listen_port=${PORT}"
+        exit 0
+      fi
+      i=$((i + 1))
+      sleep 3
+    done
+    echo "[port-up] FAILED to set listen_port=${PORT} after ${i} attempts" >&2
+    exit 1

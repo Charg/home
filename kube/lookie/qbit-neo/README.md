@@ -113,6 +113,42 @@ Nothing races on this. gluetun reaches its servers by IP and health-checks an IP
 no resolver at all; qBittorrent, which does, starts only after gluetun's own probe passes, by
 which point CoreDNS has been listening for minutes.
 
+## Port forwarding
+
+gluetun asks Proton for a forwarded port over NAT-PMP and qBittorrent has to be told what
+it got. Two paths do that, and both are needed — neither covers the other's case:
+
+- **Cold start** — `port-seed.sh` wraps qBittorrent's entrypoint, reads gluetun's
+  `/gluetun/forwarded_port` status file, and patches `Session\Port` in the config before
+  launching. gluetun fires its port-changed hook **once, when the mapping is first
+  obtained**, which with sidecar ordering is *before* this container exists — so the hook
+  cannot cover the cold start.
+- **Rotation** — `VPN_PORT_FORWARDING_UP_COMMAND` runs `port-up.sh`, which pushes the new
+  port to the WebUI API on `127.0.0.1:8080`. The config file is not touched here; the next
+  restart re-reads the status file anyway.
+
+Both scripts live in `scripts-configmap.yaml`, mounted at `/wrapper` with mode `0755`.
+
+Details worth keeping in mind before editing them:
+
+- `port-seed.sh` **`exec`s `/usr/bin/catatonit -- /entrypoint.sh`**, reproducing the image's
+  own entrypoint. Jumping straight to `qbittorrent-nox` would lose zombie reaping and the
+  entrypoint's log-symlink and stale-lockfile handling.
+- Failing to get a port is deliberately **not fatal** — qBittorrent still starts,
+  outbound-only. Turning a degraded instance into a down one is the worse outcome.
+- `port-up.sh`'s retry budget (8 × 3s ≈ 24s) is bounded on purpose: gluetun runs the hook
+  **inline and blocks its own renewal loop** while it runs, and Proton's mapping expires in
+  under a minute. Do not raise the attempt count without cutting the sleep.
+- The API call is **unauthenticated**, which works because `WebUI\LocalHostAuth=false` lets
+  a loopback caller in without a session, and every container here shares one network
+  namespace.
+- `gluetun-run` is an `emptyDir`, not a path on the PVC. The mapping is only valid for the
+  life of this tunnel, so persisting it would seed a stale port on the next start.
+- The seeded config carries **qBittorrent 5.x key names** (`[Meta] MigrationVersion=8`,
+  `[Network] PortForwardingEnabled`, `Session\UseRandomPort`) rather than the 4.x ones. With
+  the old names, 5.x runs its migration on every start — and that migration **overwrites
+  `Session\Port` from `Connection\PortRangeMin`**, discarding the port that was just seeded.
+
 ## Leak containment
 
 Two independent mechanisms, both required:
