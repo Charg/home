@@ -1,0 +1,142 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbit-neo
+  namespace: default
+  labels:
+    app.kubernetes.io/name: qbit-neo
+    app.kubernetes.io/instance: qbit-neo
+    app.kubernetes.io/version: 5.2.3
+spec:
+  replicas: 1
+  serviceName: qbit-neo
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbit-neo
+      app.kubernetes.io/instance: qbit-neo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbit-neo
+        app.kubernetes.io/instance: qbit-neo
+    spec:
+      # gluetun's wireguard needs this. It is the ONE unsafe sysctl lookie's
+      # kubelet allows (--kubelet-arg=allowed-unsafe-sysctls=
+      # net.ipv4.conf.all.src_valid_mark, set on the node, outside this repo).
+      # The pod is unschedulable without that node-level setting.
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+      # gluetun's own resolver for now. gluetun's default DNS_ADDRESS is
+      # 127.0.0.1 and it rewrites the pod-shared /etc/resolv.conf in place, so
+      # this value is what it writes anyway. A CoreDNS sidecar replaces this
+      # in a later change; until then no *.svc.cluster.local name resolves
+      # from in here, which is a coherent working state.
+      dnsPolicy: None
+      dnsConfig:
+        nameservers: ["127.0.0.1"]
+      terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: config-seed          # ordinary init container: runs to completion
+          image: docker.io/library/busybox:1.38@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
+          command: [sh, -c]
+          args:
+            - |
+              set -eu
+              # NOTE: the config lives at /config/qBittorrent/qBittorrent.conf.
+              # There is no config/ subdirectory in this image, unlike the
+              # linuxserver-family layout the legacy qbittorrent app uses.
+              mkdir -p /config/qBittorrent
+              cp -f /seed/qBittorrent.conf /config/qBittorrent/qBittorrent.conf
+          volumeMounts:
+            - { name: media, mountPath: /config, subPath: qbit-neo-config }
+            - { name: config-seed, mountPath: /seed, readOnly: true }
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { memory: 32Mi }
+        - name: gluetun              # NATIVE SIDECAR - restartPolicy makes it one
+          image: ghcr.io/qdm12/gluetun:v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
+          restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [NET_ADMIN]
+          env:
+            - { name: VPN_SERVICE_PROVIDER, value: protonvpn }
+            - { name: VPN_TYPE, value: wireguard }
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef: { name: qbit-neo-wireguard, key: privatekey }
+            # Proton issues 10.2.0.2/32 for this credential, which is already
+            # gluetun's protonvpn default - no WIREGUARD_ADDRESSES needed.
+            # Switzerland because the credential was provisioned against a
+            # P2P-capable CH server and verified to port-forward there.
+            - { name: SERVER_COUNTRIES, value: "Switzerland" }
+            # WebUI must be reachable from Traefik and other pods; gluetun's
+            # firewall DROPs inbound otherwise.
+            - { name: FIREWALL_INPUT_PORTS, value: "8080" }
+            - { name: FIREWALL_OUTBOUND_SUBNETS, value: "10.42.0.0/16,10.43.0.0/16,192.168.74.0/24" }
+            # Loopback-only: the control server exposes tunnel control with no
+            # auth, and it binds wildcard by default.
+            - { name: HTTP_CONTROL_SERVER_ADDRESS, value: "127.0.0.1:8000" }
+            # An IP, not a hostname. A name here would make the tunnel's health
+            # check wait on a resolver that is itself waiting on the tunnel.
+            - { name: HEALTH_TARGET_ADDRESS, value: "1.1.1.1:443" }
+            - { name: TZ, value: America/Los_Angeles }
+          # startupProbe, NOT readinessProbe: Kubernetes gates the next
+          # container on a sidecar having *started*, so a readinessProbe here
+          # would hold nothing back - and it would also feed pod readiness, so
+          # a tunnel blip would pull the Service endpoint out from under
+          # Traefik. exec, not httpGet: gluetun's health server binds
+          # 127.0.0.1:9999 and kubelet sends httpGet probes to the pod IP,
+          # which would never reach it.
+          startupProbe:
+            exec:
+              command: [/gluetun-entrypoint, healthcheck]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 36        # 3 minutes to first handshake
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 192Mi }
+      containers:
+        - name: qbittorrent
+          image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+          securityContext:
+            # The image defaults to uid 65534, but the shared plex-media tree
+            # (/data, /data/downloads, /config) is root-owned, so this has to
+            # be uid 0 to write to it. Root here is bounded: every capability
+            # is dropped and privilege escalation is off. Only gluetun holds
+            # NET_ADMIN, and nothing in this pod is privileged.
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - { name: TZ, value: America/Los_Angeles }
+            - { name: UMASK, value: "0" }
+          ports:
+            - { name: http, containerPort: 8080, protocol: TCP }
+          volumeMounts:
+            - { name: media, mountPath: /config, subPath: qbit-neo-config }
+            - { name: media, mountPath: /data }
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 200m, memory: 1Gi }
+            # No CPU limit on purpose: throttling this container wrecks
+            # throughput.
+            limits: { memory: 4Gi }
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: plex-media
+        - name: config-seed
+          secret:
+            secretName: qbit-neo-config-file
