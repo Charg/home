@@ -105,6 +105,17 @@ spec:
               drop: [ALL]
               add: [NET_ADMIN]
           env:
+            # The image defaults these to 1000, and gluetun chowns every file it
+            # writes to them. This container runs as root with all capabilities
+            # dropped, so it has no CAP_CHOWN and the chown fails - which is
+            # fatal to the port forwarding service, not cosmetic: it writes the
+            # port file, fails to chown it, and then deletes it again. Setting
+            # them to the uid this container already runs as makes the chown a
+            # no-op, which the kernel allows an owner to perform unprivileged.
+            # Root ownership is also what we want here - qBittorrent reads the
+            # file as uid 0.
+            - { name: PUID, value: "0" }
+            - { name: PGID, value: "0" }
             - { name: VPN_SERVICE_PROVIDER, value: protonvpn }
             - { name: VPN_TYPE, value: wireguard }
             - name: WIREGUARD_PRIVATE_KEY
@@ -172,6 +183,12 @@ spec:
             failureThreshold: 36        # 3 minutes to first handshake
           volumeMounts:
             - { name: gluetun-run, mountPath: /gluetun }
+            # gluetun creates this directory itself, without an owner-execute
+            # bit, and then cannot open the files it puts inside. Root would
+            # normally ignore that, but only via CAP_DAC_OVERRIDE, which is
+            # dropped here. Letting kubelet create the directory instead sizes
+            # the fix to the problem - no extra capability.
+            - { name: gluetun-tmp, mountPath: /tmp/gluetun }
             - { name: scripts, mountPath: /wrapper, readOnly: true }
           resources:
             requests: { cpu: 50m, memory: 64Mi }
@@ -229,6 +246,8 @@ spec:
         # not the PVC: the mapping is valid only for the life of this tunnel, so
         # persisting it across restarts would seed a stale port.
         - name: gluetun-run
+          emptyDir: {}
+        - name: gluetun-tmp
           emptyDir: {}
         - name: scripts
           configMap:

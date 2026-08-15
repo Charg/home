@@ -153,6 +153,21 @@ Details worth keeping in mind before editing them:
   namespace.
 - `gluetun-run` is an `emptyDir`, not a path on the PVC. The mapping is only valid for the
   life of this tunnel, so persisting it would seed a stale port on the next start.
+- **`PUID=0` / `PGID=0` are load-bearing.** gluetun chowns every file it writes to those
+  ids, which the image defaults to `1000`. This container runs as root with `drop: [ALL]`,
+  so it holds no `CAP_CHOWN` and the chown fails — and gluetun's response is to **delete the
+  port file it just wrote** and abort the port-forwarding service. Setting them to the uid
+  the container already runs as makes the chown a no-op, which an owner may perform
+  unprivileged. Root ownership is also correct here: qBittorrent reads the file as uid 0.
+- `/tmp/gluetun` is an `emptyDir` for a related reason. gluetun creates that directory
+  itself without an owner-execute bit and then cannot open the files inside it; root
+  normally shrugs that off, but only through `CAP_DAC_OVERRIDE`, which is dropped. Having
+  kubelet create the directory avoids granting the capability.
+
+Both of the above are the same underlying trap, and it is worth stating plainly: **this
+container is root but unprivileged.** Anything in gluetun that assumes root implies "may
+ignore file permissions" will fail here, and some of those failures are silent or, as with
+the port file, actively destructive.
 - The seeded config carries **qBittorrent 5.x key names** (`[Meta] MigrationVersion=8`,
   `[Network] PortForwardingEnabled`, `Session\UseRandomPort`) rather than the 4.x ones. With
   the old names, 5.x runs its migration on every start — and that migration **overwrites
