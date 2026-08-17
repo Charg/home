@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/name: qbittorrent
     app.kubernetes.io/version: 4.6.0-1-01
 spec:
-  replicas: 1
+  replicas: 0
   serviceName: ""
   podManagementPolicy: OrderedReady
   revisionHistoryLimit: 10
