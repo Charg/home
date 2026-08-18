@@ -51,5 +51,9 @@
       source = ./subagent-statusline.sh;
       executable = true;
     };
+    ".claude/output-styles" = {
+      source = ./output-styles;
+      recursive = true;
+    };
   };
 }
