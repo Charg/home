@@ -128,7 +128,8 @@ it got. Two paths do that, and both are needed — neither covers the other's ca
   port to the WebUI API on `127.0.0.1:8080`. The config file is not touched here; the next
   restart re-reads the status file anyway.
 
-Both scripts live in `scripts-configmap.yaml`, mounted at `/wrapper` with mode `0755`.
+Both live in `scripts-configmap.yaml` (alongside `share-limits.sh`), mounted at `/wrapper`
+with mode `0755`.
 
 Details worth keeping in mind before editing them:
 

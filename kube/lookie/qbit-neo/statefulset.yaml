@@ -232,6 +232,46 @@ spec:
             requests: { cpu: 200m, memory: 1Gi }
             # No CPU limit on purpose: throttling this container wrecks throughput.
             limits: { memory: 4Gi }
+        # Enforces the two share-limit policies qBittorrent cannot express
+        # itself - see share-limits.sh. An ordinary container, not a native
+        # sidecar: nothing starts after it, and it should not gate anything.
+        #
+        # Reuses the qBittorrent image rather than adding a fifth one to track.
+        # It already carries curl, jq and find, and gluetun DROPs outbound to
+        # everything but the LAN, so a slimmer base could not install them at
+        # runtime anyway. It talks to the WebUI over loopback in this pod's own
+        # network namespace, so it needs no credentials and no port.
+        - name: share-limits
+          image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+          securityContext:
+            # uid 0 for the same reason as qBittorrent, and specifically so the
+            # hardlink test can traverse the whole root-owned tree. A directory
+            # this container cannot read looks identical to "never imported",
+            # which after the grace period means deleting content - so a
+            # permissions gap here fails toward data loss, not toward safety.
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          command: [/bin/sh, /wrapper/share-limits.sh]
+          env:
+            - { name: TZ, value: America/Los_Angeles }
+            # Logs what it would do and changes nothing. Watch a full cycle of
+            # real downloads in the log before turning this off - the import
+            # test is inferred from hardlink counts, not read out of Scryer.
+            - { name: DRY_RUN, value: "true" }
+          volumeMounts:
+            # No subPath: the hardlink test has to see both /data/downloads and
+            # the library trees it links into, and a link count is only
+            # meaningful across the whole filesystem.
+            - { name: media, mountPath: /data }
+            - { name: scripts, mountPath: /wrapper, readOnly: true }
+          # No probe: this is a loop with nothing listening, and its being down
+          # must not affect pod readiness or pull the WebUI out of the Service.
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 128Mi }
       volumes:
         - name: media
           persistentVolumeClaim:

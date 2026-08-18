@@ -60,6 +60,119 @@ data:
     # lockfile - bypassing straight to qbittorrent-nox would lose both.
     exec /usr/bin/catatonit -- /entrypoint.sh "$@"
 
+  # Share-limit reaper. The split this implements - private seeds to a ratio,
+  # public goes away once it has been imported - cannot be expressed in
+  # qBittorrent's own settings at all: share limits are global or per-torrent,
+  # and the private/public distinction lives in the torrent's `private` flag,
+  # which is only visible through the API. So a loop sets per-torrent limits on
+  # the private ones and deletes the public ones.
+  #
+  # Runs on the same image as qBittorrent, which already carries jq, curl, find
+  # and stat - no fifth image to track, and nothing can be installed at runtime
+  # anyway because gluetun DROPs outbound.
+  share-limits.sh: |
+    #!/bin/sh
+    set -u
+
+    API=http://127.0.0.1:8080/api/v2
+    INTERVAL=${INTERVAL:-60}
+    PRIVATE_RATIO=${PRIVATE_RATIO:-2.0}
+    PRIVATE_SEED_MINUTES=${PRIVATE_SEED_MINUTES:-20160}  # 14d of ACTIVE seeding
+    ORPHAN_GRACE_HOURS=${ORPHAN_GRACE_HOURS:-168}        # 7d
+    DRY_RUN=${DRY_RUN:-true}
+
+    log() { echo "[reaper] $*"; }
+
+    # Unauthenticated on purpose, exactly as port-up.sh is:
+    # WebUI\LocalHostAuth=false admits a loopback caller with no session, and
+    # every container in this pod shares one network namespace.
+    post() { curl -sf --max-time 15 -X POST "$@"; }
+
+    # Scryer hardlinks into /data/TV on import, so a second link means the
+    # import happened. This is deliberately a ONE-WAY test: a link proves
+    # imported, but the absence of one does NOT prove otherwise - Scryer falls
+    # back to a copy when the destination already exists. That is why the
+    # no-link path waits out ORPHAN_GRACE_HOURS rather than deleting.
+    imported() {
+      [ -n "$(find "$1" -type f -links +1 2>/dev/null | head -n 1)" ]
+    }
+
+    delete_with_content() {
+      if [ "$DRY_RUN" = "true" ]; then
+        log "DRY_RUN would delete + content: $2"
+        return
+      fi
+      if post "$API/torrents/delete" -d "hashes=$1" -d "deleteFiles=true" >/dev/null; then
+        log "deleted + content: $2"
+      else
+        log "FAILED to delete: $2" >&2
+      fi
+    }
+
+    while :; do
+      if ! INFO=$(curl -sf --max-time 15 "$API/torrents/info"); then
+        log "WebUI unreachable, retrying in ${INTERVAL}s" >&2
+        sleep "$INTERVAL"
+        continue
+      fi
+      NOW=$(date +%s)
+
+      # --- private: give them limits of their own ---------------------------
+      # ratio_limit -2 is "inherit the global limit", so this fires once per
+      # torrent and never overrides a limit that was set by hand. It runs while
+      # the torrent is still downloading, long before any limit could bite.
+      echo "$INFO" |
+        jq -r '.[] | select(.private == true and .ratio_limit == -2) | [.hash, .name] | @tsv' |
+        while IFS="$(printf '\t')" read -r HASH NAME; do
+          [ -n "$HASH" ] || continue
+          if [ "$DRY_RUN" = "true" ]; then
+            log "DRY_RUN would set private limits (ratio ${PRIVATE_RATIO}): ${NAME}"
+            continue
+          fi
+          # inactiveSeedingTimeLimit=-1 (unlimited) is load-bearing: an idle
+          # private torrent is the normal case and must not be stopped for it,
+          # but the global inactive limit would do exactly that.
+          if post "$API/torrents/setShareLimits" \
+              -d "hashes=${HASH}" \
+              -d "ratioLimit=${PRIVATE_RATIO}" \
+              -d "seedingTimeLimit=${PRIVATE_SEED_MINUTES}" \
+              -d "inactiveSeedingTimeLimit=-1" >/dev/null; then
+            log "private limits set (ratio ${PRIVATE_RATIO}, ${PRIVATE_SEED_MINUTES}m): ${NAME}"
+          else
+            log "FAILED to set limits: ${NAME}" >&2
+          fi
+        done
+
+      # --- public: remove once imported -------------------------------------
+      # `private` is null until metadata arrives, so match == false rather than
+      # != true - nothing gets reaped on unknown provenance. Both loops skip
+      # nulls for the same reason, and pick the torrent up on a later pass.
+      #
+      # Name is read last so that spaces in it cannot shift the earlier fields;
+      # @tsv escapes tabs and newlines, so nothing else can either.
+      echo "$INFO" |
+        jq -r '.[] | select(.private == false and .progress == 1)
+                   | [.hash, .completion_on, .content_path, .name] | @tsv' |
+        while IFS="$(printf '\t')" read -r HASH DONE_AT CONTENT NAME; do
+          [ -n "$HASH" ] && [ -n "$CONTENT" ] || continue
+          if imported "$CONTENT"; then
+            delete_with_content "$HASH" "$NAME"
+            continue
+          fi
+          # Never imported. Deleting the torrent's content here does not touch
+          # the library: the library copy is a separate link (or, in the
+          # fallback case, a separate file) and survives either way.
+          [ "$DONE_AT" -gt 0 ] 2>/dev/null || continue
+          AGE_H=$(( (NOW - DONE_AT) / 3600 ))
+          if [ "$AGE_H" -ge "$ORPHAN_GRACE_HOURS" ]; then
+            log "never imported after ${AGE_H}h, reaping: ${NAME}"
+            delete_with_content "$HASH" "$NAME"
+          fi
+        done
+
+      sleep "$INTERVAL"
+    done
+
   # Rotation path. gluetun calls this inline on every port change and only logs
   # failures - and it BLOCKS its own renewal loop while this runs. Proton's
   # mapping expires in under a minute, so the total retry budget here has to
