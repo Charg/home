@@ -14,11 +14,13 @@
       autoCompactEnabled = true;
       effortLevel = "auto";
       model = "opusplan";
+      outputStyle = "terse";
       permissions.defaultMode = "auto";
       preferredNotifChannel = "ghostty";
       skipAutoPermissionPrompt = true;
       teammateMode = "in-process";
       tui = "fullscreen";
+      askUserQuestionTimeout = "never";
 
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
@@ -28,6 +30,11 @@
         # Compact at 100% of 300K tokens
         CLAUDE_CODE_AUTO_COMPACT_WINDOW = "300000";
         CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "100";
+
+        CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS = "10";
+        CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH = "1";
+        CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1";
+        CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1";
       };
 
       statusLine = {
