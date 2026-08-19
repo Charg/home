@@ -63,6 +63,9 @@ in
     LC_CTYPE = "en_US.UTF-8";
     PAGER = "less -FirSwX";
 
+    # Lets `nh darwin switch` / `nh home switch` run without a flake path argument
+    NH_FLAKE = "${config.home.homeDirectory}/code/home";
+
     # Needs to be set before antidote installs the magic-enter plugin
     MAGIC_ENTER_GIT_COMMAND = "git status -u";
   };
