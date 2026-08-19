@@ -170,15 +170,32 @@
       #
       # Nix
       #
-      nixg = "sudo nix-collect-garbage -d";
+      # nh reads the flake path from $NH_FLAKE. The local hostname does not
+      # match the flake attribute, so -H/-c must always be passed explicitly.
+      #
+      nixg = "nh clean all --keep 5 --keep-since 7d";
       nixrs =
         if isDarwin then
-          "sudo NIX_SSL_CERT_FILE=/etc/nix/macos-keychain.crt SSL_CERT_FILE=/etc/nix/macos-keychain.crt darwin-rebuild switch --flake ~/code/home#${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
+          "NIX_SSL_CERT_FILE=/etc/nix/macos-keychain.crt SSL_CERT_FILE=/etc/nix/macos-keychain.crt nh darwin switch -H ${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
         else
-          "sudo --preserve-env=SSH_AUTH_SOCK nixos-rebuild switch --flake ~/code/home#${currentSystemName} --option cores 6 --option max-jobs 6";
-      nixrt = "nixos-rebuild test --flake ~/code/home#${currentSystemName}";
-      nixhm = "home-manager switch --flake ~/code/home#${currentSystemUser}@${currentSystemName}";
+          "nh os switch -H ${currentSystemName} --cores 6 --max-jobs 6";
+      nixrt = "nh os test -H ${currentSystemName}";
+      nixhm = "nh home switch -c ${currentSystemUser}@${currentSystemName}";
       nixfc = "nix flake check ~/code/home";
+
+      # Build only, then print the package diff against the running system
+      nixrb =
+        if isDarwin then
+          "nh darwin build -H ${currentSystemName} --diff always"
+        else
+          "nh os build -H ${currentSystemName} --diff always";
+
+      # Update every flake input and show what it actually changes
+      nixup =
+        if isDarwin then
+          "nh darwin build -H ${currentSystemName} --update --diff always"
+        else
+          "nh os build -H ${currentSystemName} --update --diff always";
     };
 
     shellGlobalAliases = {
