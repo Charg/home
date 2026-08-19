@@ -23,6 +23,8 @@ spec:
           enabled: false
         worker:
           enabled: false
+        registerSchedules:
+          enabled: false
         web:
           enabled: true
           resources:

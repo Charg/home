@@ -23,6 +23,8 @@ spec:
           enabled: false
         web:
           enabled: false
+        registerSchedules:
+          enabled: true
         worker:
           enabled: true
           replicaCount: 2
