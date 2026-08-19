@@ -38,6 +38,17 @@ alloy:
           source_labels = ["__meta_kubernetes_pod_node_name"]
           target_label  = "node"
         }
+
+        // Set service_name explicitly. Loki only derives it when absent, and
+        // `container` is high in its lookup list.
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name",
+                           "__meta_kubernetes_pod_label_app_kubernetes_io_component"]
+          separator     = "-"
+          regex         = "(.+)-(.+)"
+          replacement   = "$1-$2"
+          target_label  = "service_name"
+        }
       }
 
       loki.source.kubernetes "pods" {
