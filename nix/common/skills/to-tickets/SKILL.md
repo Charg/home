@@ -58,7 +58,7 @@ Iterate until the user approves the breakdown.
 
 Publish the approved tickets. The tickets are the same either way, only the shape of the blocking edges changes:
 
-- **Local files** → write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below — one ticket per file, never a single combined file.
+- **Local files** → first allocate a unique feature key: `ls -d .scratch/*-[0-9][0-9][0-9][0-9][0-9] 2>/dev/null | sed 's/.*-//' | sort -n | tail -1` gives the highest existing serial (directories with no numeric suffix are legacy and don't count); use one more than that, or `00001` if there is none. Then write one file per ticket under `.scratch/<feature-slug>-<NNNNN>/issues/<NN>-<slug>.md`, tickets numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on (bare ticket numbers refer within this feature). Use the per-ticket file template below — one ticket per file, never a single combined file.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
