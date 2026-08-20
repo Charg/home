@@ -18,6 +18,7 @@
   pkgs.kube-prompt
   pkgs.lsof
   pkgs.minikube
+  pkgs.mermaid-cli # Renders mermaid diagrams to PNG/SVG (mmdc)
   pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
   pkgs.nixd # Nix LSP
