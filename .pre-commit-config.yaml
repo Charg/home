@@ -22,3 +22,16 @@ repos:
         entry: nixfmt
         language: system
         files: ^nix/.*\.nix$
+
+      - id: sops-encrypted
+        name: sops-encrypted (*.enc* must be ciphertext)
+        entry: scripts/check-sops-encrypted.sh
+        language: system
+        files: (\.enc$|\.enc\.(ya?ml|json)$)
+
+      - id: no-plaintext-k8s-secret
+        name: "no plaintext kind: Secret"
+        entry: scripts/check-plaintext-k8s-secret.sh
+        language: system
+        files: ^kube/.*\.ya?ml$
+        exclude: \.enc\.ya?ml$
