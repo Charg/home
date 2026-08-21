@@ -38,6 +38,7 @@ spec:
       random_page_cost: "1.1"
       effective_io_concurrency: "200"
       log_min_duration_statement: "250ms"
+      log_lock_waits: "on"
 
   resources:
     requests:
