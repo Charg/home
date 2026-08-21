@@ -30,12 +30,12 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.0.0
+            targetRevision: 41.3.0
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.0.0
+            targetRevision: 41.3.0
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
@@ -71,7 +71,7 @@ spec:
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
             chart: opentelemetry-collector
-            targetRevision: 0.153.0
+            targetRevision: 0.170.0
             namespace: monitoring
           - name: tempo
             repoURL: https://grafana.github.io/helm-charts
