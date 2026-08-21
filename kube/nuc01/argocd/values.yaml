@@ -9,15 +9,15 @@ configs:
     # The built-in check mirrors a child's own .status.health.status and
     # nothing else. Hook resources are excluded from Application health, so an
     # app whose only resource is a hook Job reports Healthy the instant it is
-    # applied — which is how accord's 0.15.0 rollout put web/worker (wave 2)
-    # into service ~20s after the migrate Job (wave 1) started, against a
-    # schema that was still missing the column they queried.
+    # applied. A wave-1 app that exists purely to run a hook to completion
+    # therefore satisfies the gate immediately, and wave 2 starts alongside it
+    # rather than after it.
     #
     # Treat an in-flight sync as not-yet-healthy so the wave gate waits for
     # hooks to finish. Caveat: right after a parent patches a child's spec the
     # child still carries its previous status, so a stale Healthy can still be
-    # read once; workloads should not rely on this alone (accord's chart also
-    # gates its pods on `manage.py migrate --check`).
+    # read once — a workload that must not start early should gate itself as
+    # well, not lean on wave ordering alone.
     resource.customizations.health.argoproj.io_Application: |
       hs = { status = "Progressing", message = "Waiting for Application" }
       if obj.status == nil then
