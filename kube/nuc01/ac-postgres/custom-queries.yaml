@@ -6,6 +6,8 @@ metadata:
 data:
   queries.yaml: |
     pg_stat_statements:
+      target_databases:
+        - ac
       query: |
         SELECT
           queryid::text AS queryid,
