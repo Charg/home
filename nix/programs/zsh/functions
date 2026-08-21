@@ -162,16 +162,21 @@ function awssh() {
     local username=""
     local ssh_key=""
     local aws_result=""
+    local verbose="false"
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
             -h|--help)
-                echo "Usage: awssh [-u username] [-i /path/to/key] <instance-id-or-name>"
+                echo "Usage: awssh [-v | --verbose] [-u username] [-i /path/to/key] <instance-id-or-name>"
                 return 0
                 ;;
             -u|--user)
                 username="$2"
                 shift 2
+                ;;
+            -v|--verbose)
+                verbose="true"
+                shift
                 ;;
             -i|--key)
                 ssh_key="$2"
@@ -179,7 +184,7 @@ function awssh() {
                 ;;
             -*)
                 echo "ERROR: Unknown option $1"
-                echo "Usage: awssh [-u username] [-i /path/to/key] <instance-id-or-name>"
+                echo "Usage: awssh [-v | --verbose] [-u username] [-i /path/to/key] <instance-id-or-name>"
                 return 1
                 ;;
             *)
@@ -202,24 +207,34 @@ function awssh() {
         return 1
     fi
 
+    [[ "${verbose}" == "true" ]] && echo "DEBUG: identifier=${identifier} username=${username:-<none>} ssh_key=${ssh_key:-<none>} AWS_PROFILE=${AWS_PROFILE:-<none>}"
+
     if [[ "${identifier}" =~ ^i- ]]; then
         echo "LOOKUP: Instance ID ${identifier}..."
+        local query='Reservations[].Instances[].[InstanceId, PrivateIpAddress]'
+        [[ "${verbose}" == "true" ]] && echo "DEBUG: aws ec2 describe-instances --instance-ids ${identifier} --filters Name=instance-state-name,Values=running --query '${query}' --output text"
         aws_result=$(aws ec2 describe-instances \
             --instance-ids "${identifier}" \
             --filters "Name=instance-state-name,Values=running" \
-            --query 'Reservations[].Instances[].[InstanceId, PrivateIpAddress]' \
+            --query "${query}" \
             --output text)
     else
         echo "LOOKUP: Name tag ${identifier}..."
+        local query='Reservations[].Instances[].[InstanceId, PrivateIpAddress]'
+        [[ "${verbose}" == "true" ]] && echo "DEBUG: aws ec2 describe-instances --filters Name=tag:Name,Values=${identifier} Name=instance-state-name,Values=running --query '${query}' --output text"
         aws_result=$(aws ec2 describe-instances \
             --filters "Name=tag:Name,Values=${identifier}" "Name=instance-state-name,Values=running" \
-            --query 'Reservations[].Instances[].[InstanceId, PrivateIpAddress]' \
+            --query "${query}" \
             --output text)
     fi
+
+    [[ "${verbose}" == "true" ]] && echo "DEBUG: aws_result=${aws_result:-<empty>}"
 
     local instance_count
     instance_count=$(echo "${aws_result}" | grep -c "^i-")
     local ssh_ip_addr=""
+
+    [[ "${verbose}" == "true" ]] && echo "DEBUG: instance_count=${instance_count}"
 
     if [[ ${instance_count} -gt 1 ]]; then
         if command -v fzf >/dev/null 2>&1; then
@@ -241,6 +256,8 @@ function awssh() {
         ssh_ip_addr=$(echo "${aws_result}" | awk '{print $2}')
     fi
 
+    [[ "${verbose}" == "true" ]] && echo "DEBUG: ssh_ip_addr=${ssh_ip_addr:-<none>}"
+
     if [[ -n "${ssh_ip_addr}" ]]; then
         local ssh_cmd=("ssh")
 
@@ -254,6 +271,8 @@ function awssh() {
         fi
 
         ssh_cmd+=("${target}")
+
+        [[ "${verbose}" == "true" ]] && echo "DEBUG: ssh_cmd=(${ssh_cmd[@]})"
 
         echo "CONNECTING: ${target}"
 
