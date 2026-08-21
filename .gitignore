@@ -11,3 +11,6 @@ nixos-wsl.tar.gz
 # OS trash
 .DS_Store
 .DS_Store?
+
+# Per-checkout agent instructions, deliberately not shared
+CLAUDE.local.md
