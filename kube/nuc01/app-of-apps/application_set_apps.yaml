@@ -15,12 +15,12 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 10.3.2
+            targetRevision: 10.4.0
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
-            targetRevision: 0.15.3
+            targetRevision: 0.16.1
             namespace: default
           - name: technitium-dnsserver
             repoURL: https://charts.obeone.cloud
@@ -46,27 +46,27 @@ spec:
           - name: cert-manager
             repoURL: https://charts.jetstack.io
             chart: cert-manager
-            targetRevision: v1.20.2
+            targetRevision: v1.21.1
             namespace: cert-manager
           - name: cloudnativepg
             repoURL: https://cloudnative-pg.github.io/charts
             chart: cloudnative-pg
-            targetRevision: 0.28.2
+            targetRevision: 0.29.0
             namespace: cnpg-system
           - name: redis-operator
             repoURL: https://ot-container-kit.github.io/helm-charts/
             chart: redis-operator
-            targetRevision: 0.24.0
+            targetRevision: 0.26.1
             namespace: ov
           - name: temporal
             repoURL: https://go.temporal.io/helm-charts
             chart: temporal
-            targetRevision: 1.2.0
+            targetRevision: 1.6.0
             namespace: temporal
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
-            targetRevision: 88.3.0
+            targetRevision: 88.5.3
             namespace: monitoring
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
@@ -86,7 +86,7 @@ spec:
           - name: alloy
             repoURL: https://grafana.github.io/helm-charts
             chart: alloy
-            targetRevision: 1.11.0
+            targetRevision: 1.11.1
             namespace: monitoring
   template:
     metadata:
