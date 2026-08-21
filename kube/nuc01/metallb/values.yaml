@@ -1,5 +1,11 @@
 # source: https://github.com/metallb/metallb/blob/main/charts/metallb/values.yaml
 
+# chart 0.16.0 flips the BGP backend default from speaker.frr to frr-k8s;
+# this cluster only uses L2 mode (see ../metallb-config), so pin frr-k8s off
+# to avoid deploying its Deployment/DaemonSet/webhook/CRD unrequested.
+frrk8s:
+  enabled: false
+
 controller:
   resources:
     requests:
