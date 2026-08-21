@@ -3,6 +3,39 @@
 global:
   domain: argo-nuc01.packet.fail
 configs:
+  cm:
+    # Child-Application health, used by app-of-apps sync waves.
+    #
+    # The built-in check mirrors a child's own .status.health.status and
+    # nothing else. Hook resources are excluded from Application health, so an
+    # app whose only resource is a hook Job reports Healthy the instant it is
+    # applied. A wave-1 app that exists purely to run a hook to completion
+    # therefore satisfies the gate immediately, and wave 2 starts alongside it
+    # rather than after it.
+    #
+    # Treat an in-flight sync as not-yet-healthy so the wave gate waits for
+    # hooks to finish. Caveat: right after a parent patches a child's spec the
+    # child still carries its previous status, so a stale Healthy can still be
+    # read once — a workload that must not start early should gate itself as
+    # well, not lean on wave ordering alone.
+    resource.customizations.health.argoproj.io_Application: |
+      hs = { status = "Progressing", message = "Waiting for Application" }
+      if obj.status == nil then
+        return hs
+      end
+      if obj.status.operationState ~= nil and (obj.status.operationState.phase == "Running" or obj.status.operationState.phase == "Terminating") then
+        hs.message = "Sync operation " .. obj.status.operationState.phase
+        return hs
+      end
+      if obj.status.sync ~= nil and obj.status.sync.status ~= "Synced" then
+        hs.message = "Application is " .. obj.status.sync.status
+        return hs
+      end
+      if obj.status.health ~= nil then
+        hs.status = obj.status.health.status
+        hs.message = obj.status.health.message or ""
+      end
+      return hs
   params:
     server.insecure: true
   repositories:
