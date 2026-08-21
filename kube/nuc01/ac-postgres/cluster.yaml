@@ -38,6 +38,12 @@ spec:
       random_page_cost: "1.1"
       effective_io_concurrency: "200"
       log_min_duration_statement: "250ms"
+      # log_min_duration_statement only fires when a statement *finishes*, so a
+      # statement wedged behind a lock logs nothing at all -- which is how a
+      # blocked ALTER TABLE stayed invisible for ten minutes during the accord
+      # 0.15.0 migration. This logs the wait itself (after deadlock_timeout,
+      # 1s) along with the session holding the lock. Reloadable: log_lock_waits
+      # is a superuser/SIGHUP setting, so no restart.
       log_lock_waits: "on"
 
   resources:
