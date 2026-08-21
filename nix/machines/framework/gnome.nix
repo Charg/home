@@ -9,13 +9,13 @@ in
   #
   services.udev.packages = [ pkgs.gnome-settings-daemon ];
   services.gnome = {
-      gcr-ssh-agent.enable = false;
+    gcr-ssh-agent.enable = false;
   };
 
   services.desktopManager.gnome.enable = true;
   services.displayManager.gdm = {
-      enable = true;
-      wayland = true;
+    enable = true;
+    wayland = true;
   };
 
   environment.gnome.excludePackages = with pkgs; [
