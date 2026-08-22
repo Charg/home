@@ -32,7 +32,6 @@ spec:
             chart: plex-media-server
             targetRevision: 1.6.0
             namespace: default
-            auto_sync: false
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
