@@ -48,6 +48,10 @@ spec:
             chart: cert-manager
             targetRevision: v1.21.1
             namespace: cert-manager
+          # NOTE: bumping this chart restarts postgres — the cnpg operator
+          # rolls managed Cluster instances (primary switchover + replica
+          # restarts) whenever its own version changes. Plan upgrades for a
+          # window where a brief postgres restart is acceptable.
           - name: cloudnativepg
             repoURL: https://cloudnative-pg.github.io/charts
             chart: cloudnative-pg
