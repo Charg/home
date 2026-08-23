@@ -525,6 +525,9 @@ in
     * fe80::/64
   '';
 
+  # The lid sensos is flakey atm. Ignore it until I can fix it.
+  services.logind.settings.Login.HandleLidSwitch = "ignore";
+
   security.sudo.wheelNeedsPassword = false;
   # Pipewire - allows to use the realtime scheduler for increased performance.
   security.rtkit.enable = true;
