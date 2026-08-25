@@ -19,3 +19,5 @@ Once done, use /code-review to review the work against `<base>...HEAD`.
 Commit your work to the current branch.
 
 Report the verdict in the final response.
+
+Utilize sonnet subagents when possible.
