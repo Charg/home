@@ -14,6 +14,11 @@ spec:
   destination:
     namespace: cloudflared
     server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: monitoring.coreos.com
+      kind: PodMonitor
+      jqPathExpressions:
+        - .spec.podMetricsEndpoints[].relabelings[].action
   syncPolicy:
     automated:
       prune: true
