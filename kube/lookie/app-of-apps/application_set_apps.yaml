@@ -22,11 +22,21 @@ spec:
             chart: home-assistant
             targetRevision: 0.3.74
             namespace: default
+            ignoreDifferences:
+              - group: apps
+                kind: StatefulSet
+                jqPathExpressions:
+                  - .spec.volumeClaimTemplates[].status
           - name: akri
             repoURL: https://project-akri.github.io/akri/
             chart: akri
             targetRevision: 0.13.8
             namespace: default
+            ignoreDifferences:
+              - group: apiextensions.k8s.io
+                kind: CustomResourceDefinition
+                jsonPointers:
+                  - /spec/names/categories
           - name: plex
             repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
             chart: plex-media-server
@@ -112,3 +122,7 @@ spec:
         syncOptions:
           - CreateNamespace={{ dig "createNamespace" "true" . }}
           - ServerSideApply={{ dig "serverSideApply" "true" . }}
+      {{- with dig "ignoreDifferences" (list) . }}
+      ignoreDifferences:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
