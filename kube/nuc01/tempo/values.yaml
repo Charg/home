@@ -12,7 +12,7 @@ tempo:
       memory: 384Mi
     limits:
       cpu: 300m
-      memory: 1.5Gi
+      memory: 2Gi
   retention: 48h
   overrides:
     defaults:
@@ -20,7 +20,9 @@ tempo:
         processors:
           - service-graphs
           - span-metrics
-          - local-blocks
+          # local-blocks disabled: its own block-flush cycle outpaced the
+          # compactor and drove unbounded disk/memory growth, crashlooping
+          # the pod on OOM.
   metricsGenerator:
     enabled: true
     remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
@@ -30,9 +32,6 @@ tempo:
         max_items: 10000
       span_metrics:
         enable_target_info: true
-      local_blocks:
-        flush_to_storage: true
-        filter_server_spans: false
 
 persistence:
   enabled: true
