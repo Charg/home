@@ -18,7 +18,7 @@ and renders one `Application` per PR:
 | Namespace | `accord-pr-<n>` (created on sync, deleted on prune) |
 | Chart | `helm/accord` from the accord repo at the PR's **head commit** |
 | Values | the chart's `values-preview.yaml`, plus `image.tag` and `preview.host` |
-| Image | `ghcr.io/charg/accord:pr-<n>-<head_short_sha>` |
+| Image | `ghcr.io/charg/accord:pr-<n>-<head_short_sha_7>` |
 
 The image tag is deliberately sha-suffixed rather than the moving `pr-<n>` tag:
 Argo diffs rendered manifests, not registry digests, so a tag whose *text* never

@@ -34,7 +34,7 @@ spec:
                         - values-preview.yaml
                     valuesObject:
                         image:
-                            tag: pr-{{ .number }}-{{ .head_short_sha }}
+                            tag: pr-{{ .number }}-{{ .head_short_sha_7 }}
                         imagePullSecrets:
                             - name: ghcr-pull-creds
                         preview:
@@ -94,7 +94,7 @@ sops:
             kHqqkKqM233dnzKB897+zCJe6mP5DGfuy1T8tcDgWxex6pRuFOv60iHh10XG0tuk
             Oo00Kqd+/rlIiGE=
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-08-21T00:26:00Z"
-    mac: ENC[AES256_GCM,data:OBfjU7VfQodMx0mjxgVoz9vjbyBkRrvP/rcgvGBqtOnyU0lWV0wIJ6a9cnz1EThTSlfGomUgfDzpfoVj8F/m5gKlICtFeB+y56SMrrIADjI0686igXbyC5taTd5CQPXtb2vtRCDBIJu32C+6nsaZO2MEZIMcuKLsSGOAZHVAsUE=,iv:dITayvKCnjxn156CoYfOSFCtKG+Ye1jNvEBbSkgmaIM=,tag:0iwXqcDa4I0xuuUmRt3jWQ==,type:str]
+    lastmodified: "2026-08-26T03:05:55Z"
+    mac: ENC[AES256_GCM,data:d7+1pLe9xcqC/hwW5l47PkHnm7ho0Fgpa+KT+r4WSVQLI2ygYblBwn/NtdLM+fhm+K2QvIhCM8uwseSRtAC2rc1hauitH6a3cJ4zBl8aBz8KbkVaNSczFJvttaM+6/0mHjL4+pGM5FOYOl0vbRp+cPIGQQRyY7RkUIACN1vXOwI=,iv:rNuuYiDIZWvM9DwwrSh03prJ3hGEfYunqhqITn68J00=,tag:UXpSxVp7X2O0qLajWDDCtA==,type:str]
     encrypted_regex: ^(data|stringData|dockerconfigjson)$
     version: 3.12.1
