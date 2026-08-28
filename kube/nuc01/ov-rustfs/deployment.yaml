@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ov-rustfs
+  namespace: ov
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ov-rustfs
+  template:
+    metadata:
+      labels:
+        app: ov-rustfs
+    spec:
+      containers:
+        - name: rustfs
+          # Pinned to a concrete tag rather than the floating `latest` the
+          # sibling store tracks: a floating tag moves the running version on
+          # any reschedule, with no diff to review and no way to tell after
+          # the fact which version a pod was serving. This is the tag
+          # `latest` currently resolves to, so pinning changes nothing about
+          # what runs today — only about when it changes.
+          image: rustfs/rustfs:1.0.0-beta.12
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: access-key
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: secret-key
+            - name: RUSTFS_OBS_ENDPOINT
+              value: "http://opentelemetry-collector.monitoring.svc.cluster.local:4317"
+            - name: RUSTFS_CONSOLE_ENABLE
+              value: "true"
+            - name: RUSTFS_CONSOLE_ADDRESS
+              value: ":9001"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 2
+              memory: 4Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rustfs-data

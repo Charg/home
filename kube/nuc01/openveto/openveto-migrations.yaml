@@ -1,0 +1,50 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openveto-migrations
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/charg/charts
+    chart: openveto
+    targetRevision: 0.3.0
+    helm:
+      valuesObject:
+        image:
+          tag: 0.3.0
+        imagePullSecrets:
+          - name: ghcr-pull-creds
+        existingSecret: openveto-env
+        web:
+          enabled: false
+        worker:
+          enabled: false
+        backfillWorker:
+          enabled: false
+        watermarkCheck:
+          enabled: false
+        migrations:
+          enabled: true
+          annotations:
+            argocd.argoproj.io/hook: Sync
+            argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  destination:
+    namespace: ov
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

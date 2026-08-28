@@ -1,0 +1,93 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ov-media-proxy-nginx-conf
+  namespace: ov
+data:
+  nginx.conf: |
+    worker_processes auto;
+    pid /tmp/nginx.pid;
+
+    events {
+      worker_connections 1024;
+    }
+
+    http {
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+
+      # All writable paths live under /tmp (emptyDir) since the container
+      # filesystem is otherwise read-only.
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path       /tmp/proxy_temp;
+      fastcgi_temp_path     /tmp/fastcgi_temp;
+      uwsgi_temp_path       /tmp/uwsgi_temp;
+      scgi_temp_path        /tmp/scgi_temp;
+
+      access_log /dev/stdout;
+      error_log  /dev/stderr warn;
+
+      sendfile          on;
+      tcp_nopush        on;
+      keepalive_timeout 65;
+
+      # Requests arrive from the ingress controller's pod, so $remote_addr is
+      # the same address for every caller — a rate limit keyed on it would be
+      # one shared bucket rather than a per-client one. Recover the real
+      # client from the forwarded chain first, trusting only pod addresses.
+      set_real_ip_from 10.42.0.0/16;
+      real_ip_header X-Forwarded-For;
+      real_ip_recursive on;
+
+      # Rate-limit the public media path.
+      limit_req_zone $binary_remote_addr zone=media_rl:10m rate=10r/s;
+
+      # Cache lives on the mounted PVC so it survives pod restarts.
+      proxy_cache_path /var/cache/nginx/media levels=1:2 keys_zone=media:10m
+                        max_size=5g inactive=7d use_temp_path=off;
+
+      server {
+        listen 8080;
+        server_name ov-media-nuc01.packet.fail;
+
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        # Only the image prefix is reachable.
+        location ^~ /media/legislators/ {
+          limit_except GET HEAD { deny all; }
+          limit_req zone=media_rl burst=60 nodelay;
+
+          # The public path can never perform an authenticated (privileged)
+          # operation, regardless of credential compromise.
+          proxy_set_header Authorization "";
+
+          # Callers emit /media/... with no bucket segment, so inject it.
+          #
+          # The bucket goes in via `rewrite` rather than in the proxy_pass URI
+          # itself: a variable anywhere in a proxy_pass URL switches nginx to
+          # resolving the upstream name per request, which then needs a
+          # `resolver` directive and fails with 502 without one. Keeping
+          # proxy_pass literal resolves the name once at startup instead —
+          # fine for a Service address, which is stable for its lifetime.
+          rewrite ^ /openveto-media$uri break;
+          proxy_pass http://ov-rustfs:9000;
+
+          proxy_cache media;
+          proxy_cache_valid 200 7d;
+          add_header X-Cache-Status $upstream_cache_status;
+        }
+
+        # Probe target. Kept separate from `location /` so a probe gets a 2xx
+        # while everything else outside the one exposed prefix still 404s.
+        location = /healthz {
+          access_log off;
+          return 200 "ok\n";
+        }
+
+        location / {
+          return 404;
+        }
+      }
+    }

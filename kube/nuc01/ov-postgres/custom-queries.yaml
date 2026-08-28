@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ov-postgres-custom-queries
+data:
+  queries.yaml: |
+    pg_stat_statements:
+      target_databases:
+        - openveto
+      query: |
+        SELECT
+          queryid::text AS queryid,
+          left(regexp_replace(query, '\s+', ' ', 'g'), 100) AS query,
+          calls,
+          total_exec_time / 1000.0 AS total_exec_seconds,
+          mean_exec_time / 1000.0 AS mean_exec_seconds,
+          rows
+        FROM pg_stat_statements
+        ORDER BY total_exec_time DESC
+        LIMIT 20
+      metrics:
+        - queryid:
+            usage: "LABEL"
+            description: "Query identifier"
+        - query:
+            usage: "LABEL"
+            description: "Truncated, whitespace-collapsed query text"
+        - calls:
+            usage: "COUNTER"
+            description: "Number of times the query has been executed"
+        - total_exec_seconds:
+            usage: "COUNTER"
+            description: "Total time spent executing the query, in seconds"
+        - mean_exec_seconds:
+            usage: "GAUGE"
+            description: "Mean time spent executing the query, in seconds"
+        - rows:
+            usage: "COUNTER"
+            description: "Total rows retrieved or affected by the query"

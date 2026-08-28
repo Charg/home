@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ov-media-proxy
+  namespace: ov
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: ov-media-nuc01.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: ov-media-nuc01.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ov-media-proxy
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - ov-media-nuc01.packet.fail
+      secretName: ov-media-nuc01-tls

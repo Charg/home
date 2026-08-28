@@ -10,3 +10,5 @@ spec:
   extensions:
   - name: vector
     ensure: present
+  - name: pg_stat_statements
+    ensure: present

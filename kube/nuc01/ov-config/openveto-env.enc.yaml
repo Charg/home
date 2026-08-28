@@ -1,0 +1,96 @@
+# Every environment variable the openveto workloads read, in one Opaque secret
+# the chart mounts wholesale via envFrom. Keys map one to one onto variable
+# names, and the SOPS rule for this tree encrypts only the stringData values —
+# so the key list stays reviewable in git while the values do not.
+#
+# DJANGO_ALLOWED_HOSTS must keep `localhost`: the probes address the pod by IP
+# with an explicit `Host: localhost` header, and Django does not allow it
+# implicitly once debug is off, so dropping it leaves every pod unready.
+#
+# DATABASE_URL targets the connection pooler rather than the cluster's
+# read-write service, so the workloads share a bounded pool of server
+# connections instead of opening one per process.
+#
+# The object store appears twice on purpose: the endpoint is the in-cluster
+# service the app writes through, while the custom domain is the read-only
+# proxy hostname it puts in generated URLs. They are different values.
+#
+# No Sentry DSN: alerting rides the log pipeline, so the DSN is optional and
+# omitted rather than set to an empty string.
+#
+# TODO: three values are placeholders (`REPLACE_ME`) pending the real upstream
+# credentials — SENDGRID_API_KEY, CONGRESS_API_KEY and OPENAI_API_KEY.
+apiVersion: v1
+kind: Secret
+metadata:
+    name: openveto-env
+    namespace: ov
+type: Opaque
+stringData:
+    DJANGO_SECRET_KEY: ENC[AES256_GCM,data:aoriDdAynBDGApC5bBiItR1ozCYUpx7y4PTUy5Vzx3d4kNgXo39nZ8hHkU2b/IyC4dK22U13gbWKl7RcG/IKNQ==,iv:SCaD4AC+QHJo+HJLNjakVbXiGeTcgXIOlQ56Dlzl1CM=,tag:FFTts3bIcso000pnhLNK7A==,type:str]
+    DJANGO_ADMIN_URL: ENC[AES256_GCM,data:w1zN1VlZyLEANepGA+Bp7eDhNbhB/OlGiw==,iv:0xsDpJNoViNJqfQ0xIheII/rn9hlv2sizMWti1i58+0=,tag:AFl5jCWM9rrth1MKCo934A==,type:str]
+    DJANGO_ALLOWED_HOSTS: ENC[AES256_GCM,data:IA5Uo3/NWzKd9y17HfDUzL6vYmREbMGSY76xzlYgGRW4f6+Y,iv:HECTr694EAvbg5gEkQwd1um8Bn5tN7iJUVARt2xMsas=,tag:mPwv6IZekSw7VSNoRwu2iw==,type:str]
+    DJANGO_CSRF_TRUSTED_ORIGINS: ENC[AES256_GCM,data:MfrMdmboO4QRHB5ZZghPGxLqNrsz8RqWt5RTUT26Eq0dvA==,iv:lXR2dBbOkagNDmI6b5xn8E2QKzza0FHjgRRcviW2y+k=,tag:dsNzwVKex+MHpi3aPuNDfg==,type:str]
+    DATABASE_URL: ENC[AES256_GCM,data:/tsrrpiz2MdsLotuWR26n6gLIfexH51V3jsP++KVZcy3aZkGZWkcJWzy9UhcWqOncLp6MBu/3wCkZWhu+wrgySDmDKMFOhE6El2inkWemnhWKNi93w==,iv:3gjrkJhV7t/OkR6yqypQljdoOKTkVnJoQdPvlWV+3PA=,tag:vPVC80cb0zGswsyqlAy1KA==,type:str]
+    REDIS_URL: ENC[AES256_GCM,data:Wb8qnpat2OWaHxAOvcarAai/qaeosRvwmrlNh+W6wuKT1eQhAIKFmlt6MEdR/BJlYlWHwXhXVv/JJvtmPOF7ka1iv0H2ymadjg==,iv:K+yKEcoFjhzPPmMNBblPC3Kir0ocTyyEMcLL4jX3jIM=,tag:b5BkTL8Gj+ymsuhE574Nhw==,type:str]
+    DJANGO_AWS_ACCESS_KEY_ID: ENC[AES256_GCM,data:QMtramFwNTaAb54VJM04HuFXxzE=,iv:YDjXAX3q6kO+iyBf8EXOPBzOVxj7iyFGHzvqoIGV694=,tag:Nb+zjF+HwBpjmfxPFd+2rA==,type:str]
+    DJANGO_AWS_SECRET_ACCESS_KEY: ENC[AES256_GCM,data:8DHW7hr/7nLDyewBtke3howJWnES6RsJIjGO99WC7M9EnMTJUNkkVQ==,iv:1AiWzqx/qzez0QHWRfRbToNKtJPOE5mRXIzRg9YUT8U=,tag:oiZkVe2iprWx+BVSrWu0XQ==,type:str]
+    DJANGO_AWS_STORAGE_BUCKET_NAME: ENC[AES256_GCM,data:BgBPyxKY2oQ5LbsG004=,iv:SolcszOuAYwnZ7x4RKLvd7c4SDtoJCPXXNAtVD854pw=,tag:P5dvTmIx2h7gGyympXJGpw==,type:str]
+    DJANGO_AWS_S3_REGION_NAME: ENC[AES256_GCM,data:Rbe2nTLedS9a,iv:da1zMN6WCCFHBviL/4ufEiwwMyRQd8tmUl/9U4lntzk=,tag:jR0rgUQMzQUxzPh0Svdg2A==,type:str]
+    DJANGO_AWS_S3_ENDPOINT_URL: ENC[AES256_GCM,data:e1wjaos0NHVjCDEjWAQxOrT5/YtgzJeL1KB/8FLqGf5bnrtCmZUJZVdA,iv:L1WL5HEURcGF4g/kAF+tNH1Mzja6ZKMdeJ7JvxyPAV4=,tag:DgWXeIQm0DLHhqQYCrPzMQ==,type:str]
+    DJANGO_AWS_S3_CUSTOM_DOMAIN: ENC[AES256_GCM,data:avYGBE+xGQIBGhPK0vaTFSESHN5lZsAGbms=,iv:JKe7aqCPiCnx2tyxBFYSVp5HDMj+nkrU5hw8YThfgxs=,tag:wM10rVPmk3gnxDW27cwCTw==,type:str]
+    SENDGRID_API_KEY: ENC[AES256_GCM,data:xAT2e33805v2jQ==,iv:4MKvrUlw1Bh61aDLYD9YDlWcDvSnbsccdRw/w76ksig=,tag:NJKqFt7nmOcjqu+cMCQSUg==,type:str]
+    CONGRESS_API_KEY: ENC[AES256_GCM,data:ckB/AEtmnSnTPQ==,iv:53tJl6YpSfzEgA9q22KTEusGiTm8FAgOA73DFXxxvWI=,tag:TC8a0SqC6czniH54IZ6zNQ==,type:str]
+    OPENAI_API_KEY: ENC[AES256_GCM,data:hOD+VqxVDotTkQ==,iv:vkXTXpODc6a4B1nY81P2NHrdSQFbIlBbpE73AeX5RIQ=,tag:qPcRSLD10vi8UclXzapoZA==,type:str]
+    TEMPORAL_HOST: ENC[AES256_GCM,data:IZMFrOuiCLB9EfMuyO+OYnWbO8R42DHTYQcUVja+3oNKkrxDSc7qUJSbaRQoVV/u5Q==,iv:kPnOMBcoJGtD75EZ/n6AHpqGoe8JzzWCSy4eqa3YY58=,tag:ekipp9umABuCM9JMvLjypw==,type:str]
+    TEMPORAL_NAMESPACE: ENC[AES256_GCM,data:TDg=,iv:+ND6P/XoIAdCM/hh2avx2xtNnhw0TUgeP+WZ2Aq4vyU=,tag:Sz7iRyUH6gseHO50gvMNZw==,type:str]
+    OTEL_EXPORTER_OTLP_ENDPOINT: ENC[AES256_GCM,data:OCi2bICWvUXjFYeDxdVcwL3VE6/PCc97FGU+KaTpDlsMhyN1KoN6Fvxqw/iCuxTjVvvBb4byP4BHu8XRzWuZbw==,iv:OGtyfhy6r82AbRVVCL0O4YMu0zGwl2F05ppKELVUAKk=,tag:e0BoPTlst03n/2nfxTNTBA==,type:str]
+    OTEL_EXPORTER_OTLP_PROTOCOL: ENC[AES256_GCM,data:3nC2Z3nuORPau2/KbA==,iv:br1Apw5FWoUUlf1GuH50sPn7bCGZ8IeK06yUIjjgdHo=,tag:9e8zk3BAEbSoBrMJmL/p6w==,type:str]
+    OTEL_RESOURCE_ATTRIBUTES: ENC[AES256_GCM,data:G2j9ia5/Mf50kuZXLx19hpKPFXb0xdFg1z3mbA==,iv:K/PF8DupFWTktUSe7kqU0LFLgT4N6SIo7vkZJrKp4Sw=,tag:Em/Wg1ZdZFs0zmWkcLahTQ==,type:str]
+    OTEL_TEMPORAL_METRICS_URL: ENC[AES256_GCM,data:BIy7xh0Jr5mGIXWDLOPhQGBbh9jOA8yJL3QZ1KsvIpZfCoKX0ctvHo4wvW5DIttghm7DRL2UuIuGd1lr2sEeHg==,iv:Y+kg0FvUD56OSmvf+wckCxyS1awPe9cEEtRC1pgVlSs=,tag:I7c/qJnrql4LbNuNJEsZ9w==,type:str]
+sops:
+    age:
+        - recipient: age1pq1m8fee0mfkh6fzw635qffd33y99fmjrr80k2r4zv7wkfguegp0lgv836ryfypgmdnjvxq243lvh7ftfx2wr6azz7t6mqhqsxdxse3hysqk3a63vlllpjha6j4rn729gnzhfjn2qy89dp0ce5k0wq5ed7fpn5msnkhegp8qeyelxxgxtlnea6cg7sd2jche7zcl2jsrnjfqgrwhj4xveyg7w4ffv4e3rrref5mg47n6gqxqfyxacft89dqp668vmvx6jnuxvne4na5haxs3z3zxlsqvxqqaksvjk3xlhegr4n6smd63t8l5e7x8t2pf68nq2l2z89cqk2c3h9277gj6mlvr94h9tfk5fzkktyqtjy66fuxvhj2xgqfydwsne5gn02e0rp80rd2nw4akwz3p7cuxkfhq2nuhlh9j6wqxandlcehrznnmeyun4wew83lezdu9fm484u50ql8vtpfdv8ckgmp3tyfk4gkvl9qc0dnglqj3jqvgjgjegqq6hlcdhj748mtayrcrjmgjevcfkzf2jnzzn6m4jkn26ev7ggcnqrj9nwvvngntp2ef6pj3w5ta0ufz5yetzhaskjztc2glxjtelr29nym5rdyg4yl8z33tsngxvgy5wm9kaa43xm2ax7xsu6mnqzvemxlw0n7nz4afuus87p9kvavxh8j0vvtsgjd2ejq5g38eny6j7u5p36unyw78v4m37azgln2ys3ltvnluzyg77cmlyzh7qypdqmx08zd7g43qz4lza69qa2qgwmajs85wwcc0uqc50c2tr7kxmsuryemqqew48qqvccx67u6csj0c8wrwj0a8e6q33svsq5jd0tf53t0k6rhfeah2kkpj68rwk0x4dwc8rrxl4p956u8t285cypwtqa7eqad77el926hqn05jdnjsxzdm3d2t9f3rg6ju73gp4xxgaf642atgxefhztzg9an9cj4pstk39jlkjplfz3m5rwt87skxjyrg48a8a9k497zfpjtpufejzfqjc9umpd6mrwrgjaxqqa243n3hq3vu7tyk663p5sepehdc99m7e3ulumrjt7psw7edgkdg6htjdntq4upzp9jf90s2pu74w7375m67cgenzj5ms3r4hlvjxe5tyzem69wmx26quuesdyzke9vnwgl2dpnwxv2t0m95tvswu4gnqnvdfejsjy68mhxr4c7ez5rhtr4cf5f8s25acvp0u0e328j8g8gs79607qnev08flf7c4as7ctepqd0z23gxjphhddtr90mpdn85ypvrxyklw3rqp5udp5zkc6n4vt3q72qcayhzvfj4299zajnsskz7t3u272evzn3s8ldcy54q4tmeg325z5h3glyz6g4fjkvduwvcldq2wccydej5umv8g8ks8r9st9xyeup36ys3jh9pw067k590tusp4qn8vq45kcak8xrztr9h9n8ms4msatzctcgkppgsj2xk4vkjrmgvgn2dr7syaugkfc44u5p6w4557q033nnuvtp03r9sfzxeuf4y8azwdgsu5zkkuj2evc5eu62cvtwsmte02pc47a7nhxqyuanctqk2rm5z5yy2xm0gx2zgl3uwmkznscuw0z8d9d6k8g4hh9xrgl293y0qx5ng3uz5uvpxv95hmzl9xf3uz4mn6c5w6a5c8538u6mz060rdh3pz3z565ze9n6e7l2tnyt8yzvyzdh8evxez2xfwv6skmsdjsl8gc0cynth82etff89vmc2f0ez5905rkgtzzenrx4zvnchspveffk0d2tj6fpg86h5qp0seh04p6uer7z0ljuj08tv0yr6fdmaezgwvtewreytgmmn7anm0sy4vm8t665rxuvl9q24pqmrxypuaas97cj0za9c8vtdknkcmu9aj8z8hr0v4m39rc8y9e946ncfrzngq37y5ux
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IG1sa2VtNzY4eDI1NTE5IEhYY2FybDJC
+            Mi9TTkVKMGhkUENqamxrZ1c0cWFPQTE3YkI2OUVhVWpjZHUvMUk5S1hkaHBzUE9z
+            dm9ONDl3UVBWcmEwcVNtRFZXNHRxQUZSWk1GQVNvMUtuRG1yRnErbG1xYTFqajVi
+            ZW1QL2U0MGk0R1NuK0pURmZ5enA5RTE0MTN4b2VGWUEzdFpSQmhJUWZnR3p1bVJp
+            dkFtL1hzY0FMNGQ2STlMSVFXWjVoYXBKVjBQRmVKRHRzc2J1dndvN1RLTGlPUS9Q
+            QURtNjRMazJ5R2RhSzh4S0hWVE5zNlJvR01mcXUrOXM0UzVQK0lRa1UzTjl2MXQ4
+            Qy9yM1BHYXI0TXdINUhWK2xsd2FxSW81UGczandrMHA2dXk2MU9Lai9xQWQwd3lx
+            enJCL0R2dnFLeFdsRlpVdmJHR3JYbmVWYzdsM2NKc0VHUSt2RWpXV3FxUTlEb2dy
+            Njh0WXdLZDROd0FYb1lMcEJWVWhQR0lmdUxFcEpybVY4cjhqc1V6SU1KWnZVNjJK
+            YmhCN0cvaVQ0VkJzWFBrZnV3NlozTGU0eU5xZ2J3dFBBTWpkSUs1YXorN0NkZWxQ
+            NUhuVXpjQnJ3V1NMRmFreXE4ckNtKyttWjBMRkFQRDErV21tU1dXWHBlZCtIeUht
+            SXJoN2xaKytqSGwxWDA4c1plTUpmbHorTnU2RnQzdTI2Q2dCNHZxcThQSjM0SUZn
+            cERPb0x5OE5KSnVFelkwNzhZQ1FkOVk1Qm5ieThDcWkvTG9IblZtUkdJd2h6NGZD
+            OERmS05JWGVKYXVqMVBTNGllcDVIWnlMUFBWbWVDL0tvbHZkSXo5eFpqWWsrNC9u
+            aVNjMWpVSk9MT203V3lENUtlYXhQaTNvenBueXBUaWtzZHRPTWllMXVUSVhtY3JL
+            NnU4Y2FFOW9zV1p4WlV1akVrcmY1WGNaV0ZneHl0TjNoandpQnd1cFBqZDEvdVFp
+            NE50UXJpeXkzK2l5eFh0Y0REK0JWRVg2MGFVbC9wYUhVTXJkcjVldmVjbW9XT3Zw
+            dTcrc0trMnIwU1N0TFhGcjFWZ2tvV2NHdkRxejQwbzh2WE11R0lmVThCY2xEODds
+            MXJKVEl0MTFGMGJiVDF0VldOdXRQUlJHWnFvOTVXVmY4d1JCeFY0SlJhcGdDYVVG
+            WDhYb2x4eXkzRTM1cnYxUVVhN2oreGVwV1lBaHh3OE5ka2F0Um9zZjJoQUhmdzVB
+            N1pDdTVHMFNQLzNoWDRqczFhUy9Lb3RjMXJ6T1kwa29LWEdxTzJYQ1JjVERHTVAv
+            RkZXbnFsNUx2bzFiR2Q0RDI4UWZyci85ZWxoZUhyd0JpMnVJMmFtSU9ydmhWTE5i
+            TUhXQUcrWmc0MUU3dkVDVzlDRHFQOENhYUZoUFI5T1JKOW5IQmlGYUtxZHNYVG5u
+            QldhbWV4NTZUWm1WTnZmWEdyT1lNV3lzRCs3Z3VrMnoya0FoYzZlbzVEY01pNzVC
+            dFc5cE5QT3Q1Z3pqaFh0MWtjL1lNTWN3NzlWbGFsbThkTkxFeHlpNXg3azdGOU9V
+            RHdOUUNsb25Cb1pPYTRaQXFvR2kvSUtrT1BQOER4RTNualkyV3FZdWpsa2V1dTBQ
+            WWJUUGlGU2NoVExqQnppRnNRL1E0eC9YWVR1bWlvclZvU2lYWXp3Y3RzSnF0Q3g5
+            cGtCT2tHVDB6cUxQT0VqVVBXZUx3b01oTDQzaTM2NFNNbitjREpscEdUZXE5RGZL
+            S2hJcW1vT0NCQ2M3VWJuenBQVFpvZTRwZ3NyQ0RpdWhBd1lDU2dnMmV1T0NNajRr
+            NlJyeU1hZ1A0Y0VRVkJZM0xldHZlZXhIYy9TYzlONnNBQ0ZhNERJZGNPUW5lQlA2
+            SWcrOENmWDVPMlhGLzJ4elR2U3duV1d5SC83MWtTMzFZY0JGU2ZHa1ZkZ1NqSGZz
+            NEJDVkdJRHNmS3RkOFhsaDhScnI5b3VwZmg0TUE2TmFtUTI4TTdQNEtqYVhUZwpp
+            TnR0c2Y5U1QrR3hVL1lSYk1nODltclI0OUt4YnhPVmcyNzBtSFQyZ2NFCi0tLSA1
+            dXhaaCtpeUtmci8rdllIVTNvakpId0x1RmxwS2t2Nm4yd0FMNEhWUGFRChbqzau+
+            ipEIt/ObJepK2nJm3q+MGhRKvh9rhUmzomKQ4V+BOascRECckit60QofmMLq5/XX
+            TRHP9f7krOuU01g=
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-08-28T07:03:28Z"
+    mac: ENC[AES256_GCM,data:OGX/QZknn0xUMbxryf4IZaC82B3OOzlXgrY4uiBxqq440PiFq2OaHKCz1USjmAZBW6Huctdl+U/ADoGdLjo1vm5mG1woiuTnOhwGBWSjo52qvZtyvBQXGZbzJOQHEBuMe9+KWiZ1ZkdIzJf4QEfbibA38wsvOtUucbC/ncs32FI=,iv:B/wD8ODXYSIZEkHBR9wE9PnnqGPu04Lb1ppNdRrndx8=,tag:DI7rTIxmpdrRGW1Z3QzcEQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.12.1
