@@ -1,0 +1,56 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ov-rustfs-create-buckets
+  namespace: ov
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 6
+  # The container below waits for the store in an unbounded loop, so without
+  # a deadline a store that never becomes reachable leaves this hook running
+  # forever and the sync merely pending rather than failed.
+  activeDeadlineSeconds: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: create-buckets
+          # Pinned for the same reason as the store image: a floating tag
+          # changes what runs with no diff to review.
+          image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+          env:
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: access-key
+            - name: RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-credentials
+                  key: secret-key
+            - name: MC_HOST_rustfs
+              value: "http://$(RUSTFS_ACCESS_KEY):$(RUSTFS_SECRET_KEY)@ov-rustfs.ov.svc.cluster.local:9000"
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              until mc ls rustfs >/dev/null 2>&1; do
+                echo "waiting for rustfs..."
+                sleep 2
+              done
+              mc mb --ignore-existing rustfs/openveto-media
+              # Grant anonymous read on the image prefix only, not the
+              # bucket. A bucket-wide public-read policy tends to also grant
+              # anonymous ListObjectsV2, which would let anyone enumerate
+              # every key in the bucket; scoping the grant to a single
+              # prefix avoids that.
+              #
+              # The prefix is the object-key prefix, which carries the
+              # uploader's own leading segment — it is not the same string as
+              # the public URL path the proxy exposes.
+              mc anonymous set download rustfs/openveto-media/media/legislators

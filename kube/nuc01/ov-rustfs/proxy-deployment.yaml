@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ov-media-proxy
+  namespace: ov
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ov-media-proxy
+  template:
+    metadata:
+      labels:
+        app: ov-media-proxy
+    spec:
+      # Runs as the nginx-unprivileged image's built-in non-root user, with
+      # a read-only root filesystem. Every path nginx needs to write to is
+      # an emptyDir or the cache PVC, mounted explicitly below.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.30.4-alpine3.24
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            # Masks the image's baked-in default.conf so entrypoint scripts
+            # that patch it have nothing to write, and so it can't be
+            # accidentally included alongside our server block.
+            - name: conf-d
+              mountPath: /etc/nginx/conf.d
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: ov-media-proxy-nginx-conf
+        - name: conf-d
+          emptyDir: {}
+        - name: cache
+          persistentVolumeClaim:
+            claimName: ov-media-proxy-cache
+        - name: tmp
+          emptyDir: {}

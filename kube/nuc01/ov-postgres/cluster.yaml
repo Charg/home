@@ -16,10 +16,34 @@ spec:
   storage:
     size: 100Gi
 
+  monitoring:
+    enablePodMonitor: true
+    customQueriesConfigMap:
+      - name: cnpg-default-monitoring
+        key: queries
+      - name: ov-postgres-custom-queries
+        key: queries.yaml
+
+  postgresql:
+    shared_preload_libraries:
+      - pg_stat_statements
+    parameters:
+      max_connections: "50"
+      max_parallel_workers: "2"
+      shared_buffers: "2GB"
+      effective_cache_size: "6GB"
+      work_mem: "16MB"
+      maintenance_work_mem: "512MB"
+      max_wal_size: "4GB"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      log_min_duration_statement: "250ms"
+      log_lock_waits: "on"
+
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 1000m
+      memory: 8Gi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 8Gi
