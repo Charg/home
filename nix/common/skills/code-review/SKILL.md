@@ -57,21 +57,32 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 ### 4. Spawn both sub-agents in parallel
 
+First pick a report directory for this run and create it: `.scratch/reviews/<branch-slug>/` if the repo already has a `.scratch/`, otherwise `/tmp/code-review-<branch-slug>/` (`<branch-slug>` is the current branch with `/` replaced by `-`). Each sub-agent writes its report to a file there **and** returns the same text.
+
+The file is the source of truth, because the returned text often isn't there when you go looking for it:
+
+- An auto-compact between spawn and aggregation drops the returned report, and the spawn result carrying the agent's ID with it - after which any ID you reconstruct is a guess that won't resolve.
+- Passing `name:` to the Agent tool registers a mailbox **teammate**, not a background task. `TaskOutput` then fails with `No task found with ID: <name>@session-<id>` even though the agent is alive and the ID is verbatim correct.
+
+So: spawn both agents in **one message** (concurrent), pass no `name:`, and don't poll. End the turn and let the completion notifications arrive - a `sleep` loop in Bash blocks the very turn boundary the results need in order to land. If a report still hasn't surfaced, read its file instead of hunting for the agent.
+
 **Standards sub-agent prompt** - include:
 
 - The full diff command and commit list.
 - The list of standards-source files you found in step 3, **plus the smell baseline from step 3** pasted in full - the sub-agent has no other access to it.
-- The brief: "Report - per file/hunk where relevant - (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls - documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
+- The brief: "Report - per file/hunk where relevant - (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls - documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words. Write the report to `<report-dir>/standards.md` **before** you finish, then return the same text as your final message."
 
 **Spec sub-agent prompt** - include:
 
 - The diff command and commit list.
 - The path or fetched contents of the spec.
-- The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
+- The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words. Write the report to `<report-dir>/spec.md` **before** you finish, then return the same text as your final message."
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
 ### 5. Aggregate
+
+Read `<report-dir>/standards.md` and `<report-dir>/spec.md`. Read them even if both agents returned their text - the files are cheap and they're what survives a compact. A missing file means that agent died before writing; say so in the report rather than presenting a half review as a whole one.
 
 Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings - the two axes are deliberately separate (see _Why two axes_).
 
