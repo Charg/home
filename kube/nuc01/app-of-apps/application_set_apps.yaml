@@ -92,6 +92,11 @@ spec:
             chart: alloy
             targetRevision: 1.11.1
             namespace: monitoring
+          - name: litellm
+            repoURL: ghcr.io/berriai
+            chart: litellm-helm
+            targetRevision: 1.1.2
+            namespace: litellm
   template:
     metadata:
       name: "{{ .name }}"

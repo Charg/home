@@ -1,0 +1,57 @@
+# source: https://github.com/BerriAI/litellm/tree/main/helm/litellm-helm
+
+db:
+  useExisting: true
+  deployStandalone: false
+  endpoint: litellm-postgres-rw.litellm.svc
+  database: litellm
+  secret:
+    name: postgres-credentials
+    usernameKey: username
+    passwordKey: password
+
+masterkeySecretName: litellm-masterkey
+masterkeySecretKey: masterkey
+
+# Single replica for now, so the bundled Redis (cross-pod rate-limit/cache
+# coordination) isn't needed yet - add it if/when we scale replicas.
+redis:
+  enabled: false
+
+environmentSecrets:
+  - litellm-provider-keys
+
+# api_key values are os.environ refs, not literals - this file is read from git
+# in the clear, the actual keys live in litellm-config/litellm-provider-keys.enc.yaml.
+proxy_config:
+  model_list:
+    - model_name: gpt-4o
+      litellm_params:
+        model: openai/gpt-4o
+        api_key: os.environ/OPENAI_API_KEY
+  general_settings:
+    master_key: os.environ/PROXY_MASTER_KEY
+
+ingress:
+  enabled: true
+  className: traefik-internal
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: litellm.packet.fail
+  hosts:
+    - host: litellm.packet.fail
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - litellm.packet.fail
+      secretName: litellm-nuc01-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
