@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+# *.enc(.yaml|.json) files are SOPS ciphertext by convention; the
+# `sops-encrypted` pre-commit hook (scripts/check-sops-encrypted.sh) already
+# asserts that via `sops filestatus`, so regex/entropy secret detection on
+# their contents is just noise.
+prefilter = '''
+filter.matchesAny(attributes["path"], [`\.enc$`, `\.enc\.(?:ya?ml|json)$`])
+'''
