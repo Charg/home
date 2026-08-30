@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: scryer
-          image: ghcr.io/scryer-media/scryer:0.18.12@sha256:94085d63c010ab4fb613dabc161a0f3c3f31d04c5d85330dc7797483fdb4fac8
+          image: ghcr.io/scryer-media/scryer:0.18.21@sha256:c0ab4debc394c2d6d6473881cdcbbfd9120788a4c5877dd8f9d002a0005905a6
           env:
             - name: SCRYER_BIND
               value: 0.0.0.0:8080
