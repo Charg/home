@@ -20,6 +20,7 @@ spec:
       labels:
         app.kubernetes.io/name: trawl
     spec:
+      automountServiceAccountToken: false
       # Native sidecar (restartPolicy: Always init container, GA since 1.29):
       # blocks the trawl container from starting until redis's readinessProbe
       # passes. Needed because Redis 8 bundles Bloom/Search/TimeSeries/ReJSON

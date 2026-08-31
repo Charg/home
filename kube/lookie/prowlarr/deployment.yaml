@@ -20,6 +20,7 @@ spec:
       labels:
         app.kubernetes.io/name: prowlarr
     spec:
+      automountServiceAccountToken: false
       # home-operations' image runs as a fixed uid/gid 1000, rootless - unlike
       # qbittorrent/scryer this app never touches the shared plex-media volume,
       # so there's no reason to run it as root. See README.md.

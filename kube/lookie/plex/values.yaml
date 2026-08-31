@@ -1,6 +1,8 @@
 image:
   tag: latest
   pullPolicy: Always
+serviceAccount:
+  automountServiceAccountToken: false
 ingress:
   enabled: true
   annotations:

@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/name: qbit-neo
         app.kubernetes.io/instance: qbit-neo
     spec:
+      automountServiceAccountToken: false
       # gluetun's wireguard needs this.
       # The pod is unschedulable without that node-level setting.
       securityContext:
