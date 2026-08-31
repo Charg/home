@@ -1,0 +1,77 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: scryer
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: scryer
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-internal
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qbit-neo
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prowlarr
+      ports:
+        - protocol: TCP
+          port: 9696
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: trawl
+      ports:
+        - protocol: TCP
+          port: 8191
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: plex-media-server
+      ports:
+        - protocol: TCP
+          port: 32400
+    # Allowing internet egress
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8 # RFC1918 - covers the pod and service networks too
+              - 172.16.0.0/12 # RFC1918
+              - 192.168.0.0/16 # RFC1918 - covers the LAN
+              - 169.254.0.0/16 # link-local, incl. cloud metadata
+      ports:
+        - protocol: TCP
+          port: 443
