@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: scryer
 spec:
-  replicas: 0
+  replicas: 1
   # SQLite on a RWO volume must never have two writers at once.
   strategy:
     type: Recreate
@@ -21,30 +21,27 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: scryer
           image: ghcr.io/scryer-media/scryer:0.19.4@sha256:e16af536abd122acdd172213b4ab8ff3bf873aac923f44cf8d6ffd54d8f5ab8e
           securityContext:
-            runAsUser: 0
-            runAsGroup: 0
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
-              add: [SETUID, SETGID]
           env:
             - name: SCRYER_BIND
               value: 0.0.0.0:8080
-            # Required: qBittorrent writes everything on the shared /data
-            # volume as root:root with UMASK=0. Scryer's image defaults to
-            # 1000:1000 and would not be able to import without this.
-            - name: PUID
-              value: "0"
-            - name: PGID
-              value: "0"
+            # UMASK: matches qbit-neo, so the two agree on what an imported file looks
+            # like on the shared tree.
             - name: UMASK
-              value: "0"
+              value: "002"
             - name: TZ
               value: America/Los_Angeles
             - name: SCRYER_ENCRYPTION_KEY
@@ -71,7 +68,6 @@ spec:
             # path mapping between the download client and the library.
             - name: plex-media
               mountPath: /data
-          # 0.18.11 OOMKilled in a crashloop under the previous 1Gi limit, bumping memory limits
           resources:
             requests:
               cpu: 100m

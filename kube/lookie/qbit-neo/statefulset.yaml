@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: qbit-neo
     app.kubernetes.io/version: 5.2.3
 spec:
-  replicas: 0
+  replicas: 1
   serviceName: qbit-neo
   selector:
     matchLabels:
@@ -22,12 +22,26 @@ spec:
         app.kubernetes.io/instance: qbit-neo
     spec:
       automountServiceAccountToken: false
-      # gluetun's wireguard needs this.
+      # gluetun's wireguard needs the sysctl.
       # The pod is unschedulable without that node-level setting.
+      #
+      # Deliberately NO pod-level runAsUser/runAsNonRoot: either would capture
+      # gluetun, which has to stay root - see its PUID/PGID comment below. The
+      # two containers that drop to 1000 declare it themselves.
+      #
+      # fsGroup reaches the gluetun emptyDirs as well as the PVC, giving them
+      # gid 1000 and g+rwxs. gluetun still writes them fine as root.
       securityContext:
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
             value: "1"
+        fsGroup: 1000
+        # The kubelet skips its recursive walk only when the volume root's gid
+        # already matches fsGroup AND its mode already carries the bits it
+        # would otherwise apply. plex-media's root is 2775 1000:1000, which
+        # passes both. Tidying that root back to 0755 would quietly reintroduce
+        # the walk on every mount.
+        fsGroupChangePolicy: OnRootMismatch
       # Points at the in-pod CoreDNS sidecar, which splits cluster names to
       # kube-dns and everything else to DoT over the tunnel. gluetun is
       # configured (DNS_KEEP_NAMESERVER=on) to leave this alone rather than
@@ -45,6 +59,19 @@ spec:
       initContainers:
         - name: config-seed          # ordinary init container: runs to completion
           image: docker.io/library/busybox:1.38@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
+          # Must match the uid qBittorrent runs as. This rewrites the config
+          # file on EVERY pod start, so left at root it would hand qBittorrent
+          # a root-owned file it can no longer write - re-breaking the volume's
+          # ownership on each restart, with no error at seed time.
+          #
+          # Note the kubelet creates a *missing* subPath directory as root:root
+          # 0755. If qbit-neo-config ever disappears from the volume, this
+          # container fails its mkdir/cp as uid 1000 and the pod wedges in
+          # Init: loud and data-safe, but a full outage whose cause is not
+          # obvious from the symptom.
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
           command: [sh, -c]
           args:
             - |
@@ -113,8 +140,14 @@ spec:
             # port file, fails to chown it, and then deletes it again. Setting
             # them to the uid this container already runs as makes the chown a
             # no-op, which the kernel allows an owner to perform unprivileged.
-            # Root ownership is also what we want here - qBittorrent reads the
-            # file as uid 0.
+            #
+            # So this container stays root while the other two dropped to 1000,
+            # and that is not an oversight: it holds NET_ADMIN to bring up
+            # WireGuard, and these two must keep naming the uid it already is.
+            # Point them at 1000 and the chown stops being a no-op, fails for
+            # want of CAP_CHOWN, and gluetun deletes the port file - breaking
+            # port forwarding silently. qBittorrent reads that file as uid 1000
+            # now, which works because it is world-readable.
             - { name: PUID, value: "0" }
             - { name: PGID, value: "0" }
             - { name: VPN_SERVICE_PROVIDER, value: protonvpn }
@@ -198,13 +231,19 @@ spec:
         - name: qbittorrent
           image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
           securityContext:
-            # The image defaults to uid 65534, but the shared plex-media tree
-            # is root-owned, so this has to be uid 0 to write to it.
-            # Root here is bounded: every capability
-            # is dropped and privilege escalation is off. Only gluetun holds
-            # NET_ADMIN, and nothing in this pod is privileged.
-            runAsUser: 0
-            runAsGroup: 0
+            # The image defaults to uid 65534. Pinned to 1000 to match the
+            # shared plex-media tree, which is owned 1000:1000 with directories
+            # 2775 - the same uid prowlarr, plex and scryer use.
+            #
+            # The uid has to match the tree's owner, not merely be able to
+            # write it: fs.protected_hardlinks is 1 on this node, so a non-root
+            # process may only link() a file it owns. A mismatch would not fail
+            # loudly - imports would be refused the hardlink and fall back to
+            # copying, silently consuming a volume sized on the assumption that
+            # a library file and its download share one inode.
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
@@ -214,7 +253,11 @@ spec:
           command: [/bin/sh, /wrapper/port-seed.sh]
           env:
             - { name: TZ, value: America/Los_Angeles }
-            - { name: UMASK, value: "0" }
+            # 002, not 0. UMASK=0 produced world-writable files so that apps
+            # running under different uids could interoperate on the shared
+            # tree; now that they all run as 1000, that buys nothing and only
+            # widens what a compromise of any one of them can rewrite.
+            - { name: UMASK, value: "002" }
           ports:
             - { name: http, containerPort: 8080, protocol: TCP }
           volumeMounts:
@@ -245,13 +288,17 @@ spec:
         - name: share-limits
           image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
           securityContext:
-            # uid 0 for the same reason as qBittorrent, and specifically so the
-            # hardlink test can traverse the whole root-owned tree. A directory
-            # this container cannot read looks identical to "never imported",
-            # which after the grace period means deleting content - so a
-            # permissions gap here fails toward data loss, not toward safety.
-            runAsUser: 0
-            runAsGroup: 0
+            # Same uid as qBittorrent, and specifically so the hardlink test can
+            # traverse the whole tree. A directory this container cannot read
+            # looks identical to "never imported", which after the grace period
+            # means deleting content - so a permissions gap here fails toward
+            # data loss, not toward safety. uid 1000 covers it: the tree is
+            # owned 1000:1000 with every directory 2775. The residual risk is
+            # handled in share-limits.sh, whose readable() guard turns an
+            # unreadable path into a skip rather than a delete.
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]

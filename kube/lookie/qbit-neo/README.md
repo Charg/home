@@ -194,10 +194,19 @@ Two independent mechanisms, both required:
 
 Both pods mount the same RWX `plex-media` PVC, so the separation is by path:
 
-`/data`, `/data/downloads` and `/config` on that volume are all owned by uid 0. That is why
-this pod pins `runAsUser: 0` even though the image would happily run as uid 65534: it
-cannot write to the shared tree otherwise. Root here is bounded — all capabilities dropped,
-`allowPrivilegeEscalation: false`, nothing privileged.
+`/data`, `/data/downloads` and `/config` on that volume are owned `1000:1000`, with
+directories `2775` and files `664`. That is why this pod pins `runAsUser: 1000` even though
+the image would happily run as uid 65534, and why `config-seed` is pinned to the same uid —
+it rewrites the config file on every start, so a root-owned seed would leave qBittorrent
+unable to write its own config.
+
+The uid has to *match* the tree's owner rather than merely be able to write it.
+`fs.protected_hardlinks` is `1` on this node, so a non-root process may only `link()` a file
+it owns — and Scryer's import step is a hardlink. A mismatch fails toward a silent copy, not
+an error.
+
+gluetun is the one container still running as root; see the `PUID`/`PGID` comment in
+`statefulset.yaml` for why that is deliberate and what breaks if it is "fixed".
 
 ## Config is git-authoritative
 
