@@ -31,6 +31,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
+              add: [SETUID, SETGID]
           env:
             - name: SCRYER_BIND
               value: 0.0.0.0:8080
