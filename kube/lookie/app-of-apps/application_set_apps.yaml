@@ -15,12 +15,12 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 10.4.0
+            targetRevision: 10.5.0
             namespace: argocd
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
             chart: home-assistant
-            targetRevision: 0.3.74
+            targetRevision: 0.3.78
             namespace: default
             ignoreDifferences:
               - group: apps
@@ -40,7 +40,7 @@ spec:
           - name: plex
             repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
             chart: plex-media-server
-            targetRevision: 1.6.0
+            targetRevision: 1.7.1
             namespace: default
             ignoreDifferences:
               - group: apps
@@ -60,12 +60,12 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.3.0
+            targetRevision: 41.4.0
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.3.0
+            targetRevision: 41.4.0
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
