@@ -253,11 +253,6 @@ spec:
           command: [/bin/sh, /wrapper/port-seed.sh]
           env:
             - { name: TZ, value: America/Los_Angeles }
-            # 002, not 0. UMASK=0 produced world-writable files so that apps
-            # running under different uids could interoperate on the shared
-            # tree; now that they all run as 1000, that buys nothing and only
-            # widens what a compromise of any one of them can rewrite.
-            - { name: UMASK, value: "002" }
           ports:
             - { name: http, containerPort: 8080, protocol: TCP }
           volumeMounts:

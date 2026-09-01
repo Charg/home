@@ -2,7 +2,7 @@
 
 [scryer-media/scryer](https://github.com/scryer-media/scryer) — a Sonarr/Radarr-style
 media manager. No upstream Helm chart exists, so this is a plain-manifest app (same
-pattern as `kube/lookie/qbittorrent/` and `kube/nuc01/cloudflared/`).
+pattern as `kube/lookie/qbit-neo/` and `kube/nuc01/cloudflared/`).
 
 Pre-1.0, roughly weekly releases. Image tag is pinned and digest-locked; bump
 deliberately, and back up `/config/scryer.db` **and** the encryption key secret before
@@ -28,14 +28,14 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
 1. **Set an admin password.** A fresh install creates an `admin` account with no
    password and form login disabled — nothing prompts for sign-in until this is done.
    Settings → Users → set a password (the literal value `admin` is rejected). Then add
-   `SCRYER_AUTH_ENABLED=true` to `deployment.yaml` and commit — see the comment in that
-   file.
+   `SCRYER_AUTH_ENABLED=true` to `deployment.yaml` and commit.
 2. **Download client** — install the `qbittorrent` plugin.
-   `base_url: http://qbittorrent.default.svc.cluster.local:8080`, credentials from the
-   qBittorrent WebUI. `routing_mode: category` (default), `post_import_action:
+   `base_url: http://qbit-neo.default.svc.cluster.local:8080`, credentials from the
+   qBittorrent WebUI (only in Scryer's encrypted database, not in git — read them from
+   the UI). `routing_mode: category` (default), `post_import_action:
    tag_imported` (default — keeps seeding; do not use `remove_with_data`). The
    `scryer:imported` tag resets on qBittorrent pod restarts since
-   `kube/lookie/qbittorrent/qbittorrent-config-file.enc.yaml` is git-authoritative and
+   `kube/lookie/qbit-neo/qbit-neo-config-file.enc.yaml` is git-authoritative and
    doesn't carry Scryer's tags — cosmetic only, qBittorrent re-registers tags from
    torrent resume data.
 3. **Media server** — install the `plex` notification plugin.
@@ -47,17 +47,15 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    Without this, Scryer's targeted library-section refresh can't resolve the path and
    won't trigger.
 4. **Libraries** — Movies root `/data/Movies`, Series root `/data/TV`. By design, Scryer
-   only manages new acquisitions here — the existing ~470 titles keep their release names
-   and are not bulk-imported or renamed.
+   only manages new acquisitions here — pre-existing titles keep their release names and
+   are not bulk-imported or renamed.
 5. **Indexers** — install the `torznab` plugin (and `nyaa` for anime — Prowlarr doesn't
-   cover that as cleanly) from the plugin catalog. As of `kube/lookie/prowlarr/`, add
-   trackers here as Prowlarr-backed Torznab feeds rather than direct-to-tracker: for each
-   indexer configured in Prowlarr, add a Scryer `torznab` entry pointing at
-   `http://prowlarr.default.svc.cluster.local:9696/<indexerid>/api`, API key from the
-   `prowlarr-api-key` secret (`<indexerid>` is Prowlarr's numeric ID for that indexer,
-   visible in its Torznab feed URL). Prowlarr owns the tracker definitions and login
-   flows now — see `kube/lookie/prowlarr/README.md` — which is what fixes trackers that
-   were returning HTML login/interstitial pages instead of caps XML.
+   cover that as cleanly) from the plugin catalog. Add trackers here as Prowlarr-backed
+   Torznab feeds: for each indexer configured in Prowlarr, add a Scryer `torznab` entry
+   pointing at `http://prowlarr.default.svc.cluster.local:9696/<indexerid>/api`, API key
+   from the `prowlarr-api-key` secret (`<indexerid>` is Prowlarr's numeric ID for that
+   indexer, visible in its Torznab feed URL). Prowlarr owns the tracker definitions and
+   login flows — see `kube/lookie/prowlarr/README.md`.
 6. **Proxy** — Settings → Indexers → **Indexer proxies** (Beta) → **Connect indexer
    proxy**:
    - **Provider**: `Trawl`.

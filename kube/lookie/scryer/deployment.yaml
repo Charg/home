@@ -38,8 +38,6 @@ spec:
           env:
             - name: SCRYER_BIND
               value: 0.0.0.0:8080
-            # UMASK: matches qbit-neo, so the two agree on what an imported file looks
-            # like on the shared tree.
             - name: UMASK
               value: "002"
             - name: TZ
