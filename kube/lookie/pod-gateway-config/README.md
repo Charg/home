@@ -260,6 +260,108 @@ with `externalTrafficPolicy: Local`.
 Get that CIDR list wrong and every routed pod goes `NotReady` about thirty
 seconds after it starts, which is a confusing way to discover a routing typo.
 
+## Observed failure behaviour
+
+All four measured against a real routed workload rather than reasoned about.
+
+### Gateway down: fails closed, no fallback
+
+With the gateway scaled to zero, a running routed pod's outbound requests **fail**.
+Sampling egress from inside the pod every ~3s across the whole outage, every
+single sample was either the tunnel's exit address or an outright failure -
+**never the house address**. There is nothing to fall back to: the default route
+is deleted at init and never restored.
+
+Recovery on the way back, same pod throughout, **no pod restart** and no restart
+of the app container:
+
+| interval | observed |
+|---|---|
+| gateway gone -> egress starts failing | ~2s |
+| gateway Ready -> egress restored | **~34s** |
+| total egress outage | **~51s** |
+
+That 34s is longer than `client_sidecar.sh`'s ten-second loop suggests, and
+`CONNECTION_RETRY_COUNT: 10` is why: each `ping -c 10` takes about nine seconds,
+there is a `sleep 10` between checks, and `client_init.sh` then does two more
+rounds of its own. The setting buys cold-boot tolerance at the cost of slower
+reconnect detection. That is the right trade here, but do not expect ten seconds.
+
+Egress also returns on a **different** exit address, because gluetun negotiates a
+fresh session on restart. Anything that pins an outbound address will notice.
+
+### The slow case, which is the one that looks broken
+
+A client pod **created while the gateway is down** is a different story from a
+running one. `gateway-init` fails, the pod sits in `Init`, and kubelet backs off -
+observed four restarts, with the pod only becoming functional about **57 seconds
+after the gateway itself went Ready**. With backoff stretching toward five
+minutes, a client can sit dead for several minutes *after* the gateway is healthy
+again.
+
+That is correct behaviour but slow, and it is why the gateway uses `Recreate` and
+why needless gateway restarts are worth avoiding. Someone watching a pod fail to
+recover for four minutes needs to find this written down rather than conclude it
+is broken.
+
+### Webhook down: rejected, and only for opted-in pods
+
+With no webhook endpoint, the routed app's replacement pod is **rejected** and the
+ReplicaSet logs it:
+
+```
+Warning FailedCreate replicaset/prowlarr Error creating: Internal error occurred:
+failed calling webhook "pod-gateway-routed.svc.cluster.local": ... no endpoints
+available for service "pod-gateway-webhook"
+```
+
+Fail closed - nothing starts unrouted. An ordinary **unlabelled** pod created in
+`default` at the same moment schedules and runs normally. That second half is the
+more important of the two: it is the proof that the blast radius does not reach
+the house's DNS server, cloudflared, metallb or the monitoring stack. Without
+`objectSelector` the namespace would be unschedulable.
+
+A `setGateway: "yes"` typo is rejected too, with the ParseBool error quoted
+earlier - loudly, rather than starting unrouted.
+
+### gluetun restarting in place: clients keep egress
+
+Restarting **only** the gluetun container - same pod, no init containers re-run -
+leaves routed clients with working egress afterwards, on a fresh exit address.
+This is the test the post-rules ConfigMap exists for. Without it the gateway
+would come back `Running` and healthy with `wg0` up and forward nothing.
+
+## Break-glass runbook
+
+Neither of these is a git operation, so **Argo will undo both** - and faster than
+the spec-level phrase "a re-sync undoes it" suggests. Measured on this cluster:
+`selfHeal` reverted a hand-edited ConfigMap within about 90 seconds and a
+hand-changed replica count within about 4 seconds. If you need a break-glass
+change to persist for more than a moment, disable `automated` on the owning
+Application first, and remember to put it back.
+
+| symptom | action |
+|---|---|
+| Opted-in pods being rejected at admission and you need them up now | Delete `mutatingwebhookconfiguration/pod-gateway-routed`. Admission is un-gated instantly. Pods then start **unrouted**, so the backstop policy is the only thing still holding them closed. |
+| A labelled pod has no egress and you need it restored now | Delete `networkpolicy/pod-gateway-routed` in `default` **and** the app's own policy, e.g. `networkpolicy/prowlarr`. Policies are additive, so removing only the backstop leaves the app's own Egress policy - which has no internet rule - still denying everything. |
+| Clients lost egress but the gateway pod is `Running` and `wg0` is up | Delete the gateway pod. This is the post-rules failure mode; check the gluetun log at `LOG_LEVEL=debug` for whether the `-t nat` instruction was rejected. |
+
+Whoever uses one of these must also fix the underlying cause, because the next
+reconcile takes the workaround away.
+
+## Boot ordering is expected to be noisy
+
+There is no HA and no ordering primitive here. On a cold node boot everything
+starts at once and clients crashloop against a gateway that is still mid-handshake
+- which is what `CONNECTION_RETRY_COUNT` is tuned for. The webhook independently
+resolves the gateway's name at startup and crashloops until the headless Service
+has an endpoint.
+
+It converges on its own. Expect a few minutes of churn after a reboot and do not
+chase it. `system-cluster-critical` is not available (Priority admission restricts
+it to `kube-system`), and on a single node priority affects preemption rather than
+start order, so it would not help anyway.
+
 ## Out-of-repo preconditions
 
 Two things this gateway needs that are not expressed in this repo:
