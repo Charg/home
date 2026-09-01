@@ -1,0 +1,82 @@
+---
+# Hand-maintained replacement for the chart's
+# templates/webhook-admissionregistration.yaml. The chart's own
+# MutatingWebhookConfiguration (named "pod-gateway") is left in place but
+# deliberately inert - its namespaceSelector in kube/lookie/pod-gateway/values.yaml
+# matches a label that exists nowhere.
+#
+# Why a copy exists at all: the chart renders only a namespaceSelector and omits
+# failurePolicy entirely, so the API server defaults it to Fail. That leaves two
+# options and both are bad.
+#
+#   - Namespace-scoped with Fail. Every pod CREATE in `default` becomes gated on
+#     this webhook being up with a valid serving certificate. That namespace
+#     holds the DNS server the house resolves through, metallb-speaker,
+#     cloudflared, the kube-prometheus stack, akri, plex and home-assistant. A
+#     chart upgrade, a certificate renewal failure, an image pull problem or
+#     unlucky boot ordering and nothing schedules in `default` at all.
+#   - failurePolicy: Ignore. The client pod is admitted unmutated. It keeps its
+#     normal default route and normal ClusterFirst DNS and leaks silently while
+#     looking perfectly healthy. That is the exact failure this design exists to
+#     prevent.
+#
+# admissionregistration.k8s.io/v1 supports objectSelector, which narrows
+# interception to pods that carry the opt-in label. The chart simply does not
+# template it.
+#
+# THE COST: a major chart bump needs a manual diff of the upstream template
+# rather than a Renovate merge. The template is short and has been stable across
+# the 7.x line, but it is no longer tracked automatically.
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: pod-gateway-routed
+  annotations:
+    # cainjector fills clientConfig.caBundle below from this Certificate's
+    # secret. Both Argo Applications that touch a MutatingWebhookConfiguration
+    # carry an ignoreDifferences for that field - without it selfHeal fights
+    # cainjector indefinitely and the app never reports Synced.
+    cert-manager.io/inject-ca-from: pod-gateway/pod-gateway-webhook-tls
+webhooks:
+  - name: pod-gateway-routed.svc.cluster.local
+    # Fail is the SAFE choice here, and only because objectSelector has already
+    # narrowed the scope to pods that asked to be routed. Webhook down means
+    # opted-in pods are rejected: fail closed, nothing starts unrouted. Every
+    # other pod in `default` never reaches this webhook and is unaffected.
+    failurePolicy: Fail
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: default
+    # Exists rather than an exact "true" match on purpose. The mutator runs the
+    # label value through strconv.ParseBool, so "yes", "on" or a trailing space
+    # make it return an error - which under failurePolicy: Fail rejects the pod
+    # outright. Matching Exists routes those typos here to be rejected loudly.
+    # Matching only "true" would let them through unmutated AND unfenced, since
+    # networkpolicy-routed.yaml selects the same exact value.
+    #
+    # The annotation of the same name is evaluated AFTER the label and overrides
+    # it. Do not use both.
+    objectSelector:
+      matchExpressions:
+        - key: setGateway
+          operator: Exists
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    clientConfig:
+      service:
+        namespace: pod-gateway
+        name: pod-gateway-webhook
+        path: /wh/mutating/setgateway
+        port: 8080
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    # Short on purpose: the mutator calls net.LookupIP on the gateway's name on
+    # EVERY admission, not just at startup. If the gateway pod is gone the
+    # headless Service returns NXDOMAIN, the mutator errors, and the pod is
+    # rejected - you cannot start a client while the gateway is down. Correct,
+    # but worth knowing before it surprises someone at 2am.
+    timeoutSeconds: 5

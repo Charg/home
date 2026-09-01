@@ -8,8 +8,17 @@ data:
   Corefile: |
     # In-pod split-horizon resolver for the gateway. Cluster names -> kube-dns;
     # everything else -> DoT over the tunnel. Binds loopback only: every
-    # container in the pod shares one network namespace, so 127.0.0.1 is
-    # reachable from dnsmasq, and nothing outside the pod can query this.
+    # container in the pod shares one network namespace, so this is reachable
+    # from dnsmasq, and nothing outside the pod can query it.
+    #
+    # 127.0.0.2, NOT 127.0.0.1. gateway_sidecar.sh runs dnsmasq with
+    # `interface=vxlan0 bind-interfaces`, which sounds like it binds only
+    # 172.16.0.1 - but dnsmasq always includes the loopback interface, so it
+    # takes 127.0.0.1:53 as well and this container loses the race with
+    # "failed to create listening socket for 127.0.0.1: Address in use".
+    # Keeping the two on separate loopback addresses also keeps dnsmasq from
+    # discarding its own upstream: it ignores any nameserver that resolves to an
+    # address it is itself listening on, to break forwarding loops.
     #
     # This is what makes routed clients' external lookups leave over the VPN.
     # The pod's dnsConfig points at 127.0.0.1, gateway_sidecar.sh copies that
@@ -30,7 +39,7 @@ data:
     (common) {
         errors
         cache 30
-        bind 127.0.0.1
+        bind 127.0.0.2
     }
 
     cluster.local:53 {

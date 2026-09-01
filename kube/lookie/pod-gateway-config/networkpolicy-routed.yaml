@@ -1,0 +1,58 @@
+---
+# Backstop for every routed pod in `default`. It selects on the SAME label that
+# opts a pod in - the label that routes you also fences you.
+#
+# The webhook plus objectSelector plus failurePolicy: Fail already stops an
+# opted-in pod starting unmutated. This covers what admission cannot: someone
+# deleting the MutatingWebhookConfiguration, webhook.gatewayDefault getting
+# flipped, or a hand-run pod carrying the label. In any of those cases the pod
+# keeps its normal default route but has no permission to use it, so it fails
+# closed instead of leaking.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pod-gateway-routed
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      setGateway: "true"
+  # Egress only, deliberately. Adding Ingress here would flip prowlarr and
+  # trawl - which have no ingress policy of their own - to default-deny inbound
+  # the moment they are labelled, breaking Traefik in a way that has nothing to
+  # do with egress. Ingress stays in each app's own policy file.
+  policyTypes:
+    - Egress
+  egress:
+    # To the gateway, with NO ports: restriction. It has to carry ICMP as well
+    # as the VXLAN: client_init.sh pings the gateway pod IP before building the
+    # tunnel and client_sidecar.sh pings the VXLAN address every ten seconds,
+    # and NetworkPolicy cannot express ICMP any other way.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: pod-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main
+    # client_init.sh resolves the gateway by name BEFORE the tunnel exists.
+    # Without this the injected init container fails at that dig and the pod
+    # never starts.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Note what is NOT here: any internet destination at all. All of that
+    # traffic is inside the VXLAN, so kube-router only ever sees the outer UDP
+    # packet to the gateway. That is precisely why default-deny works here
+    # without an allowlist - and why destination allowlists on a routed pod are
+    # decorative.
