@@ -1,0 +1,94 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: trawl
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: trawl
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # trawl.packet.fail, for driving a solve by hand.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-internal
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8191
+    # The two callers of the FlareSolverr-compatible POST /v1 endpoint. Both
+    # flows are pod-to-pod, so they are inside NOT_ROUTED_TO_GATEWAY_CIDRS and
+    # travel the normal path - ordinary podSelector rules still apply to them.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: scryer
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prowlarr
+      ports:
+        - protocol: TCP
+          port: 8191
+    # THE GATEWAY INGRESS RULE, and it is not optional. VXLAN return traffic is a
+    # separate conntrack flow, not a reply: the client sends
+    # (clientIP:hash -> gatewayIP:4789) and the gateway sends
+    # (gatewayIP:hash -> clientIP:4789). Different five-tuples, so a
+    # RELATED,ESTABLISHED accept does not cover it.
+    #
+    # Omit this and the injected init container PASSES its ICMP ping to the
+    # gateway - that has a real reply - and then hangs on udhcpc. The symptom
+    # points at DHCP; the cause is here. No ports: restriction, because it has to
+    # carry ICMP as well as the VXLAN.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: pod-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main
+  egress:
+    # client_init.sh resolves the gateway by name before the tunnel exists. Once
+    # routed, Trawl's own lookups go to the gateway's CoreDNS over the VXLAN
+    # instead, so this rule only covers the pre-tunnel window and any in-cluster
+    # name Trawl resolves before the default route is replaced.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Egress to the gateway itself. Duplicated from
+    # kube/lookie/pod-gateway-config/networkpolicy-routed.yaml on purpose:
+    # NetworkPolicies are additive, and once this pod has an Egress policy of its
+    # own, deleting the backstop no longer restores anything here.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: pod-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main
+    # No internet destinations, deliberately - and for Trawl that is the whole
+    # point. A scraping engine's destination set is every site it is ever asked
+    # to fetch, which is not something an allowlist can express. Everything it
+    # reaches outside the cluster now travels inside the VXLAN, so kube-router
+    # only ever sees the outer UDP packet to the gateway; the gateway's own
+    # firewall is the real control.
+    #
+    # Redis needs no rule: it is a container in this same pod, reached over
+    # loopback, which NetworkPolicy does not see.

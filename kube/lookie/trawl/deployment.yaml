@@ -12,6 +12,8 @@ spec:
   # availability benefit on a single-node cluster - recreate instead of roll.
   strategy:
     type: Recreate
+  # NOT the place for setGateway - a Deployment's selector is immutable, and a
+  # routing flag has no business being part of this workload's identity.
   selector:
     matchLabels:
       app.kubernetes.io/name: trawl
@@ -19,15 +21,32 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: trawl
+        # Routes all non-cluster egress through the WireGuard gateway, so
+        # tracker pages load from the tunnel's exit rather than the house
+        # connection. See kube/lookie/pod-gateway-config/README.md, and this
+        # directory's README for the ordering trap it introduces here.
+        setGateway: "true"
     spec:
       automountServiceAccountToken: false
-      # Native sidecar (restartPolicy: Always init container, GA since 1.29):
-      # blocks the trawl container from starting until redis's readinessProbe
-      # passes. Needed because Redis 8 bundles Bloom/Search/TimeSeries/ReJSON
+      # Native sidecar (restartPolicy: Always init container, GA since 1.29).
+      #
+      # The gate is the startupProbe, NOT a readinessProbe. Kubelet moves on to
+      # the next container once a restartable init container has *started* and,
+      # if a startupProbe is defined, once that probe succeeds - readiness does
+      # not participate. Verified directly: a sidecar whose readinessProbe can
+      # never pass still lets the next container start and log, while the same
+      # sidecar with a startupProbe that can never pass leaves the pod in
+      # PodInitializing. kube/lookie/qbit-neo/README.md records the same finding.
+      #
+      # The gate matters because Redis 8 bundles Bloom/Search/TimeSeries/ReJSON
       # modules that take ~1.5-2s to load before it accepts connections - long
       # enough to blow past trawl's 1000ms startup Redis-connect timeout when
       # both containers start in parallel, permanently disabling Tier 2 cache
       # for the pod's lifetime (trawl doesn't retry after the initial check).
+      #
+      # No readinessProbe here on purpose: on a native sidecar it feeds POD
+      # readiness, so a redis blip would pull trawl's endpoint out from under
+      # Traefik for a cache tier that is only a performance concern.
       initContainers:
         - name: redis
           image: redis:8.8.1-alpine@sha256:8096655e437712b07503796fb64d81359256cfcff0ab29d95a7da72863786efb
@@ -51,11 +70,14 @@ spec:
             limits:
               cpu: 200m
               memory: 256Mi
-          readinessProbe:
+          startupProbe:
             exec:
               command: ["redis-cli", "-h", "localhost", "ping"]
             initialDelaySeconds: 1
             periodSeconds: 2
+            # 10 x 2s past the 1s delay - generous against the module load, and
+            # a failure here holds the pod in PodInitializing rather than
+            # starting trawl against a Redis that isn't listening yet.
             failureThreshold: 10
       containers:
         - name: trawl
