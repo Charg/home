@@ -42,6 +42,7 @@ spec:
             chart: plex-media-server
             targetRevision: 1.7.1
             namespace: default
+            respectIgnoreDifferences: true
             ignoreDifferences:
               - group: apps
                 kind: StatefulSet
@@ -127,6 +128,7 @@ spec:
         syncOptions:
           - CreateNamespace={{ dig "createNamespace" "true" . }}
           - ServerSideApply={{ dig "serverSideApply" "true" . }}
+          - RespectIgnoreDifferences={{ dig "respectIgnoreDifferences" "false" . }}
       {{- with dig "ignoreDifferences" (list) . }}
       ignoreDifferences:
       {{- toYaml . | nindent 6 }}
