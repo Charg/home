@@ -62,6 +62,43 @@ Prowlarr's push-sync (Settings → Apps) only targets *arr-family apps (Sonarr, 
 etc.) — Scryer isn't in that catalog, so this pull/Torznab-feed direction is the only
 integration path.
 
+## Routed through the WireGuard gateway
+
+`spec.template.metadata.labels` carries `setGateway: "true"`, so indexer API calls
+and tracker logins leave through the tunnel rather than the house connection. The
+mechanism, and every trap in it, is documented in
+`kube/lookie/pod-gateway-config/README.md`. Three things specific to Prowlarr:
+
+**The pod's security context is meaningfully weaker, and that is a conscious
+trade.** The injected `gateway-init` and `gateway-sidecar` run **as root with
+`NET_ADMIN` and `NET_RAW` and an empty capability drop list**. That is hard-coded
+in the admission controller and is not configurable. Prowlarr's own container is
+untouched — still uid 1000, `runAsNonRoot`, `drop: [ALL]`,
+`allowPrivilegeEscalation: false` — but the pod as a whole now contains two root
+containers with network capabilities. This is inherent to the mechanism: you
+cannot build a VXLAN without `NET_ADMIN`. It is a trade, not a bug, but a security
+review should find a decision here rather than an accident.
+
+**Prowlarr can never be exposed with a public client address.** Inbound is
+untouched, but once the default route is deleted a reply is only deliverable if
+its destination matches one of the routes installed from
+`NOT_ROUTED_TO_GATEWAY_CIDRS`. `traefik-internal` SNATs, so its pod address is in
+the pod range and the flow stays symmetric; kubelet's probes come from the node or
+the CNI bridge, both also in that list. But a *public* client address matches no
+not-routed route, so the reply would go down the tunnel and be dropped as
+asymmetric. Prowlarr must therefore never be moved behind the public Traefik
+instance or a Service with `externalTrafficPolicy: Local`.
+
+**Indexers that reject the VPN exit.** Some private trackers flag or refuse logins
+from datacenter VPN addresses. That is a per-indexer policy problem, not something
+to solve by changing the routing. None recorded so far; add any here by name as
+they turn up.
+
+`networkpolicy.yaml` includes the gateway **ingress** rule, which is load-bearing
+rather than tidy — see the conntrack section of the gateway README. Scryer's pull
+of the Torznab feeds is unaffected: that flow is in the pod range, which is in
+`NOT_ROUTED_TO_GATEWAY_CIDRS`, so it travels the normal path.
+
 ## Secrets
 
 - `prowlarr-tls` — cert-manager-issued, regenerates automatically.

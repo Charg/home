@@ -12,6 +12,8 @@ spec:
   # same constraint as Scryer, see kube/lookie/scryer/deployment.yaml.
   strategy:
     type: Recreate
+  # NOT the place for setGateway - a Deployment's selector is immutable, and a
+  # routing flag has no business being part of this workload's identity.
   selector:
     matchLabels:
       app.kubernetes.io/name: prowlarr
@@ -19,6 +21,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: prowlarr
+        # Routes all non-cluster egress through the WireGuard gateway. The
+        # admission webhook appends two injected containers on the strength of
+        # this label, and networkpolicy-routed.yaml in kube/lookie/pod-gateway-config
+        # fences the pod on the strength of the same one. Only "true"/"false"
+        # are safe values - see that directory's README.
+        setGateway: "true"
     spec:
       automountServiceAccountToken: false
       # home-operations' image runs as a fixed uid/gid 1000, rootless - unlike
