@@ -59,11 +59,25 @@ no default route or the wrong one.** Such a sidecar has to move into
 **Every fetch is now a tunnel fetch, and the solve rate is the thing to watch.**
 Challenge providers score datacenter and VPN address ranges more harshly than
 residential ones, so a challenge that solves from the house connection can start
-failing from the exit. Measured before and after the switch with repeated
-cache-busted `request.get` solves against a live Cloudflare challenge page; the
-numbers held. If challenges start failing in a way that tracks the exit rather
-than the target, removing the label from `deployment.yaml` is the revert, and it
-is a one-line one.
+failing from the exit. Measured before and after the switch, from inside
+the `trawl` container, as five cache-busted `request.get` solves against a live
+Cloudflare challenge page:
+
+| | solves | steady-state per solve |
+|---|---|---|
+| house connection | 5/5 | ~6-7s |
+| tunnel exit | 5/5 | ~6s |
+
+(First solve after a pod start is slower either way — 14s and 17s respectively —
+which is the browser pool warming, not the exit.) So the switch cost nothing
+measurable. Re-run the same comparison before believing any later report that it
+did; a target that has simply got harder looks identical from the outside. If
+challenges do start failing in a way that tracks the exit rather than the target,
+removing the label from `deployment.yaml` is the revert, and it is a one-line one.
+
+Pick discriminating targets when re-measuring. `nowsecure.nl` serves no challenge
+to either exit and solves sub-second from both, so it proves reachability and
+nothing about challenge difficulty.
 
 **The pod's security context is meaningfully weaker, and that is a conscious
 trade.** The injected `gateway-init` and `gateway-sidecar` run **as root with
