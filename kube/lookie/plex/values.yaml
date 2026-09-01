@@ -1,6 +1,8 @@
 image:
-  tag: latest
-  pullPolicy: Always
+  # renovate: datasource=docker depName=plexinc/pms-docker
+  tag: 1.43.3.10896-cb3ebc72d
+  sha: sha256:83a425ae9e133b1cb2cc3b809556e01c61cd8ff65c582e41b4374bc2210bac9e
+  pullPolicy: IfNotPresent
 serviceAccount:
   automountServiceAccountToken: false
 ingress:
