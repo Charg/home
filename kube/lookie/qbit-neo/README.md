@@ -131,6 +131,17 @@ it got. Two paths do that, and both are needed — neither covers the other's ca
 Both live in `scripts-configmap.yaml` (alongside `share-limits.sh`), mounted at `/wrapper`
 with mode `0755`.
 
+Proton hands out a *different* port on the first rotation, seconds after the cold-start
+port is obtained — every start sees a brief `port forwarded is X` immediately followed by
+`external port changed: X to Y`. `port-up.sh` pushes `Y` to qBittorrent, but without
+forcing a reannounce, the tracker only learns about it on qBittorrent's own schedule
+(tens of minutes on this tracker) — so for that whole window every peer that asks the
+tracker is handed `X`, a port we've already stopped listening on, and inbound reachability
+is silently dead. `port-up.sh` therefore also calls `torrents/reannounce` (`hashes=all`,
+since a pod can seed more than one torrent) right after a successful port push. It is
+best-effort and does not affect the exit code — a failed reannounce just means the tracker
+catches up on its normal interval instead of immediately.
+
 Details worth keeping in mind before editing them:
 
 - `port-seed.sh` **`exec`s `/usr/bin/catatonit -- /entrypoint.sh`**, reproducing the image's

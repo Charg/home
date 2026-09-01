@@ -225,6 +225,18 @@ data:
           --post-data="json={\"listen_port\":${PORT}}" \
           http://127.0.0.1:8080/api/v2/app/setPreferences >/dev/null 2>&1; then
         echo "[port-up] listen_port=${PORT}"
+        # Force an immediate reannounce so the tracker learns the new port
+        # right away. Without this, qBittorrent waits out its own reannounce
+        # interval (tens of minutes) before telling the tracker - and every
+        # peer that asks the tracker in the meantime is handed a port we've
+        # already stopped listening on. Best-effort: a failure here just
+        # means the tracker catches up on its normal schedule instead.
+        if wget -q -O- --timeout=2 --post-data="hashes=all" \
+            http://127.0.0.1:8080/api/v2/torrents/reannounce >/dev/null 2>&1; then
+          echo "[port-up] reannounced"
+        else
+          echo "[port-up] reannounce failed, tracker will pick up the new port on its own schedule" >&2
+        fi
         exit 0
       fi
       i=$((i + 1))
