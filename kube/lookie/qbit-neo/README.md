@@ -201,6 +201,39 @@ Two independent mechanisms, both required:
    keeps listening unbound, so the containment silently disappears while everything still
    looks healthy. If you change one, change the other.
 
+## Why this pod is not on the shared pod-gateway
+
+`kube/lookie/pod-gateway/` routes `prowlarr`, `trawl` and `scryer` out through a
+shared WireGuard gateway pod, which makes one tunnel per cluster instead of one
+per app. This pod keeps its own sidecar anyway. That is a decision, not an
+oversight — do not "tidy it up".
+
+Four reasons, three of them things that would actually break:
+
+- **Port forwarding does not survive a pod boundary.** Both paths above are
+  in-pod by construction. `port-up.sh` pushes the rotated port to
+  `127.0.0.1:8080`, and `port-seed.sh` reads gluetun's status file from a volume
+  shared inside this pod. Neither has an equivalent across pods: the gateway
+  would hold the mapping and have no way to reach a download client in another
+  pod's network namespace or read a file into it.
+- **Making that work would mean re-enabling authentication for a non-loopback
+  caller.** The API call is unauthenticated only because `WebUI\LocalHostAuth=false`
+  admits a loopback caller without a session. A caller from the gateway pod is not
+  loopback, so the port push would need credentials — cutting directly against
+  the choice the Port forwarding section above explains.
+- **Interface-binding leak containment stops working.** `Session\Interface=wg0`
+  depends on there being a `wg0` device in this pod. Routed pods get a `vxlan0`
+  and no tunnel device at all, so the second of the two containment mechanisms
+  above simply has nothing to bind to — and a mismatch there **fails open**, not
+  closed.
+- **No credential saving.** Proton issues a distinct WireGuard key per session, so
+  this pod needs its own key whether it shares a gateway or not. There is nothing
+  to consolidate.
+
+Worth noting the side benefit, since it is easy to read the duplication as pure
+cost: peer traffic and indexer traffic leave on two separate sessions from
+different exits, so neither is visible in the other's flow.
+
 ## Storage, and not colliding with the legacy instance
 
 Both pods mount the same RWX `plex-media` PVC, so the separation is by path:

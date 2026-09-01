@@ -46,6 +46,16 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    ```
    Without this, Scryer's targeted library-section refresh can't resolve the path and
    won't trigger.
+
+   **Use the in-cluster Service URL, not `plex.syn.sh`.** The LAN hostname resolves to
+   a `192.168.74.0/24` address, and `networkpolicy.yaml` has never permitted egress to
+   the LAN — the first draft of that policy already carried `192.168.0.0/16` in its
+   `except` list. A connection configured against the public hostname therefore fails
+   with a connection refusal (kube-router REJECTs rather than drops), which surfaces as
+   `media server playback reconciliation failed` in Scryer's log. This is a
+   configuration mismatch, not a routing problem: it fails identically whether or not
+   the pod goes through the gateway. Reaching Plex over the Service is both allowed by
+   policy and one hop shorter.
 4. **Libraries** — Movies root `/data/Movies`, Series root `/data/TV`. By design, Scryer
    only manages new acquisitions here — pre-existing titles keep their release names and
    are not bulk-imported or renamed.

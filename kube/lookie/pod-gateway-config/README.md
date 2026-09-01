@@ -11,8 +11,46 @@ Two Argo Applications make it up:
 | `pod-gateway` | the upstream Helm chart, values in `kube/lookie/pod-gateway/values.yaml` |
 | `pod-gateway-config` | this directory: the WireGuard key, the two ConfigMaps, the admission webhook config, and the backstop NetworkPolicy |
 
-`qbit-neo` is deliberately **not** on this gateway. See
-`kube/lookie/qbit-neo/README.md` for why.
+## What is routed
+
+| pod | routed | notes |
+|---|---|---|
+| `prowlarr` | yes | indexer API calls and tracker logins |
+| `trawl` | yes | every page the scraping engine fetches; solve rate measured before and after and unchanged, see `kube/lookie/trawl/README.md` |
+| `scryer` | yes | metadata and artwork lookups; its `0.0.0.0/0` egress rule was **deleted** rather than superseded, see `kube/lookie/scryer/README.md` |
+| `qbit-neo` | **no**, deliberately | runs its own tunnel in-pod; see `kube/lookie/qbit-neo/README.md` |
+
+Everything else in `default` is untouched and never reaches the admission
+webhook at all.
+
+The in-cluster paths between these apps are unaffected, because pod and service
+addresses are in `NOT_ROUTED_TO_GATEWAY_CIDRS` and so travel the normal path.
+Ordinary `podSelector` rules still work on them. What stops working on a routed
+pod is the *internet-egress allowlist*: see the section below.
+
+## Destination allowlists stop working on a routed pod
+
+Once the default route is replaced, every internet flow is encapsulated before it
+leaves the pod. kube-router sees one UDP packet addressed to the gateway and
+never the real destination, so an `ipBlock` egress rule can no longer match
+anything it was written to match — it allows nothing and forbids nothing.
+
+Leaving such a rule in place is **worse than deleting it**, because it still
+reads like a control. `scryer`'s was deleted for exactly this reason. Egress for
+routed pods is decided by the gateway's own firewall
+(`FIREWALL_OUTBOUND_SUBNETS` plus the VPN kill switch) and by the gateway's
+egress NetworkPolicy.
+
+Three things this does *not* apply to, and all three are still worth writing:
+
+- **Ingress policy.** Completely unaffected. Inbound never touches the tunnel.
+- **In-cluster egress rules** (`podSelector` / `namespaceSelector`). Still
+  enforced, because those destinations are in `NOT_ROUTED_TO_GATEWAY_CIDRS`.
+- **Unrouted pods.** For anything without the label, a destination allowlist is
+  still the real enforcement layer.
+
+If a routed pod is ever un-routed, restore a real allowlist in the same commit
+that removes the label — do not keep a dead one warm against that day.
 
 ## How a pod opts in
 
