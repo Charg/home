@@ -15,7 +15,7 @@ ingress:
     secretName: tls-plex-ingress
 pms:
   storageClassName: synology-iscsi-storage
-  configStorage: 10Gi
+  configStorage: 20Gi
   resources:
     requests:
       cpu: 1000m

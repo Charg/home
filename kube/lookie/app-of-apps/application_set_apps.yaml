@@ -42,7 +42,11 @@ spec:
             chart: plex-media-server
             targetRevision: 1.6.0
             namespace: default
-            selfHeal: false
+            ignoreDifferences:
+              - group: apps
+                kind: StatefulSet
+                jqPathExpressions:
+                  - .spec.volumeClaimTemplates[].spec.resources.requests.storage
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
