@@ -100,6 +100,16 @@ still uid 1000, `runAsNonRoot`, `drop: [ALL]`. You cannot build a VXLAN without
 `NET_ADMIN`; this is a trade, not a bug, but a security review should find a
 decision here rather than an accident.
 
+**The grab leg is unverified, and worth exercising once deliberately.** What was
+checked after routing: Prowlarr's indexers all test valid and a live search
+returns results through the tunnel, Scryer reaches Prowlarr, Trawl, qBittorrent
+and Plex, and `/data` is writable. What was *not* checked is an actual grab —
+the Scryer → qBittorrent hand-off and the completed-item import — because
+performing one pulls real content into the library. Those two steps are
+pod-to-pod and filesystem respectively, so neither crosses the tunnel and
+neither has a mechanism by which routing could affect it. But that is reasoning,
+not observation. Treat the next organic grab as the confirmation.
+
 **Nothing about the in-cluster pipeline changes.** Prowlarr's Torznab feeds,
 Trawl's solver endpoint, qBittorrent's API and Plex are all pod-to-pod, which is
 inside `NOT_ROUTED_TO_GATEWAY_CIDRS`, so those flows travel the normal path and

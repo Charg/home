@@ -17,7 +17,7 @@ Two Argo Applications make it up:
 |---|---|---|
 | `prowlarr` | yes | indexer API calls and tracker logins |
 | `trawl` | yes | every page the scraping engine fetches; solve rate measured before and after and unchanged, see `kube/lookie/trawl/README.md` |
-| `scryer` | yes | metadata and artwork lookups; its `0.0.0.0/0` egress rule was **deleted** rather than superseded, see `kube/lookie/scryer/README.md` |
+| `scryer` | yes | metadata and artwork lookups; its `0.0.0.0/0` egress rule was **deleted** rather than superseded. Search verified live; the grab and import legs are reasoned about rather than observed — see `kube/lookie/scryer/README.md` |
 | `qbit-neo` | **no**, deliberately | runs its own tunnel in-pod; see `kube/lookie/qbit-neo/README.md` |
 
 Everything else in `default` is untouched and never reaches the admission
