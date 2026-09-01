@@ -89,6 +89,14 @@ spec:
             chart: node-feature-discovery
             targetRevision: 0.18.3
             namespace: node-feature-discovery
+          # Adopted from a hand-run Helm release; see values.yaml. pod-gateway
+          # below needs a cert-manager that honours additionalOutputFormats,
+          # which the previously installed v1.14 gated off by default.
+          - name: cert-manager
+            repoURL: https://charts.jetstack.io
+            chart: cert-manager
+            targetRevision: v1.21.1
+            namespace: cert-manager
           # A MAJOR bump here is not a Renovate merge: this repo carries a
           # hand-maintained copy of the chart's MutatingWebhookConfiguration in
           # kube/lookie/pod-gateway-config/, which has to be diffed against the

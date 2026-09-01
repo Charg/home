@@ -1,0 +1,46 @@
+# source: https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
+#
+# Adopted from a hand-run Helm release (v1.14.4, installed 2024-03-30) so that
+# it is version-controlled like the rest of lookie. The Deployment selectors are
+# byte-identical between v1.14 and v1.21, so Argo adopts the live objects in
+# place rather than hitting an immutable-field error.
+#
+# The old `cert-manager` Helm release record is left in place but is now inert -
+# do not run `helm upgrade` against it, or it will fight Argo's selfHeal.
+#
+# The version matters to kube/lookie/pod-gateway: that chart's webhook serving
+# Certificate asks for `additionalOutputFormats: CombinedPEM`, which v1.14
+# refused because the AdditionalCertificateOutputFormats feature gate was still
+# alpha and off by default. It is on by default from v1.15 onward, so no gate is
+# configured here.
+
+crds:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+webhook:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
+# cainjector is what fills clientConfig.caBundle on the pod-gateway admission
+# webhook configurations. It is not optional here.
+cainjector:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
