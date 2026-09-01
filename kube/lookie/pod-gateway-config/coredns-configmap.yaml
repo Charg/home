@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pod-gateway-coredns
+  namespace: pod-gateway
+data:
+  Corefile: |
+    # In-pod split-horizon resolver for the gateway. Cluster names -> kube-dns;
+    # everything else -> DoT over the tunnel. Binds loopback only: every
+    # container in the pod shares one network namespace, so 127.0.0.1 is
+    # reachable from dnsmasq, and nothing outside the pod can query this.
+    #
+    # This is what makes routed clients' external lookups leave over the VPN.
+    # The pod's dnsConfig points at 127.0.0.1, gateway_sidecar.sh copies that
+    # /etc/resolv.conf into dnsmasq's resolv-file, and dnsmasq serves clients
+    # on 172.16.0.1 with this resolver as its upstream.
+    #
+    # gluetun's own DNS server must stay OFF (DNS_SERVER=off). It binds
+    # wildcard :53 regardless of DNS_ADDRESS, so it would collide with this
+    # resolver. gluetun must also run with DNS_KEEP_NAMESERVER=on so it leaves
+    # the pod-shared /etc/resolv.conf alone - see the values.yaml comment for
+    # why DNS_ADDRESS cannot be used for that instead.
+    #
+    # No `health` plugin on purpose: it binds WILDCARD, which would make an
+    # otherwise loopback-only service reachable from the whole cluster for no
+    # gain. Probing is not possible here anyway - this image has no shell and
+    # no dig, so an exec probe is out, and kubelet dials tcpSocket/httpGet at
+    # the pod IP, which this resolver does not listen on.
+    (common) {
+        errors
+        cache 30
+        bind 127.0.0.1
+    }
+
+    cluster.local:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    # Private reverse zones only - pod (10.42/16), service (10.43/16) and LAN
+    # (192.168.74/24) all live under these. Public rDNS must NOT come here, or
+    # every such lookup would exit to the LAN off-tunnel. This is why
+    # in-addr.arpa is not forwarded wholesale.
+    10.in-addr.arpa:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    168.192.in-addr.arpa:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    .:53 {
+        import common
+        forward . tls://1.1.1.1 tls://1.0.0.1 {
+            tls_servername cloudflare-dns.com
+        }
+    }

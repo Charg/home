@@ -89,6 +89,23 @@ spec:
             chart: node-feature-discovery
             targetRevision: 0.18.3
             namespace: node-feature-discovery
+          # A MAJOR bump here is not a Renovate merge: this repo carries a
+          # hand-maintained copy of the chart's MutatingWebhookConfiguration in
+          # kube/lookie/pod-gateway-config/, which has to be diffed against the
+          # upstream template by hand.
+          - name: pod-gateway
+            repoURL: https://angelnu.github.io/helm-charts/
+            chart: pod-gateway
+            targetRevision: 7.1.1
+            namespace: pod-gateway
+            respectIgnoreDifferences: true
+            # cainjector writes this field. Without the exception Argo flaps
+            # OutOfSync and selfHeal fights cainjector indefinitely.
+            ignoreDifferences:
+              - group: admissionregistration.k8s.io
+                kind: MutatingWebhookConfiguration
+                jqPathExpressions:
+                  - .webhooks[].clientConfig.caBundle
   template:
     metadata:
       name: "{{ .name }}"

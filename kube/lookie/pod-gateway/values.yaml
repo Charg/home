@@ -1,0 +1,327 @@
+---
+# WireGuard egress gateway. Pods in `default` that carry setGateway: "true"
+# are mutated by the admission webhook to route all non-cluster traffic through
+# this pod's tunnel. See kube/lookie/pod-gateway-config/README.md for the whole
+# mechanism; this file only explains the settings whose obvious value is wrong.
+#
+# A MAJOR chart bump needs manual review, not a Renovate merge:
+# kube/lookie/pod-gateway-config/mutatingwebhookconfiguration.yaml is a
+# hand-maintained copy of templates/webhook-admissionregistration.yaml and has
+# to be diffed against upstream when that template changes.
+
+controllers:
+  main:
+    # Recreate, NOT RollingUpdate. client_init.sh resolves the gateway with a
+    # bare `dig +short` and feeds the answer straight into `ip route add`. Two
+    # ready pods return two A records on the headless Service, which makes that
+    # a multi-line string and breaks every client that reconnects during the
+    # roll.
+    strategy: Recreate
+
+    pod:
+      # gluetun's WireGuard needs this. Without the matching unsafe-sysctl
+      # kubelet argument on the node the pod stays Pending with a
+      # SysctlForbidden event - that setting lives on the node, not in this
+      # repo.
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+
+      # Points every container in this pod at the in-pod CoreDNS sidecar, whose
+      # public upstream is DoT inside the tunnel. gateway_sidecar.sh then copies
+      # this /etc/resolv.conf into dnsmasq's resolv-file, so the clients dnsmasq
+      # serves on 172.16.0.1 inherit the same split-horizon view.
+      #
+      # THIS MUST STAY PER-CONTROLLER AND NEVER MOVE TO defaultPodOptions. The
+      # webhook copies its OWN resolv.conf into each client pod's dnsConfig and
+      # passes its own nameservers to client_init.sh as K8S_DNS_ips, which the
+      # script uses for `dig @<ip> <gateway>`. Give the webhook 127.0.0.1 and
+      # every client's tunnel setup fails at that dig.
+      dnsPolicy: None
+      dnsConfig:
+        nameservers: ["127.0.0.1"]
+        searches:
+          - pod-gateway.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - { name: ndots, value: "5" }
+
+    containers:
+      # `main` is the chart's own gateway_sidecar.sh container (dnsmasq + DHCP
+      # on vxlan0). Its command, capabilities and the gateway_init.sh init
+      # container are hard-coded in the chart and are not configurable here.
+      main:
+        resources:
+          requests: { cpu: 25m, memory: 32Mi }
+          limits: { memory: 128Mi }
+
+      # Deliberately NOT gluetun's own resolver: gluetun binds wildcard :53
+      # regardless of DNS_ADDRESS, and dnsmasq already holds 172.16.0.1:53 in
+      # this pod's network namespace.
+      coredns:
+        image:
+          repository: registry.k8s.io/coredns/coredns
+          tag: v1.14.6@sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea
+        args: ["-conf", "/etc/coredns/Corefile"]
+        securityContext:
+          runAsUser: 65534
+          runAsGroup: 65534
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+            # 53 is a privileged port and this image's binary carries no file
+            # capabilities, so dropping ALL without re-adding this makes the
+            # container fail at exec time ("operation not permitted") rather
+            # than log a warning.
+            add: [NET_BIND_SERVICE]
+        resources:
+          requests: { cpu: 25m, memory: 32Mi }
+          limits: { memory: 128Mi }
+
+      gluetun:
+        enabled: true
+        dependsOn: [main, coredns]
+        image:
+          repository: ghcr.io/qdm12/gluetun
+          tag: v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+            add: [NET_ADMIN]
+        env:
+          # The image defaults these to 1000 and gluetun chowns every file it
+          # writes to them. This container runs as root with all capabilities
+          # dropped, so it has no CAP_CHOWN and the chown fails - fatal, not
+          # cosmetic. Naming the uid it already runs as makes the chown a no-op,
+          # which the kernel allows an owner to perform unprivileged.
+          PUID: "0"
+          PGID: "0"
+          VPN_SERVICE_PROVIDER: protonvpn
+          VPN_TYPE: wireguard
+          # Must agree with settings.VPN_INTERFACE below - gateway_init.sh keys
+          # every forward and masquerade rule off that name.
+          VPN_INTERFACE: wg0
+          WIREGUARD_PRIVATE_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: pod-gateway-wireguard
+                key: privatekey
+          # A different country from qbit-neo's on purpose: the two tunnels are
+          # separate Proton sessions and separating the exits as well keeps
+          # peer traffic and indexer traffic visibly distinct.
+          SERVER_COUNTRIES: Netherlands
+          # 1320, not the default. Pod eth0 is 1450; VXLAN costs 50 and
+          # WireGuard 60, so 1320 inside the client becomes 1370 on eth0 and
+          # 1380 on the wire - both under 1450, nothing fragments. Leave it
+          # unset and large TLS handshakes hang while ping and DNS work
+          # perfectly, which is a miserable thing to diagnose.
+          WIREGUARD_MTU: "1320"
+          # VXLAN arriving on eth0 from clients.
+          FIREWALL_INPUT_PORTS: "4789"
+          # The VXLAN subnet is in this list for a reason: gluetun's OUTPUT DROP
+          # policy would otherwise kill dnsmasq's replies to clients on
+          # 172.16.0.0/24.
+          FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/16,10.43.0.0/16,192.168.74.0/24,172.16.0.0/24"
+          # Loopback-only: the control server exposes tunnel control with no
+          # auth, and it binds wildcard by default.
+          HTTP_CONTROL_SERVER_ADDRESS: "127.0.0.1:8000"
+          # An IP, not a hostname. A name here would make the tunnel's health
+          # check wait on a resolver that is itself waiting on the tunnel.
+          HEALTH_TARGET_ADDRESSES: "1.1.1.1:443"
+          # Built-in resolver off: it binds wildcard :53 regardless of
+          # DNS_ADDRESS and would collide with the CoreDNS container.
+          DNS_SERVER: "off"
+          # DNS_KEEP_NAMESERVER, not DNS_ADDRESS. gluetun refuses to point
+          # /etc/resolv.conf at a loopback address when its own forwarder is off
+          # - it treats that as a black hole and silently substitutes its
+          # bootstrap upstream. qbit-neo's README records the verification.
+          # Since /etc/resolv.conf is shared by every container in the pod, that
+          # would drag dnsmasq off the split-horizon resolver too.
+          DNS_KEEP_NAMESERVER: "on"
+          # NAT-PMP stays with qbit-neo, which keeps its own sidecar. Nothing
+          # routed through this gateway listens for inbound connections.
+          VPN_PORT_FORWARDING: "off"
+          TZ: America/Los_Angeles
+        probes:
+          # startupProbe, NOT readinessProbe. qbit-neo's README explains at
+          # length: exec rather than httpGet because gluetun's health server
+          # binds 127.0.0.1:9999 and kubelet dials probes at the pod IP, and
+          # startup rather than readiness so a tunnel blip does not pull the
+          # headless Service endpoint out from under every client - the webhook
+          # resolves that name on every admission.
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: [/gluetun-entrypoint, healthcheck]
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              failureThreshold: 36 # 3 minutes to first handshake
+          liveness:
+            enabled: false
+          readiness:
+            enabled: false
+        resources:
+          requests: { cpu: 50m, memory: 64Mi }
+          limits: { memory: 192Mi }
+
+persistence:
+  coredns-config:
+    enabled: true
+    type: configMap
+    name: pod-gateway-coredns
+    advancedMounts:
+      main:
+        coredns:
+          - path: /etc/coredns
+            readOnly: true
+  # gluetun replays this at the end of every firewall enable. It is what keeps a
+  # gluetun-only restart from producing a healthy-looking gateway that forwards
+  # nothing - see the ConfigMap for the full explanation.
+  gluetun-post-rules:
+    enabled: true
+    type: configMap
+    name: pod-gateway-iptables
+    advancedMounts:
+      main:
+        gluetun:
+          - path: /iptables
+            readOnly: true
+  # gluetun creates this directory itself without an owner-execute bit and then
+  # cannot open the files it puts inside. Root would normally ignore that, but
+  # only via CAP_DAC_OVERRIDE, which is dropped here. Letting kubelet create the
+  # directory sizes the fix to the problem - no extra capability.
+  gluetun-tmp:
+    enabled: true
+    type: emptyDir
+    advancedMounts:
+      main:
+        gluetun:
+          - path: /tmp/gluetun
+
+# Note the lowercase key. `networkPolicies` silently renders nothing in this
+# chart and in bjw-s common v5.
+networkpolicies:
+  main:
+    enabled: true
+    controller: main
+    policyTypes:
+      - Egress
+    rules:
+      egress:
+        # LOAD-BEARING, NOT DECORATIVE - do not trim this to "the gateway is
+        # firewalled anyway". It closes the window between gluetun's disable(),
+        # which returns its policies to ACCEPT and tears down wg0 while leaving
+        # the MASQUERADE in the nat table, and the pod actually dying. During
+        # that window forwarded client traffic could otherwise exit via eth0 in
+        # the clear. kube-router evaluates the host FORWARD chain before
+        # flannel's POSTROUTING SNAT, so the source is still this pod's address
+        # and the policy applies.
+        - to:
+            - ipBlock:
+                cidr: 0.0.0.0/0
+          ports:
+            - port: 51820
+              protocol: UDP
+        # Cluster-internal traffic keeps the normal path.
+        - to:
+            - ipBlock:
+                cidr: 10.42.0.0/16
+            - ipBlock:
+                cidr: 10.43.0.0/16
+        # Do NOT "harden" this by adding Ingress without also allowing UDP/4789
+        # from the pod CIDR, or you cut off every client.
+
+# -----------------------------------------------------------
+# Chart-specific settings below this point
+# -----------------------------------------------------------
+
+# Must equal VXLAN_IP_NETWORK + ".1" - this is the address dnsmasq binds on
+# vxlan0, and it is what every mutated pod gets as its nameserver.
+DNS: 172.16.0.1
+DNSPolicy: None
+clusterName: cluster.local
+publicPorts: []
+
+# REQUIRED even though the chart's own webhook is inert. This is what copies the
+# settings/nat.conf ConfigMap into `default`, where the injected containers
+# mount it from the CLIENT's namespace. Without it a mutated pod references a
+# ConfigMap that does not exist and never starts.
+routed_namespaces:
+  - default
+
+# settings.sh is sourced after the image's own defaults, so any key the scripts
+# read can be set here - not only the ones the chart documents.
+settings:
+  # The chart default is "" with a comment claiming "(Flannel does)". Flannel
+  # adds a route for the POD cidr but NOT the SERVICE cidr - confirmed by
+  # reading /proc/net/route inside a running pod. Left at the default, every
+  # ClusterIP connection goes down the tunnel, is forwarded back out, and is
+  # MASQUERADED - so in-cluster peers see the gateway's address instead of the
+  # client's, quietly breaking every podSelector-based NetworkPolicy in the
+  # namespace.
+  NOT_ROUTED_TO_GATEWAY_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.74.0/24"
+
+  VXLAN_ID: 42
+  # Clear of the pod (10.42/16), service (10.43/16) and LAN (192.168.74/24)
+  # ranges, and nothing on the node routes anything in 172.16/12.
+  VXLAN_IP_NETWORK: "172.16.0"
+  # MUST be set explicitly. The image default is the STRING "0", which
+  # gateway_init.sh treats as set and turns into
+  # `iptables -A INPUT -p udp --dport=0`. The real VXLAN port then never gets an
+  # INPUT accept and the tunnel dies the moment gluetun applies INPUT DROP.
+  # 4789 also keeps clear of flannel's 8472.
+  VXLAN_PORT: "4789"
+  VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
+
+  VPN_INTERFACE: wg0
+  # gluetun sets `--policy FORWARD DROP` when it enables its firewall, and the
+  # only thing that adds a matching accept is this flag's
+  # `iptables -I FORWARD -o $VPN_INTERFACE -j ACCEPT` in gateway_init.sh. Set
+  # false, the tunnel comes up healthy and no client packet is ever forwarded.
+  VPN_BLOCK_OTHER_TRAFFIC: true
+  VPN_TRAFFIC_PORT: 51820
+  VPN_LOCAL_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.74.0/24"
+
+  # Same reverse-zone split as the CoreDNS Corefile, same reason: public rDNS
+  # must not be answered by the LAN resolver, so in-addr.arpa is not sent there
+  # wholesale.
+  DNS_LOCAL_CIDRS: "local 10.in-addr.arpa 168.192.in-addr.arpa"
+  # Set explicitly because gateway_sidecar.sh would otherwise derive it from
+  # /etc/resolv.conf.org, which dnsPolicy: None above has pointed at loopback.
+  DNS_LOCAL_SERVER: "10.43.0.10"
+  # CoreDNS already validates over DoT upstream; doing it twice buys nothing.
+  GATEWAY_ENABLE_DNSSEC: false
+  # The default of 1 is a single ping, far too tight when everything starts at
+  # once on a cold boot.
+  CONNECTION_RETRY_COUNT: 10
+
+  # Sets vxlan0's MTU on both the gateway and every client. Do NOT rely on the
+  # chart's clamp-to-(eth0 - 50) branch: it is dead code in both
+  # gateway_init.sh and client_init.sh. The test is written
+  # `[ ${VPN_INTERFACE_MTU} >= ${VXLAN0_INTERFACE_MAX_MTU} ]`, where bash parses
+  # `>` as an output redirection to a file literally named `=`, leaving `[` with
+  # two arguments and an error return. The else branch always wins, so vxlan0
+  # gets exactly what is set here.
+  VPN_INTERFACE_MTU: 1320
+
+webhook:
+  # Deliberately matches nothing. The chart templates only a namespaceSelector
+  # and omits failurePolicy, which leaves a choice between gating every pod in
+  # `default` on this webhook or admitting opted-in pods unmutated and leaking
+  # silently. Neither is acceptable, so the chart's own config stays inert and
+  # kube/lookie/pod-gateway-config/mutatingwebhookconfiguration.yaml - which
+  # also carries an objectSelector - does the real work.
+  namespaceSelector:
+    type: custom
+    custom:
+      matchLabels:
+        pod-gateway.angelnu.com/inert: "matches-nothing"
+  # Opt-in, never opt-out. A pod is routed only if it asks to be.
+  gatewayDefault: false
+  gatewayLabel: setGateway
+  sidecarAsInit: true

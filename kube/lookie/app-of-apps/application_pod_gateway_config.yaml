@@ -1,0 +1,40 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pod-gateway-config
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/lookie/pod-gateway-config
+    targetRevision: main
+    # Required: the directory holds *.enc.yaml, so it must go through lookie's
+    # SOPS CMP (kube/lookie/argocd/values.yaml) rather than plain directory
+    # rendering.
+    plugin: {}
+  destination:
+    namespace: pod-gateway
+    server: https://kubernetes.default.svc
+  # cainjector writes clientConfig.caBundle on the MutatingWebhookConfiguration
+  # this app owns. Without this, Argo flaps OutOfSync and selfHeal fights
+  # cainjector indefinitely.
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jqPathExpressions:
+        - .webhooks[].clientConfig.caBundle
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # The namespace is created by the pod-gateway Helm Application, but this
+      # app must not depend on that ordering: the ConfigMaps and Secret it owns
+      # are what the gateway pod mounts.
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
