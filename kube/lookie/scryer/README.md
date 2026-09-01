@@ -64,6 +64,40 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    - **Timeout**: `60` seconds (valid range 1–180).
    - **Enabled**: checked, then **Test**.
 
+## Routed through the WireGuard gateway
+
+`spec.template.metadata.labels` carries `setGateway: "true"`, so Scryer's calls out
+of the cluster — metadata lookups, artwork, the hosted GraphQL gateway below —
+leave through the tunnel rather than the house connection. The mechanism, and
+every trap in it, is documented in `kube/lookie/pod-gateway-config/README.md`.
+Three things specific to Scryer:
+
+**The `0.0.0.0/0` egress rule was deleted, not merely superseded.** That deletion
+is the point of routing this pod. Once the default route is replaced, every
+internet flow is encapsulated before it leaves the pod, so kube-router sees a
+single UDP packet addressed to the gateway and never the real destination — an
+ipBlock allowlist can no longer match anything it was written to match. Leaving
+it in place would have been worse than removing it, because it would still read
+like a control while allowing and forbidding nothing. Egress is now decided by
+the gateway's firewall. If Scryer ever stops being routed, restore a real
+allowlist in the same commit that removes the label.
+
+**The pod's security context is meaningfully weaker, and that is a conscious
+trade.** The injected `gateway-init` and `gateway-sidecar` run **as root with
+`NET_ADMIN` and `NET_RAW` and an empty capability drop list**, hard-coded in the
+admission controller and not configurable. Scryer's own container is untouched —
+still uid 1000, `runAsNonRoot`, `drop: [ALL]`. You cannot build a VXLAN without
+`NET_ADMIN`; this is a trade, not a bug, but a security review should find a
+decision here rather than an accident.
+
+**Nothing about the in-cluster pipeline changes.** Prowlarr's Torznab feeds,
+Trawl's solver endpoint, qBittorrent's API and Plex are all pod-to-pod, which is
+inside `NOT_ROUTED_TO_GATEWAY_CIDRS`, so those flows travel the normal path and
+ordinary podSelector rules still apply to them. The `plex-media` mount is
+filesystem I/O and never touches the network at all. `networkpolicy.yaml` also
+gains the gateway **ingress** rule, which is load-bearing rather than tidy — see
+the conntrack section of the gateway README.
+
 ## Secrets NOT in git
 
 - `scryer-tls` — cert-manager-issued, regenerates automatically.

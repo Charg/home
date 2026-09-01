@@ -22,6 +22,24 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    # THE GATEWAY INGRESS RULE, and it is not optional. VXLAN return traffic is a
+    # separate conntrack flow, not a reply: the client sends
+    # (clientIP:hash -> gatewayIP:4789) and the gateway sends
+    # (gatewayIP:hash -> clientIP:4789). Different five-tuples, so a
+    # RELATED,ESTABLISHED accept does not cover it.
+    #
+    # Omit this and the injected init container PASSES its ICMP ping to the
+    # gateway - that has a real reply - and then hangs on udhcpc. The symptom
+    # points at DHCP; the cause is here. No ports: restriction, because it has to
+    # carry ICMP as well as the VXLAN.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: pod-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main
   egress:
     - to:
         - namespaceSelector:
@@ -63,15 +81,28 @@ spec:
       ports:
         - protocol: TCP
           port: 32400
-    # Allowing internet egress
+    # Egress to the gateway itself. Duplicated from
+    # kube/lookie/pod-gateway-config/networkpolicy-routed.yaml on purpose:
+    # NetworkPolicies are additive, and once this pod has an Egress policy of its
+    # own, deleting the backstop no longer restores anything here.
     - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-            except:
-              - 10.0.0.0/8 # RFC1918 - covers the pod and service networks too
-              - 172.16.0.0/12 # RFC1918
-              - 192.168.0.0/16 # RFC1918 - covers the LAN
-              - 169.254.0.0/16 # link-local, incl. cloud metadata
-      ports:
-        - protocol: TCP
-          port: 443
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: pod-gateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main
+    # The broad 0.0.0.0/0-on-443 rule that used to live here is GONE, and its
+    # removal is the point of routing this pod rather than a tidy-up alongside it.
+    # Once the default route is replaced, every internet flow is encapsulated
+    # before it leaves the pod, so kube-router sees one UDP packet to the gateway
+    # and never the real destination. An ipBlock allowlist can no longer match
+    # anything it was written to match - it would allow nothing and forbid
+    # nothing, which is worse than absent because it reads like a control. The
+    # gateway's own firewall (FIREWALL_OUTBOUND_SUBNETS and the VPN kill switch)
+    # is where egress is actually decided now.
+    #
+    # Do not add it back as insurance. If this pod ever stops being routed, the
+    # correct move is to restore a real allowlist in the same commit that removes
+    # the setGateway label, not to keep a dead one warm.

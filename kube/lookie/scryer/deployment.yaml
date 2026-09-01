@@ -11,6 +11,8 @@ spec:
   # SQLite on a RWO volume must never have two writers at once.
   strategy:
     type: Recreate
+  # NOT the place for setGateway - a Deployment's selector is immutable, and a
+  # routing flag has no business being part of this workload's identity.
   selector:
     matchLabels:
       app.kubernetes.io/name: scryer
@@ -18,6 +20,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: scryer
+        # Routes all non-cluster egress through the WireGuard gateway. The
+        # admission webhook appends two injected containers on the strength of
+        # this label, and networkpolicy-routed.yaml in kube/lookie/pod-gateway-config
+        # fences the pod on the strength of the same one. Only "true"/"false"
+        # are safe values - see that directory's README.
+        setGateway: "true"
     spec:
       automountServiceAccountToken: false
       securityContext:
