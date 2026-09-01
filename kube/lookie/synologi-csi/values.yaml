@@ -1,0 +1,16 @@
+# source: https://github.com/SynologyOpenSource/synology-csi/tree/main/deploy/helm
+#
+# The client-info Secret is managed separately in synologi-csi-config/ (SOPS
+# encrypted) - the chart's own Secret template only renders on a real `helm
+# install`, which never happens under Argo CD's `helm template` rendering, so
+# `create` here is purely documentation of that fact.
+clientInfoSecret:
+  create: false
+  name: client-info-secret
+
+storageClasses:
+  synology-iscsi-storage:
+    reclaimPolicy: Retain
+    parameters:
+      fsType: ext4
+      formatOptions: "-E nodiscard"

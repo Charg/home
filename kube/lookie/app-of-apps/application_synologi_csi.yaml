@@ -1,0 +1,47 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: synologi-csi
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    # Synology doesn't publish a Helm repo index - the chart only exists as a
+    # path in their git repo, so this can't join the chart-repo list in
+    # application_set_apps.yaml.
+    #
+    # releaseName is pinned to "synology-csi" (not this Application's name)
+    # because the chart's fullname helper reuses Release.Name verbatim only
+    # when it already contains the chart name - this namespace predates Argo
+    # and every live object (synology-csi-controller, synology-csi-node, the
+    # ClusterRoles, ...) was created under release name "synology-csi". Using
+    # any other release name here would rename every resource on next sync.
+    - repoURL: https://github.com/SynologyOpenSource/synology-csi.git
+      path: deploy/helm
+      targetRevision: v1.1.3
+      helm:
+        releaseName: synology-csi
+        valueFiles:
+          - "$values/kube/lookie/synologi-csi/values.yaml"
+    - repoURL: https://github.com/Charg/home.git
+      targetRevision: main
+      ref: values
+    # client-info-secret.enc.yaml - kept out of the chart's own values so
+    # NAS host/credentials never render into a Helm values file.
+    - repoURL: https://github.com/Charg/home.git
+      path: kube/lookie/synologi-csi-config
+      targetRevision: main
+      plugin: {}
+  destination:
+    namespace: synologi-csi
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
