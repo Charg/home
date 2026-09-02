@@ -29,6 +29,7 @@
       ".DS_Store"
       ".venv"
       "venv"
+      "mp-cli.log"
     ];
 
     includes = [
