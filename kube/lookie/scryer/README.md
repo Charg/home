@@ -38,7 +38,10 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    `kube/lookie/qbit-neo/qbit-neo-config-file.enc.yaml` is git-authoritative and
    doesn't carry Scryer's tags — cosmetic only, qBittorrent re-registers tags from
    torrent resume data.
-3. **Media server** — install the `plex` notification plugin.
+3. **Media server** — **Integrations → Media Servers**
+   (`/integrations/media-servers`), install the `plex` plugin. Note this is not under
+   Settings and not under Notifications; the `/settings/*` routes are `profile`,
+   `security`, `library`, `subtitles` and `download-clients` only.
    `base_url: http://plex-plex-media-server.default.svc.cluster.local:32400`, a Plex
    token as `auth_token`, `update_library: true`, and critically:
    ```
@@ -100,15 +103,12 @@ still uid 1000, `runAsNonRoot`, `drop: [ALL]`. You cannot build a VXLAN without
 `NET_ADMIN`; this is a trade, not a bug, but a security review should find a
 decision here rather than an accident.
 
-**The grab leg is unverified, and worth exercising once deliberately.** What was
-checked after routing: Prowlarr's indexers all test valid and a live search
-returns results through the tunnel, Scryer reaches Prowlarr, Trawl, qBittorrent
-and Plex, and `/data` is writable. What was *not* checked is an actual grab —
-the Scryer → qBittorrent hand-off and the completed-item import — because
-performing one pulls real content into the library. Those two steps are
-pod-to-pod and filesystem respectively, so neither crosses the tunnel and
-neither has a mechanism by which routing could affect it. But that is reasoning,
-not observation. Treat the next organic grab as the confirmation.
+**The full pipeline was checked after routing** — search, grab, hand-off to the
+download client, and import. Prowlarr's indexers test valid and a live search
+returns results through the tunnel; Scryer reaches Prowlarr, Trawl, qBittorrent
+and Plex; `/data` is writable; and grabs complete and import normally. The last
+two legs are pod-to-pod and filesystem respectively, so neither crosses the
+tunnel, which is why routing does not disturb them.
 
 **Nothing about the in-cluster pipeline changes.** Prowlarr's Torznab feeds,
 Trawl's solver endpoint, qBittorrent's API and Plex are all pod-to-pod, which is
