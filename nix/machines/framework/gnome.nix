@@ -18,6 +18,10 @@ in
     wayland = true;
   };
 
+  # pop-shell's floating_exceptions/main.js is a standalone GTK3 GJS app,
+  # but the GNOME session is GTK4-based and doesn't export a GTK3 typelib.
+  environment.variables.GI_TYPELIB_PATH = "${pkgs.gtk3}/lib/girepository-1.0";
+
   environment.gnome.excludePackages = with pkgs; [
     atomix # puzzle game
     baobab # disk usage analyzer
