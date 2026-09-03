@@ -249,16 +249,19 @@ in
           "disabled": true
         },
         {
-          "class": "zoom",
+          "class": "zoom"
         },
         {
           "class": "vicinae",
-          "title": ".*vicinae.*",
+          "title": ".*vicinae.*"
         },
         {
           "class": "VirtualBox",
-          "title": "^(?!.*VirtualBox).*$",
+          "title": "^(?!.*VirtualBox).*$"
         },
+        {
+          "class": "Emulator"
+        }
       ],
       "skiptaskbarhidden": [],
       "log_on_focus": false
