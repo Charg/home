@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: rustfs
-          image: rustfs/rustfs:latest
+          image: rustfs/rustfs:1.0.0-beta.12
           ports:
             - containerPort: 9000
             - containerPort: 9001
