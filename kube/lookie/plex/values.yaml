@@ -17,7 +17,8 @@ ingress:
     secretName: tls-plex-ingress
 pms:
   storageClassName: synology-iscsi-storage
-  configStorage: 20Gi
+  # Live state for this PVC is now 20Gi
+  configStorage: 10Gi
   resources:
     requests:
       cpu: 1000m
