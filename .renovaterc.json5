@@ -20,6 +20,23 @@
   "pre-commit": {
     enabled: true,
   },
+  kubernetes: {
+    enabled: true,
+    managerFilePatterns: [
+      '/^kube/lookie/prowlarr/deployment\\.yaml$/',
+      '/^kube/lookie/qbit-neo/statefulset\\.yaml$/',
+      '/^kube/lookie/scryer/deployment\\.yaml$/',
+      '/^kube/lookie/trawl/deployment\\.yaml$/',
+      '/^kube/nuc01/ac-redis/redis\\.yaml$/',
+      '/^kube/nuc01/ov-redis/redis\\.yaml$/',
+      '/^kube/nuc01/ac-rustfs/deployment\\.yaml$/',
+      '/^kube/nuc01/ac-rustfs/create-bucket-job\\.yaml$/',
+      '/^kube/nuc01/ov-rustfs/deployment\\.yaml$/',
+      '/^kube/nuc01/ov-rustfs/proxy-deployment\\.yaml$/',
+      '/^kube/nuc01/ov-rustfs/create-bucket-job\\.yaml$/',
+      '/^kube/nuc01/cloudflared/deployment\\.yaml$/',
+    ],
+  },
   packageRules: [
     {
       matchFileNames: ['nix/programs/litellm/docker-compose.yaml'],
@@ -36,6 +53,14 @@
       matchFileNames: ['kube/lookie/app-of-apps/application_set_apps.yaml'],
       groupName: 'lookie cluster updates',
       groupSlug: 'lookie-cluster',
+    },
+    {
+      matchPackageNames: [
+        'plexinc/pms-docker',
+        'ghcr.io/qdm12/gluetun',
+        'ghcr.io/home-operations/qbittorrent',
+      ],
+      schedule: ['at any time'],
     },
   ],
   customManagers: [
