@@ -64,16 +64,22 @@ server:
       limits:
         cpu: 300m
         memory: 512Mi
+    additionalEnv:
+      - name: GOMEMLIMIT
+        value: "410MiB" # ~80% of the memory limit above
 
   history:
     replicaCount: 1
     resources:
       requests:
         cpu: 50m
-        memory: 256Mi
+        memory: 768Mi
       limits:
         cpu: 500m
         memory: 768Mi
+    additionalEnv:
+      - name: GOMEMLIMIT
+        value: "614MiB" # ~80% of the memory limit above
 
   matching:
     replicaCount: 1
@@ -84,6 +90,9 @@ server:
       limits:
         cpu: 300m
         memory: 512Mi
+    additionalEnv:
+      - name: GOMEMLIMIT
+        value: "410MiB" # ~80% of the memory limit above
 
   worker:
     replicaCount: 1
@@ -94,6 +103,9 @@ server:
       limits:
         cpu: 200m
         memory: 256Mi
+    additionalEnv:
+      - name: GOMEMLIMIT
+        value: "205MiB" # ~80% of the memory limit above
 
 web:
   enabled: true

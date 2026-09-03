@@ -10,10 +10,14 @@ replicaCount: 1
 resources:
   requests:
     cpu: 50m
-    memory: 128Mi
+    memory: 512Mi
   limits:
     cpu: 300m
-    memory: 512Mi
+    memory: 768Mi
+
+extraEnvs:
+  - name: GOMEMLIMIT
+    value: "614MiB" # ~80% of the memory limit above
 
 config:
   receivers:

@@ -27,10 +27,31 @@ spec:
           enabled: true
           env:
             TEMPORAL_MANAGE_SCHEDULE: 'True'
+          resources:
+            requests:
+              cpu: 250m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
         backfillWorker:
           enabled: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 768Mi
         watermarkCheck:
           enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
   destination:
     namespace: ov
     server: https://kubernetes.default.svc
