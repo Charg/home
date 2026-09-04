@@ -1,0 +1,77 @@
+name: Bump openveto version
+
+on:
+  repository_dispatch:
+    types: [openveto-release]
+
+permissions: {}
+
+concurrency:
+  group: openveto-bump-${{ github.event.client_payload.version }}
+  cancel-in-progress: true
+
+jobs:
+  bump:
+    name: Bump openveto version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to commit the version bump
+      pull-requests: write # to open, label, and auto-merge the PR
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Bump version strings
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERSION:-}" ]; then
+            echo "client_payload.version is required" >&2
+            exit 1
+          fi
+
+          files=(
+            kube/nuc01/openveto/openveto-web.yaml
+            kube/nuc01/openveto/openveto-worker.yaml
+            kube/nuc01/openveto/openveto-migrations.yaml
+          )
+          for f in "${files[@]}"; do
+            sed -i -E "s/^(\s*targetRevision:\s*).*/\1${VERSION}/" "$f"
+            sed -i -E "s/^(\s*tag:\s*).*/\1${VERSION}/" "$f"
+          done
+
+      - name: Ensure label exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create "🤖 agent" --repo "$GITHUB_REPOSITORY" \
+            --description "Agent Authored" --color C4C4C4 || true
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        with:
+          commit-message: "chore(kube): nuc01 - openveto bump to ${{ github.event.client_payload.version }}"
+          title: "chore(kube): nuc01 - openveto bump to ${{ github.event.client_payload.version }}"
+          body: |
+            Automated version bump triggered by a release in the openveto repo.
+
+            Bumps `targetRevision` and `image.tag` to
+            `${{ github.event.client_payload.version }}` across the openveto
+            ArgoCD Applications. Auto-merge is enabled; ArgoCD will sync once
+            this merges to `main`.
+          branch: "chore/openveto-bump-${{ github.event.client_payload.version }}"
+          base: main
+          draft: false
+          labels: "🤖 agent"
+          delete-branch: true
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          gh pr merge --auto --squash "${PR_NUMBER}"
