@@ -1,25 +1,3 @@
-# Every environment variable the openveto workloads read, in one Opaque secret
-# the chart mounts wholesale via envFrom. Keys map one to one onto variable
-# names, and the SOPS rule for this tree encrypts only the stringData values —
-# so the key list stays reviewable in git while the values do not.
-#
-# DJANGO_ALLOWED_HOSTS must keep `localhost`: the probes address the pod by IP
-# with an explicit `Host: localhost` header, and Django does not allow it
-# implicitly once debug is off, so dropping it leaves every pod unready.
-#
-# DATABASE_URL targets the connection pooler rather than the cluster's
-# read-write service, so the workloads share a bounded pool of server
-# connections instead of opening one per process.
-#
-# The object store appears twice on purpose: the endpoint is the in-cluster
-# service the app writes through, while the custom domain is the read-only
-# proxy hostname it puts in generated URLs. They are different values.
-#
-# No Sentry DSN: alerting rides the log pipeline, so the DSN is optional and
-# omitted rather than set to an empty string.
-#
-# TODO: three values are placeholders (`REPLACE_ME`) pending the real upstream
-# credentials — SENDGRID_API_KEY, CONGRESS_API_KEY and OPENAI_API_KEY.
 apiVersion: v1
 kind: Secret
 metadata:
@@ -29,8 +7,8 @@ type: Opaque
 stringData:
     DJANGO_SECRET_KEY: ENC[AES256_GCM,data:aoriDdAynBDGApC5bBiItR1ozCYUpx7y4PTUy5Vzx3d4kNgXo39nZ8hHkU2b/IyC4dK22U13gbWKl7RcG/IKNQ==,iv:SCaD4AC+QHJo+HJLNjakVbXiGeTcgXIOlQ56Dlzl1CM=,tag:FFTts3bIcso000pnhLNK7A==,type:str]
     DJANGO_ADMIN_URL: ENC[AES256_GCM,data:w1zN1VlZyLEANepGA+Bp7eDhNbhB/OlGiw==,iv:0xsDpJNoViNJqfQ0xIheII/rn9hlv2sizMWti1i58+0=,tag:AFl5jCWM9rrth1MKCo934A==,type:str]
-    DJANGO_ALLOWED_HOSTS: ENC[AES256_GCM,data:IA5Uo3/NWzKd9y17HfDUzL6vYmREbMGSY76xzlYgGRW4f6+Y,iv:HECTr694EAvbg5gEkQwd1um8Bn5tN7iJUVARt2xMsas=,tag:mPwv6IZekSw7VSNoRwu2iw==,type:str]
-    DJANGO_CSRF_TRUSTED_ORIGINS: ENC[AES256_GCM,data:MfrMdmboO4QRHB5ZZghPGxLqNrsz8RqWt5RTUT26Eq0dvA==,iv:lXR2dBbOkagNDmI6b5xn8E2QKzza0FHjgRRcviW2y+k=,tag:dsNzwVKex+MHpi3aPuNDfg==,type:str]
+    DJANGO_ALLOWED_HOSTS: ENC[AES256_GCM,data:zXfUly4255CmrD/h4XtXBbmViwg6lh9ejo07Ba5W0lpkZs1dWp1k+ZjUruUPvxGA7A==,iv:v3BG2d7IdKqB9zbNUzuRbHLcvVsxvtyVpzOlgUvyZLE=,tag:/z6dxqTbAkMtx7fZMD4pEA==,type:str]
+    DJANGO_CSRF_TRUSTED_ORIGINS: ENC[AES256_GCM,data:2kk1+LMIqeW1JOHkne21u66pQwEQiykwom/eYoj2BPlYyiql8o2X8M5Osd/T/3wtjxQl6FlBEw==,iv:oVu1bmq2kp1DV9nJgM5U4m4ocd+uO6vNa4oUCIC7xOM=,tag:FcDIHRiZk1pGCGgwjIP0+Q==,type:str]
     DATABASE_URL: ENC[AES256_GCM,data:/tsrrpiz2MdsLotuWR26n6gLIfexH51V3jsP++KVZcy3aZkGZWkcJWzy9UhcWqOncLp6MBu/3wCkZWhu+wrgySDmDKMFOhE6El2inkWemnhWKNi93w==,iv:3gjrkJhV7t/OkR6yqypQljdoOKTkVnJoQdPvlWV+3PA=,tag:vPVC80cb0zGswsyqlAy1KA==,type:str]
     REDIS_URL: ENC[AES256_GCM,data:Wb8qnpat2OWaHxAOvcarAai/qaeosRvwmrlNh+W6wuKT1eQhAIKFmlt6MEdR/BJlYlWHwXhXVv/JJvtmPOF7ka1iv0H2ymadjg==,iv:K+yKEcoFjhzPPmMNBblPC3Kir0ocTyyEMcLL4jX3jIM=,tag:b5BkTL8Gj+ymsuhE574Nhw==,type:str]
     DJANGO_AWS_ACCESS_KEY_ID: ENC[AES256_GCM,data:QMtramFwNTaAb54VJM04HuFXxzE=,iv:YDjXAX3q6kO+iyBf8EXOPBzOVxj7iyFGHzvqoIGV694=,tag:Nb+zjF+HwBpjmfxPFd+2rA==,type:str]
@@ -90,7 +68,7 @@ sops:
             ipEIt/ObJepK2nJm3q+MGhRKvh9rhUmzomKQ4V+BOascRECckit60QofmMLq5/XX
             TRHP9f7krOuU01g=
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-09-02T06:15:54Z"
-    mac: ENC[AES256_GCM,data:rP7cGz/sJ2Q00KqBUAz56Gg/SNLgYgop1qPZcnw/eXiDTEOqszNM8pHPPzAqRrEs+u/L1jKPJD8s4sm7s6c3QiSKq2hRCvRHby+KRjSJy1dFFtmJKVxbboGkqtjWgh8cB7BEIm0su2gGMZK6Geo075J13BLX4TqEyalMacch9Pw=,iv:Bm6qZ4g0DPlgXB5BR/3ImE2BF/Yxs+OSYNNHgaQMYXM=,tag:vcFZ2vR3y0aeEG3VYyhv2g==,type:str]
+    lastmodified: "2026-09-04T01:33:43Z"
+    mac: ENC[AES256_GCM,data:MW/nuvDakAF59EIRG3wcQc0B8CghDBxhK5sNLx4trr0AeYvDJmjx+Nmbh0aEOdzJ1ADO5ARpRLtXw0VX92pgwynfFokBowEnV6Xl0yxNh1zMcU9ZLfcwIr2XiHYGnMfFlEAMyk5/GHoyF69PSyeBxBQ2S0Px9/V6jrL0CFzMooA=,iv:TwNKJrhOiF3rmKJM1fyZUgR/X8/0pPj6TtverpO5yBw=,tag:NQWlMFm5qO5MtY2t4hdOew==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.12.1
