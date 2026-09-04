@@ -11,11 +11,11 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: openveto
-    targetRevision: 0.5.1
+    targetRevision: 0.6.0
     helm:
       valuesObject:
         image:
-          tag: 0.5.1
+          tag: 0.6.0
         imagePullSecrets:
           - name: ghcr-pull-creds
         existingSecret: openveto-env
