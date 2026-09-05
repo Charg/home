@@ -15,7 +15,7 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 10.4.0
+            targetRevision: 10.8.0
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
@@ -30,12 +30,12 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.3.0
+            targetRevision: 41.4.0
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.3.0
+            targetRevision: 41.4.0
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
@@ -70,12 +70,12 @@ spec:
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
-            targetRevision: 88.5.3
+            targetRevision: 88.6.5
             namespace: monitoring
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
             chart: opentelemetry-collector
-            targetRevision: 0.170.0
+            targetRevision: 0.172.1
             namespace: monitoring
           - name: tempo
             repoURL: https://grafana.github.io/helm-charts
@@ -90,7 +90,7 @@ spec:
           - name: alloy
             repoURL: https://grafana.github.io/helm-charts
             chart: alloy
-            targetRevision: 1.11.1
+            targetRevision: 1.12.1
             namespace: monitoring
           - name: litellm
             repoURL: ghcr.io/berriai
