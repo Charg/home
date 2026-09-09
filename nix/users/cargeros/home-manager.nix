@@ -11,7 +11,7 @@
 }:
 
 let
-  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs; };
+  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs; };
 in
 
 {
