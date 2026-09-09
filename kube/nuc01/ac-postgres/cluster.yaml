@@ -16,6 +16,23 @@ spec:
   storage:
     size: 100Gi
 
+  backup:
+    retentionPolicy: "7d"
+    barmanObjectStore:
+      destinationPath: "s3://backups/ac-postgres"
+      endpointURL: "http://backup-rustfs.backup.svc.cluster.local:9000"
+      s3Credentials:
+        accessKeyId:
+          name: backup-rustfs-credentials
+          key: access-key
+        secretAccessKey:
+          name: backup-rustfs-credentials
+          key: secret-key
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+
   monitoring:
     enablePodMonitor: true
     customQueriesConfigMap:

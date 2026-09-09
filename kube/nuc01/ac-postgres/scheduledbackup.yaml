@@ -1,0 +1,11 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: ac-postgres-daily
+spec:
+  # Daily at 02:00.
+  schedule: "0 0 2 * * *"
+  backupOwnerReference: cluster
+  cluster:
+    name: ac-postgres
