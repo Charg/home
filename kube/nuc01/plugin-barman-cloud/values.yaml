@@ -1,0 +1,9 @@
+# source: https://github.com/cloudnative-pg/charts/blob/main/charts/plugin-barman-cloud/values.yaml
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi

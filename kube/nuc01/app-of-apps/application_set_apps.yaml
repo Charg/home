@@ -57,6 +57,11 @@ spec:
             chart: cloudnative-pg
             targetRevision: 0.29.0
             namespace: cnpg-system
+          - name: plugin-barman-cloud
+            repoURL: https://cloudnative-pg.github.io/charts
+            chart: plugin-barman-cloud
+            targetRevision: 0.8.0
+            namespace: cnpg-system
           - name: redis-operator
             repoURL: https://ot-container-kit.github.io/helm-charts/
             chart: redis-operator
