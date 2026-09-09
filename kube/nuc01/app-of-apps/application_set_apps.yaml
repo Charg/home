@@ -95,7 +95,7 @@ spec:
           - name: litellm
             repoURL: ghcr.io/berriai
             chart: litellm-helm
-            targetRevision: 1.1.2
+            targetRevision: 1.100.0
             namespace: litellm
   template:
     metadata:
