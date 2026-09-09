@@ -82,6 +82,11 @@
 
       fi
 
+      #
+      # PATH
+      #
+      export PATH="$HOME/.local/bin:$PATH"
+
       # TODO: Use SOPS to import these
       if [[ -f $HOME/.zsh_functions_work ]]; then
         source $HOME/.zsh_functions_work
@@ -100,11 +105,6 @@
       # Plugin Configuration
       zstyle ':zshzoo:magic-enter' command 'ls -alh'
       zstyle ':zshzoo:magic-enter' git-command 'git status'
-
-      #
-      # PATH
-      #
-      export PATH="$HOME/.local/bin:$PATH"
 
       #
       # Mise
