@@ -33,6 +33,34 @@
         identityAgent = "~/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh";
       };
 
+      "mpc00-unlock" = {
+        hostname = "192.168.73.228";
+        port = 2222;
+        user = "root";
+        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc00";
+      };
+
+      "mpc00" = {
+        hostname = "192.168.73.228";
+        port = 22;
+        user = "nixos";
+        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc00";
+      };
+
+      "mpc01-unlock" = {
+        hostname = "192.168.74.12";
+        port = 2222;
+        user = "root";
+        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc01";
+      };
+
+      "mpc01" = {
+        hostname = "192.168.74.12";
+        port = 22;
+        user = "nixos";
+        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc01";
+      };
+
     };
   };
 
@@ -47,4 +75,14 @@
 
   home.file.".ssh/config.d/.keep".text = "# Managed by Home Manager";
   home.file.".ssh/sockets/.keep".text = "# Managed by Home Manager";
+
+  home.file.".ssh/known_hosts.d/mpc00".text = ''
+    [192.168.73.228]:2222 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC7XXWkYl1IaGq3ZSVF0xiS5oranQAS/Yr77tH8Cx9w8
+    192.168.73.228 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC7XXWkYl1IaGq3ZSVF0xiS5oranQAS/Yr77tH8Cx9w8
+  '';
+
+  home.file.".ssh/known_hosts.d/mpc01".text = ''
+    [192.168.74.12]:2222 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrBTt1ILjEDGteqTAtIAkQBHNYHfDOdnBWbPb2SXVi2
+    192.168.74.12 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrBTt1ILjEDGteqTAtIAkQBHNYHfDOdnBWbPb2SXVi2
+  '';
 }
