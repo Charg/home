@@ -1,7 +1,10 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../users/dev/nixos.nix
   ];
+
+  home-manager.users.dev = ../../users/dev/home-manager.nix;
 
   users.users.nixos = {
     isNormalUser = true;
