@@ -97,6 +97,16 @@
           user = "nixos";
         };
 
+        mpc00 = {
+          system = "x86_64-linux";
+          user = "nixos";
+        };
+
+        mpc01 = {
+          system = "x86_64-linux";
+          user = "nixos";
+        };
+
         mbp-work-1 = {
           system = "aarch64-darwin";
           user = "cargeros";
