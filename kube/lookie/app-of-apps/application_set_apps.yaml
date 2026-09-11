@@ -15,24 +15,24 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 10.5.0
+            targetRevision: 10.9.0
             namespace: argocd
           - name: home-assistant
             repoURL: http://pajikos.github.io/home-assistant-helm-chart/
             chart: home-assistant
-            targetRevision: 0.3.78
+            targetRevision: 0.3.80
             namespace: default
             serverSideDiff: true
           - name: akri
             repoURL: https://project-akri.github.io/akri/
             chart: akri
-            targetRevision: 0.13.8
+            targetRevision: 0.14.0
             namespace: default
             serverSideDiff: true
           - name: plex
             repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
             chart: plex-media-server
-            targetRevision: 1.7.1
+            targetRevision: 1.9.0
             namespace: default
             serverSideDiff: true
           - name: metallb
@@ -48,18 +48,18 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.4.0
+            targetRevision: 41.5.0
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.4.0
+            targetRevision: 41.5.0
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
             repoURL: https://kubernetes-sigs.github.io/external-dns/
             chart: external-dns
-            targetRevision: 1.21.1
+            targetRevision: 1.22.0
             namespace: external-dns
           - name: intel-operator
             repoURL: https://intel.github.io/helm-charts
@@ -79,7 +79,7 @@ spec:
           - name: cert-manager
             repoURL: https://charts.jetstack.io
             chart: cert-manager
-            targetRevision: v1.21.1
+            targetRevision: v1.21.2
             namespace: cert-manager
           # A MAJOR bump here is not a Renovate merge: this repo carries a
           # hand-maintained copy of the chart's MutatingWebhookConfiguration in
