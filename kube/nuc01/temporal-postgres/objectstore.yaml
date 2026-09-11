@@ -2,11 +2,11 @@
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
 metadata:
-  name: ac-postgres
+  name: temporal-postgres
 spec:
   retentionPolicy: "3d"
   configuration:
-    destinationPath: "s3://backups/ac-postgres"
+    destinationPath: "s3://backups/temporal-postgres"
     endpointURL: "http://backup-rustfs.backup.svc.cluster.local:9000"
     s3Credentials:
       accessKeyId:
