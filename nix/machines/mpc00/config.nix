@@ -2,6 +2,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../users/dev/nixos.nix
+    ./firewall.nix
   ];
 
   home-manager.users.dev = ../../users/dev/home-manager.nix;
