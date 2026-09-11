@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: nginx
-          image: nginxinc/nginx-unprivileged:1.30.4-alpine3.24
+          image: nginxinc/nginx-unprivileged:1.30.4-alpine3.24@sha256:442753882674b49ae2c1de83ed67896131c0777f56df5005e356e62bc3f7e7ce
           ports:
             - containerPort: 8080
           readinessProbe:
