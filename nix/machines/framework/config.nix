@@ -46,6 +46,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ./gnome.nix
+    ../../common/nix-ld.nix
   ];
 
   #
@@ -623,10 +624,6 @@ in
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
   ];
-
-  # https://github.com/nix-community/nix-ld
-  # Run unpatched dynamic binaries on NixOS0
-  programs.nix-ld.enable = true;
 
   nix = {
     # package = pkgs.nixVersions.latest;

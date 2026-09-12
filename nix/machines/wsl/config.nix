@@ -1,6 +1,6 @@
 { pkgs, currentSystemUser, ... }:
 {
-  imports = [ ];
+  imports = [ ../../common/nix-ld.nix ];
 
   wsl = {
     enable = true;
@@ -12,9 +12,6 @@
   environment.systemPackages = [
     pkgs.wget
   ];
-
-  # https://nix-community.github.io/NixOS-WSL/how-to/vscode.html#option-1-set-up-nix-ld
-  programs.nix-ld.enable = true;
 
   nix = {
     package = pkgs.nixVersions.latest;

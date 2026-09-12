@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ../../users/dev/nixos.nix
     ./firewall.nix
+    ../../common/nix-ld.nix
   ];
 
   home-manager.users.dev = ../../users/dev/home-manager.nix;
