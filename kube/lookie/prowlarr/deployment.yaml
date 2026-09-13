@@ -42,7 +42,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: prowlarr
-          image: ghcr.io/home-operations/prowlarr:2.5.2.5491@sha256:9dc56404214b8617d26af4af0a2df93ceb73fb4f2e1cb5383f5c2154f5fd98a2
+          image: ghcr.io/home-operations/prowlarr:2.6.4.5611@sha256:a5b8031268268b9d3a121c49ea7cc89248538e6379a3e29b0d419489bd95e004
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
