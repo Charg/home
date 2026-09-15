@@ -22,10 +22,10 @@ spec:
             chart: metallb
             targetRevision: 0.16.1
             namespace: default
-          - name: technitium-dnsserver
-            repoURL: https://charts.obeone.cloud
-            chart: technitium-dnsserver
-            targetRevision: 1.13.0
+          - name: technitium-dns-server
+            repoURL: ghcr.io/charg
+            chart: technitium-dns-server
+            targetRevision: 0.4.1
             namespace: default
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts

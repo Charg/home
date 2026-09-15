@@ -1,0 +1,97 @@
+# source: oci://ghcr.io/charg/technitium-dns-server (chart 0.4.1, appVersion 15.4.0)
+#   https://github.com/Charg/charts/tree/main/charts/technitium-dns-server
+#
+# Replaces the obeone `technitium-dnsserver` release. Two independent resolvers
+# spread one-per-node for DNS HA; each replica owns its own PVC and gets its own
+# pinned LoadBalancer address via perReplicaService.
+#
+# PREREQUISITE: podAntiAffinity is `required`, so replica-1 stays Pending until a
+# second node exists. This lands with the nuc01 + mpc00 + mpc01 consolidation, not
+# before. See README.md for the cutover order.
+
+# Two resolvers. Bump to 3 for one-per-node once all three nodes are joined.
+replicaCount: 2
+
+# DNS is infrastructure: a resolver lost to eviction takes everything that depends
+# on it down too. system-cluster-critical is built in (verified present on nuc01).
+priorityClassName: system-cluster-critical
+
+perReplicaService:
+  enabled: true
+  type: LoadBalancer
+  # Index-aligned to StatefulSet ordinals: replica-0 -> .52 (the address the current
+  # resolver already holds), replica-1 -> .53 (next free). Both inside nuc01's MetalLB
+  # pool 192.168.74.50-.69 (.50/.51 are the two Traefiks). Pinned so a Service
+  # recreation can't silently move the LAN's resolver to another address.
+  loadBalancerIPs:
+    - 192.168.74.52
+    - 192.168.74.53
+  # externalTrafficPolicy defaults to Local (preserves client source IP for recursion
+  # ACLs and query logs); a per-replica Service has a single endpoint, so that is
+  # exactly the routing intended here.
+
+# FQDN advertised by the server. First-boot only (see the note below).
+server:
+  domain: dns.packet.fail
+
+# Admin password seeded on first boot from a SOPS-managed Secret, mounted via the
+# _FILE variable so it never lands in the pod's process environment. The Secret is
+# applied by the `technitium-config` Application (kube/nuc01/technitium-dns-server-config).
+auth:
+  existingSecret:
+    name: technitium-admin
+    key: password
+
+# Ad/malware blocking — the pi-hole half. Full recursion, no forwarders, so no third
+# party sees the LAN's query stream and no upstream outage breaks resolution.
+blocking:
+  enabled: true
+  blockListUrls:
+    - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+    - https://small.oisd.nl
+recursion:
+  mode: AllowOnlyForPrivateNetworks
+logging:
+  useLocalTime: true
+
+# NOTE: every value above that maps to a DNS_SERVER_* variable (server.domain,
+# blocking.*, recursion.*, logging.*, the admin password) is read ONLY on first boot
+# against an empty PVC. `helm upgrade` does NOT reconfigure an already-initialised
+# replica — change those in the web console / HTTP API (or wipe the PVC). Once the
+# operator or native clustering manages this state, that becomes the source of truth.
+
+# Steady state measured on the current instance ~3m CPU / ~100Mi; headroom is for the
+# blocklist reload, which parses several MB of hosts files into memory.
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+persistence:
+  size: 10Gi
+  # nuc01's only StorageClass; hostPath-backed, so a bound PVC pins its replica to the
+  # node that first claimed it. That is fine here — each replica is an independent
+  # copy, not a migratable one — and composes with the anti-affinity spread.
+  storageClass: local-path
+
+# Web console via the internal Traefik, TLS from cert-manager. external-dns still
+# publishes this record (unchanged from the previous release) until the packet.fail
+# split-horizon cutover.
+ingress:
+  enabled: true
+  className: traefik-internal
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: dns.packet.fail
+  hosts:
+    - host: dns.packet.fail
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - dns.packet.fail
+      secretName: technitium-tls

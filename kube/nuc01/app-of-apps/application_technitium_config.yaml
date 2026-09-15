@@ -1,0 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: technitium-config
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/nuc01/technitium-dns-server-config
+    targetRevision: main
+    plugin: {}
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
