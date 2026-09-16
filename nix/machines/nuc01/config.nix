@@ -70,14 +70,5 @@
     "L+ /usr/local/sbin/iscsiadm - - - - ${pkgs.openiscsi}/bin/iscsiadm"
   ];
 
-  # services.k3s = {
-  #   enable = true;
-  #   role = "server";
-  #   # clusterInit = true;
-  #   disable = [
-  #     "traefik"
-  #     "servicelb"
-  #     "metrics-server"
-  #   ];
-  # };
+  services.k3s.clusterInit = true;
 }
