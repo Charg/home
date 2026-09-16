@@ -79,10 +79,15 @@ spec:
               mountPath: /data
           resources:
             requests:
-              cpu: 100m
-              memory: 512Mi
+              cpu: 500m
+              memory: 768Mi
+            # CPU limit was 1000m; container_cpu_usage_seconds_total peaked at
+            # 0.99 cores with the throttle ratio hitting 97% during a scan/import
+            # burst - genuinely CPU-bound, not just blocked on the old iSCSI
+            # storage. Memory limit is untouched: peak usage was 541Mi against
+            # 2Gi, zero OOM events in 30d.
             limits:
-              cpu: 1000m
+              cpu: 3000m
               memory: 2Gi
           readinessProbe:
             httpGet:
@@ -99,7 +104,11 @@ spec:
       volumes:
         - name: scryer-config
           persistentVolumeClaim:
-            claimName: scryer-config
+            # Node-local (see pvc.yaml): SQLite fsyncs every write transaction,
+            # and synology-iscsi-storage put a network round-trip behind each
+            # one. Migrated from scryer-config (retained, not deleted, so it
+            # still holds a pre-migration copy of /config).
+            claimName: scryer-config-local
         - name: plex-media
           persistentVolumeClaim:
             claimName: plex-media
