@@ -11,3 +11,19 @@ spec:
   resources:
     requests:
       storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scryer-config-local
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # Node-local: SQLite fsyncs every write transaction, and an iSCSI round-trip
+  # per fsync is what made scryer-config slow. local-path can't be expanded
+  # later (no volume expansion support), hence the headroom over the 2Gi db.
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 30Gi
