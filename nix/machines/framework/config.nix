@@ -47,6 +47,7 @@ in
     ./hardware-configuration.nix
     ./gnome.nix
     ../../common/nix-ld.nix
+    ../../common/system-packages.nix
   ];
 
   #

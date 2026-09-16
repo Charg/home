@@ -6,6 +6,7 @@
     ../../users/dev/nixos.nix
     ./firewall.nix
     ../../common/nix-ld.nix
+    ../../common/system-packages.nix
   ];
 
   home-manager.users.dev = ../../users/dev/home-manager.nix;

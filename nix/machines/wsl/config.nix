@@ -1,6 +1,9 @@
 { pkgs, currentSystemUser, ... }:
 {
-  imports = [ ../../common/nix-ld.nix ];
+  imports = [
+    ../../common/nix-ld.nix
+    ../../common/system-packages.nix
+  ];
 
   wsl = {
     enable = true;

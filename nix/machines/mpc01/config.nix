@@ -1,6 +1,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../common/system-packages.nix
   ];
 
   users.users.nixos = {
