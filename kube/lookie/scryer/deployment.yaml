@@ -7,7 +7,10 @@ metadata:
   labels:
     app.kubernetes.io/name: scryer
 spec:
-  replicas: 1
+  # Scaled to 0 for the /config storage-class cutover: SQLite must have no
+  # writer while its files are copied to the new node-local PVC. Restored to
+  # 1 once the copy is verified and the volume claim below is switched.
+  replicas: 0
   # SQLite on a RWO volume must never have two writers at once.
   strategy:
     type: Recreate
