@@ -9,6 +9,25 @@ deliberately, and back up `/config/scryer.db` **and** the encryption key secret 
 upgrading — the DB is unusable without the key that encrypts the credentials stored in
 it.
 
+## Storage
+
+`/config` (the encrypted SQLite DB) is on `scryer-config-local`, a `local-path`
+(node-local) PVC — see `pvc.yaml`. SQLite fsyncs on every write transaction; on
+`lookie`'s prior `synology-iscsi-storage` PVC, each of those fsyncs paid a network
+round-trip to the NAS. `lookie` is single-node, so `local-path`'s hostPath backing
+carries no scheduling risk, and it's already how `home-assistant`, `technitium-dnsserver`
+and `vaultwarden` store their state on this cluster.
+
+This trades away durability the iSCSI volume gave for free: `local-path`'s reclaim
+policy is `Delete`, and the volume can't be expanded. Scryer's own scheduled-backup
+feature (Settings → Backup) is pointed at `/data/backups/scryer` — the `plex-media`
+PVC, already mounted at `/data` — so backups land on durable, expandable, Synology-backed
+storage independent of `/config`'s lifecycle, without a dedicated backup PVC. Keep the
+backup path outside `/data/Movies` and `/data/TV` so Plex never scans it.
+
+The original `scryer-config` PVC (iSCSI, `Retain`) is left in place, unreferenced, as a
+frozen pre-migration copy of `/config`.
+
 ## Shared storage
 
 Mounts the `plex-media` PVC at `/data` — the same volume root qBittorrent mounts at
@@ -76,6 +95,9 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
      Scryer appends `/v1` itself).
    - **Timeout**: `60` seconds (valid range 1–180).
    - **Enabled**: checked, then **Test**.
+7. **Backups** — Settings → Backup: set the folder to `/data/backups/scryer` (not the
+   `/config` default — see Storage above), and a schedule/retention. Trigger a manual
+   backup afterward and confirm the file appears there.
 
 ## Routed through the WireGuard gateway
 

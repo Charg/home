@@ -7,10 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: scryer
 spec:
-  # Scaled to 0 for the /config storage-class cutover: SQLite must have no
-  # writer while its files are copied to the new node-local PVC. Restored to
-  # 1 once the copy is verified and the volume claim below is switched.
-  replicas: 0
+  replicas: 1
   # SQLite on a RWO volume must never have two writers at once.
   strategy:
     type: Recreate
@@ -79,10 +76,15 @@ spec:
               mountPath: /data
           resources:
             requests:
-              cpu: 100m
-              memory: 512Mi
+              cpu: 500m
+              memory: 768Mi
+            # CPU limit was 1000m; container_cpu_usage_seconds_total peaked at
+            # 0.99 cores with the throttle ratio hitting 97% during a scan/import
+            # burst - genuinely CPU-bound, not just blocked on the old iSCSI
+            # storage. Memory limit is untouched: peak usage was 541Mi against
+            # 2Gi, zero OOM events in 30d.
             limits:
-              cpu: 1000m
+              cpu: 3000m
               memory: 2Gi
           readinessProbe:
             httpGet:
@@ -99,7 +101,11 @@ spec:
       volumes:
         - name: scryer-config
           persistentVolumeClaim:
-            claimName: scryer-config
+            # Node-local (see pvc.yaml): SQLite fsyncs every write transaction,
+            # and synology-iscsi-storage put a network round-trip behind each
+            # one. Migrated from scryer-config (retained, not deleted, so it
+            # still holds a pre-migration copy of /config).
+            claimName: scryer-config-local
         - name: plex-media
           persistentVolumeClaim:
             claimName: plex-media
