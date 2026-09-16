@@ -29,9 +29,20 @@ serves Torznab/Newznab feeds. It does **not** mount `plex-media`, and doesn't ne
 
 ## Storage
 
-`prowlarr-config` PVC, 5Gi, `synology-iscsi-storage`, RWO, mounted at `/config` (holds
-`prowlarr.db`, an SQLite file — same "must never have two writers" constraint as Scryer,
-hence `strategy: Recreate` / `replicas: 1`).
+`/config` (holds `prowlarr.db`, an SQLite file — same "must never have two writers"
+constraint as Scryer, hence `strategy: Recreate` / `replicas: 1`) is on
+`prowlarr-config-local`, a `local-path` (node-local) PVC, 5Gi — same rationale and
+pattern as `scryer-config-local` (`kube/lookie/scryer/README.md`): SQLite fsyncs every
+write transaction, and `synology-iscsi-storage` put a network round-trip - and, as of a
+Sep 2026 incident, an outright read-only remount from a corrupted ext4 journal - behind
+each one. `lookie` is single-node, so `local-path`'s hostPath backing carries no
+scheduling risk.
+
+This trades away durability the iSCSI volume gave for free: `local-path`'s reclaim
+policy is `Delete`, and the volume can't be expanded.
+
+The original `prowlarr-config` PVC (iSCSI, `Retain`) is left in place, unreferenced, as a
+frozen pre-migration copy of `/config`.
 
 ## API key is git-authoritative
 
