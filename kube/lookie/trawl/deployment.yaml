@@ -81,7 +81,7 @@ spec:
             failureThreshold: 10
       containers:
         - name: trawl
-          image: ghcr.io/germondai/trawl:1.4.0@sha256:b8d81faa832f0417dbdeb2684c395a8405fb85739bbb89b19c019cdc3131814c
+          image: ghcr.io/germondai/trawl:1.6.2@sha256:fc39225a890a40b64ac65731dddd66e52f83fc9c20b54b7ed87c6cecdf355b13
           env:
             - name: BROWSER_POOL_SIZE
               value: "2"
