@@ -8,6 +8,7 @@
   pkgs.age
   pkgs.bottom
   inputs.colmena.packages.${pkgs.system}.colmena # NixOS multi-machine deployment tool
+  pkgs.codex # OpenAI Codex
   pkgs.crane # Tools for interacting with remote images and registries including crane and gcrane
   pkgs.dig
   pkgs.dive # Tool for exploring each layer in a docker image
