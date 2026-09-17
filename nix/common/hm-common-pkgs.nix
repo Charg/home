@@ -38,6 +38,7 @@
   pkgs.unzip
   pkgs.uv
   pkgs.whois
+  pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
   pkgs.yubikey-manager
   pkgs.zoxide
 
