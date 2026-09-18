@@ -1,7 +1,10 @@
+{ lib, ... }:
+
 {
   imports = [
     ./hardware-configuration.nix
     ../../common/system-packages.nix
+    ./firewall.nix
   ];
 
   users.users.nixos = {
@@ -18,6 +21,12 @@
 
   security.sudo.wheelNeedsPassword = false;
   nixpkgs.config.allowUnfree = true;
+
+  # Join forces with the nuc01 cluster
+  services.k3s.serverAddr = "https://nuc01:6443";
+  services.k3s.tokenFile = "/etc/rancher/k3s/token";
+  services.k3s.extraFlags = lib.mkForce "--disable=traefik --disable=servicelb --disable=metrics-server --node-ip=192.168.74.12 --advertise-address=192.168.74.12 --tls-san=192.168.74.12";
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
