@@ -15,10 +15,6 @@ resources:
     cpu: 300m
     memory: 768Mi
 
-extraEnvs:
-  - name: GOMEMLIMIT
-    value: "614MiB" # ~80% of the memory limit above
-
 config:
   receivers:
     otlp:
