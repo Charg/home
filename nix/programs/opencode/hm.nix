@@ -1,12 +1,13 @@
 {
   pkgs,
+  unstable-pkgs,
   ...
 }:
 
 {
   programs.opencode = {
     enable = true;
-    package = pkgs.opencode;
+    package = unstable-pkgs.opencode;
     settings = {
       autoupdate = false;
       share = "disabled";

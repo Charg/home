@@ -1,6 +1,13 @@
 { inputs }:
 
 let
+  # Pulls a single package forward from nixpkgs-unstable, globally, for every
+  # `pkgs.<name>` reference. Only worth it when something needs the override
+  # to apply implicitly (e.g. a module that reaches for `pkgs.foo` on its
+  # own) or as a base to build further overrides on (see claude-code below).
+  # A module that references the package directly can just take `unstable-pkgs`
+  # as an argument (see nix/lib/mksystem.nix) and use `unstable-pkgs.<name>`
+  # instead of adding an overlay here.
   unstableOverlay =
     packageName:
     (
@@ -58,12 +65,16 @@ in
           url = "${baseUrl}/${version}/${platformKey}/claude";
           sha256 = checksums.${platformKey};
         };
+        # Anthropic now serves this release's binary uncompressed; nixpkgs'
+        # installPhase still assumes the old .zst-compressed distribution.
+        installPhase =
+          builtins.replaceStrings
+            [ "unzstd -q $src -o $out/bin/claude" ]
+            [
+              "install -m755 $src $out/bin/claude"
+            ]
+            old.installPhase;
       }
     );
   })
-
-  (unstableOverlay "herdr")
-  (unstableOverlay "mise")
-  (unstableOverlay "opencode")
-  (unstableOverlay "prek")
 ]

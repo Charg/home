@@ -1,6 +1,7 @@
 {
   pkgs,
   inputs,
+  unstable-pkgs,
 }:
 
 [
@@ -22,14 +23,14 @@
   pkgs.lsof
   pkgs.minikube
   pkgs.mermaid-cli # Renders mermaid diagrams to PNG/SVG (mmdc)
-  pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
+  unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
   pkgs.nixd # Nix LSP
   pkgs.nixfmt-rfc-style
   pkgs.nnn
   pkgs.nodejs
   pkgs.openssl
-  pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
+  unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
   pkgs.python313
   pkgs.sqlite-interactive # compiled with quality of additions like readline support
   pkgs.sops
@@ -38,7 +39,7 @@
   pkgs.unzip
   pkgs.uv
   pkgs.whois
-  pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
+  unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
   pkgs.yubikey-manager
   pkgs.zoxide
 

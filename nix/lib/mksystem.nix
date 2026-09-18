@@ -22,6 +22,14 @@ let
   isDarwin = darwin;
   isLinux = !isDarwin && !isWSL;
 
+  # A plain nixpkgs-unstable package set, handed to modules as `unstable-pkgs`
+  # so they can reach for e.g. `unstable-pkgs.wtp` directly instead of adding
+  # an overlay just to pull one package forward from unstable.
+  unstable-pkgs = import inputs.nixpkgs-unstable {
+    inherit system;
+    config.allowUnfree = true;
+  };
+
   # The config files for this system.
   machineConfig = ../machines/${name}/config.nix;
   userOSConfig = ../users/${user}/${if isDarwin then "darwin" else "nixos"}.nix;
@@ -49,6 +57,11 @@ let
       home-manager.users.${user} = userHMConfig;
       home-manager.sharedModules = [
         inputs.sops-nix.homeManagerModules.sops
+        {
+          # sops-install-secrets' go.mod now needs a newer Go than nixos-25.11 ships;
+          # build it with nixpkgs-unstable's toolchain instead of the system's.
+          sops.package = (import inputs.sops-nix { pkgs = unstable-pkgs; }).sops-install-secrets;
+        }
       ];
       home-manager.extraSpecialArgs = {
         currentSystemName = name;
@@ -57,6 +70,7 @@ let
         isDarwin = isDarwin;
         isLinux = isLinux;
         isWSL = isWSL;
+        unstable-pkgs = unstable-pkgs;
       };
     }
 
@@ -67,6 +81,7 @@ let
         currentSystemUser = user;
         isWSL = isWSL;
         inputs = inputs;
+        unstable-pkgs = unstable-pkgs;
       };
     }
 

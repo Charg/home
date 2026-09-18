@@ -7,11 +7,12 @@
   isDarwin,
   isLinux,
   isWSL,
+  unstable-pkgs,
   ...
 }:
 
 let
-  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs; };
+  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs unstable-pkgs; };
 in
 
 {

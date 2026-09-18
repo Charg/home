@@ -1,6 +1,6 @@
-{ pkgs, ... }:
+{ unstable-pkgs, ... }:
 {
-  home.packages = [ pkgs.herdr ];
+  home.packages = [ unstable-pkgs.herdr ];
 
   xdg.configFile."herdr/config.toml".text = ''
     # Managed by Home Manager - edit nix/programs/herdr/hm.nix instead.
