@@ -1,0 +1,47 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openveto-mcp
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/charg/charts
+    chart: openveto
+    targetRevision: 0.11.0
+    helm:
+      valuesObject:
+        image:
+          tag: 0.11.0
+        imagePullSecrets:
+          - name: ghcr-pull-creds
+        existingSecret: openveto-env
+        migrations:
+          enabled: false
+        web:
+          enabled: false
+        worker:
+          enabled: false
+        backfillWorker:
+          enabled: false
+        watermarkCheck:
+          enabled: false
+        mcp:
+          enabled: true
+          env:
+            OTEL_SERVICE_NAME: openveto-mcp
+            OPENVETO_API_BASE_URL: http://openveto-web-web.ov.svc:80
+            OPENVETO_API_INTERNAL: 'true'
+  destination:
+    namespace: ov
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
