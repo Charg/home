@@ -1,4 +1,9 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  config,
+  ...
+}:
 
 {
   # Using determinate to manage nix. Not nix-darwin.
@@ -54,4 +59,11 @@
 
   # Required for some settings like homebrew to know what user to apply to.
   system.primaryUser = "cargeros";
+
+  # ghostty doesn't have darwin support. So we install it via a homebrew casks.
+  # this points ncurses at the bundled terminfo
+  environment.variables.TERMINFO_DIRS = [
+    "${config.users.users.cargeros.home}/Applications/Ghostty.app/Contents/Resources/terminfo"
+    "/Applications/Ghostty.app/Contents/Resources/terminfo"
+  ];
 }
