@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ov-media-proxy-public
+  namespace: ov
+  annotations:
+    # DNS for this host is owned by the Cloudflare Tunnel's public hostname
+    # (CNAME to <tunnel>.cfargotunnel.com), not external-dns — without this,
+    # external-dns would also create an A record pointing at the private
+    # traefik-internal LB IP and fight with the tunnel's CNAME.
+    external-dns.alpha.kubernetes.io/exclude: "true"
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: images.openveto.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ov-media-proxy
+                port:
+                  number: 8080
