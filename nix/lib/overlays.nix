@@ -49,13 +49,13 @@ in
     claude-code = prev.claude-code.overrideAttrs (
       old:
       let
-        version = "2.1.281";
+        version = "2.1.284";
         baseUrl = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
         checksums = {
-          "darwin-arm64" = "a922981f6f3b55a251ef9f9dbaa0621a5f99cbcb5ca67f8a797476ccfc83f626";
-          "darwin-x64" = "a9355cbb0d291ce948efcf61a6ef397401672f64fa5e5e67bca092fed6cd9088";
-          "linux-arm64" = "dd27b36438a4fed1670cd29bad2fda6a73b628b6da55443e5c2f647fe6ed328f";
-          "linux-x64" = "56fe3da88458465fb27d7e9299dddb3fead55750fb9c2de795f233b5eea6dce1";
+          "darwin-arm64" = "50a14c2f50f56668380fdda490167f1d3630d5cc18fb8aed3073c2c7ea7314fe";
+          "darwin-x64" = "79441b868935a11ed0630b2ee59327eda9f6a93bb8d470bd6633c03df76d2135";
+          "linux-arm64" = "3dd0f96d7ada463152d20300186f6cfc6ab94b57e218f49e3ac86db42ac695a6";
+          "linux-x64" = "5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f";
         };
         platformKey = "${final.stdenv.hostPlatform.node.platform}-${final.stdenv.hostPlatform.node.arch}";
       in
