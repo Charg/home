@@ -1,7 +1,5 @@
 {
   isLinux,
-  isDarwin,
-  lib,
   ...
 }:
 {
@@ -28,9 +26,6 @@
         identitiesOnly = true;
         identityFile = "~/.ssh/github";
         user = "git";
-      }
-      // lib.optionalAttrs isDarwin {
-        identityAgent = "~/Library/Containers/com.maxgoedjen.Secretive.SecretAgent/Data/socket.ssh";
       };
 
       "mpc00-unlock" = {

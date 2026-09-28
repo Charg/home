@@ -34,7 +34,6 @@
       "intellij-idea-ce"
       "podman-desktop"
       "raycast"
-      "secretive"
       "slack"
       "vagrant"
       "virtualbox"
