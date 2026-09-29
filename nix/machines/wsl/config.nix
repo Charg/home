@@ -16,6 +16,16 @@
     pkgs.wget
   ];
 
+  # https://nix-community.github.io/NixOS-WSL/how-to/vscode.html#option-1-set-up-nix-ld
+  programs.nix-ld.enable = true;
+
+  virtualisation.docker = {
+    enable = true;
+    package = pkgs.docker_29;
+  };
+
+  users.extraGroups.docker.members = [ currentSystemUser ];
+
   nix = {
     package = pkgs.nixVersions.latest;
     extraOptions = ''
