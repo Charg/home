@@ -261,6 +261,9 @@ in
         },
         {
           "class": "Emulator"
+        },
+        {
+          "class": "io.github.bugaevc.wl-clipboard"
         }
       ],
       "skiptaskbarhidden": [],
