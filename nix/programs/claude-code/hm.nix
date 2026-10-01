@@ -33,8 +33,6 @@
         "Bash(aws s3 rm *)"
         "Bash(aws s3 mv *)"
         "Bash(aws s3 sync * --delete*)"
-        "Bash(aws s3api delete-*)"
-        "Bash(aws cloudformation delete-stack*)"
         "Bash(aws iam create-access-key*)"
         "Bash(aws iam attach-*)"
         "Bash(aws iam put-*)"
@@ -78,7 +76,7 @@
         "Bash(git push * --force*)"
         "Bash(git push * -f *)"
         "Bash(git push * --delete*)"
-        "Bash(git push * :*)"
+        "Bash(git push * :* *)"
         "Bash(git reset --hard*)"
         "Bash(git clean*)"
         "Bash(git checkout -- *)"
@@ -116,11 +114,6 @@
         "Bash(gh api * --method DELETE*)"
 
         # Filesystem / system
-        "Bash(rm -rf /*)"
-        "Bash(rm -rf ~*)"
-        "Bash(rm -rf $HOME*)"
-        "Bash(rm -rf .)"
-        "Bash(rm -rf ..*)"
         "Bash(rm -rf *)"
         "Bash(rm -fr *)"
         "Bash(rm -r -f *)"
@@ -185,16 +178,6 @@
         "Edit(~/.bash_profile)"
         "Edit(~/.profile)"
         "Edit(/etc/**)"
-        "Write(~/.ssh/**)"
-        "Write(~/.aws/**)"
-        "Write(~/.gnupg/**)"
-        "Write(~/.kube/**)"
-        "Write(~/.zshrc)"
-        "Write(~/.zprofile)"
-        "Write(~/.bashrc)"
-        "Write(~/.bash_profile)"
-        "Write(~/.profile)"
-        "Write(/etc/**)"
       ];
       permissions.ask = [
         # Terraform / Terragrunt / OpenTofu
