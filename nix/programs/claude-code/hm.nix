@@ -13,7 +13,7 @@
     settings = {
       autoCompactEnabled = true;
       effortLevel = "auto";
-      model = "opusplan";
+      model = "opus";
       outputStyle = "terse";
       permissions.defaultMode = "auto";
       preferredNotifChannel = "ghostty";
