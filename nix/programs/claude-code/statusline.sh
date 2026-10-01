@@ -126,158 +126,149 @@ if [[ "$currency_code" != "USD" ]]; then
   fi
 fi
 
-# Daily cost: today's USD spend across every project, derived from
-# ~/.claude/projects/*/*.jsonl. Cached for 60s so the statusline isn't
-# repeatedly scanning the transcript tree at typing speed. Cache busts on
-# local date rollover.
-daily_cost_usd=0
-daily_cache_file="${INSTALL_DIR}/.daily-cost-cache"
+# Daily + weekly (Mon-start) USD spend from ~/.claude/projects/*/*.jsonl.
+# Cached 60s / 300s; each cache busts on day / week rollover.
 today_local=$(date '+%Y-%m-%d')
-need_recompute=true
-if [[ -f "$daily_cache_file" ]]; then
-  c_total=$(sed -n '1p' "$daily_cache_file" 2>/dev/null || echo "")
-  c_ts=$(sed -n '2p' "$daily_cache_file" 2>/dev/null || echo 0)
-  c_day=$(sed -n '3p' "$daily_cache_file" 2>/dev/null || echo "")
-  # Treat any corrupt/non-numeric cache line as a miss — the script runs
-  # under `set -e` so an arithmetic error here would abort the whole render.
+
+# Pricing — USD per 1M tokens (https://platform.claude.com/docs/en/about-claude/pricing).
+# First match wins, so specific ids sit above their family fallback.
+# Unmatched models are dropped (under-counted), so keep this current.
+# Dedupe by message.id|requestId: transcripts re-emit the same usage record.
+COST_JQ='
+  def model_rate($m):
+    ($m | ascii_downcase) as $lm
+    | if   ($lm | test("(fable|mythos)-5-[1-9]([^0-9]|$)")) then {i:10, o:50, cw5:12.50, cw1h:20, cr:0.25}
+      elif ($lm | test("fable|mythos"))             then {i:10,   o:50,   cw5:12.50,  cw1h:20,    cr:1.00}
+      elif ($lm | test("opus-5-5"))                  then {i:4,    o:20,   cw5:5,      cw1h:8,     cr:0.20}
+      elif ($lm | test("opus-4-[5-9]|opus-[5-9]"))   then {i:5,    o:25,   cw5:6.25,   cw1h:10,    cr:0.50}
+      elif ($lm | test("opus"))                      then {i:15,   o:75,   cw5:18.75,  cw1h:30,    cr:1.50}
+      elif ($lm | test("sonnet-5|sonnet-[6-9]"))     then {i:2,    o:10,   cw5:2.50,   cw1h:4,     cr:0.20}
+      elif ($lm | test("sonnet"))                    then {i:3,    o:15,   cw5:3.75,   cw1h:6,     cr:0.30}
+      elif ($lm | test("haiku-4|haiku-[5-9]"))       then {i:1,    o:5,    cw5:1.25,   cw1h:2,     cr:0.10}
+      elif ($lm | test("3-5-haiku|haiku-3-5"))       then {i:0.80, o:4,    cw5:1,      cw1h:1.60,  cr:0.08}
+      elif ($lm | test("3-haiku|haiku-3"))           then {i:0.25, o:1.25, cw5:0.3125, cw1h:0.50,  cr:0.025}
+      elif ($lm | test("haiku"))                     then {i:1,    o:5,    cw5:1.25,   cw1h:2,     cr:0.10}
+      else null end;
+  [ inputs
+    | select(.timestamp != null and (.message.usage // null) != null and (.message.model // null) != null)
+    | (((.timestamp[0:19] + "Z") | fromdateiso8601?) // 0) as $ts
+    | select($ts >= $lo and $ts < $hi)
+    | select(model_rate(.message.model) != null)
+  ]
+  | (map(select((.message.id // "") != "" or (.requestId // "") != ""))
+      | unique_by((.message.id // "") + "|" + (.requestId // "")))
+    + map(select((.message.id // "") == "" and (.requestId // "") == ""))
+  | .[]
+  | model_rate(.message.model) as $r
+  | .message.usage as $u
+  | ((($u.input_tokens // 0)              * $r.i)
+    + (($u.output_tokens // 0)            * $r.o)
+    + (($u.cache_read_input_tokens // 0)  * $r.cr)
+    + (if ($u.cache_creation // null) != null
+         then (($u.cache_creation.ephemeral_5m_input_tokens // 0) * $r.cw5)
+            + (($u.cache_creation.ephemeral_1h_input_tokens // 0) * $r.cw1h)
+         else (($u.cache_creation_input_tokens // 0) * $r.cw5)
+       end)) / 1000000
+'
+
+# Local midnight of YYYY-MM-DD as epoch (BSD, then GNU date). Empty on failure.
+local_midnight_epoch() {
+  date -j -f '%Y-%m-%d %H:%M:%S' "$1 00:00:00" '+%s' 2>/dev/null \
+    || date -d "$1 00:00:00" '+%s' 2>/dev/null \
+    || true
+}
+
+# USD spend in [lo, hi) from transcripts modified in the last `mmin` minutes.
+# Non-zero exit on jq failure so callers keep the last cached value.
+sum_cost_usd() {
+  local lo=$1 hi=$2 mmin=$3 f raw
+  local projects_dir="${HOME}/.claude/projects"
+  local files=()
+  if [[ -d "$projects_dir" ]]; then
+    while IFS= read -r f; do
+      [[ -n "$f" ]] && files+=("$f")
+    done < <(find "$projects_dir" -type f -name '*.jsonl' -mmin "-${mmin}" 2>/dev/null)
+  fi
+  if (( ${#files[@]} == 0 )); then printf '0'; return 0; fi
+  raw=$(jq -n -r --argjson lo "$lo" --argjson hi "$hi" "$COST_JQ" "${files[@]}" 2>/dev/null) || return 1
+  printf '%s\n' "$raw" | awk 'BEGIN{s=0} {s+=$1} END{printf "%.4f", s+0}'
+}
+
+# Cache format: total, fetch epoch, window key. Sets <prefix>_cost_usd if the
+# key matches (stale fallback) and <prefix>_need=false if also within ttl.
+read_cost_cache() {
+  local file=$1 key=$2 ttl=$3 prefix=$4 c_total c_ts c_key
+  printf -v "${prefix}_need" '%s' true
+  [[ -f "$file" ]] || return 0
+  c_total=$(sed -n '1p' "$file" 2>/dev/null || echo "")
+  c_ts=$(sed -n '2p' "$file" 2>/dev/null || echo 0)
+  c_key=$(sed -n '3p' "$file" 2>/dev/null || echo "")
+  # Corrupt lines = miss; bad arithmetic would abort under `set -e`.
   [[ "$c_ts" =~ ^[0-9]+$ ]] || c_ts=0
   [[ "$c_total" =~ ^[0-9]+(\.[0-9]+)?$ ]] || c_total=""
-  # Carry today's last known total forward as a fallback so a transient
-  # recompute failure (jq parse error, date parse failure) doesn't blank
-  # out the daily display — the next successful recompute will refresh it.
-  if [[ -n "$c_total" && "$c_day" == "$today_local" ]]; then
-    daily_cost_usd="$c_total"
-    if (( $(date +%s) - c_ts < 60 )); then
-      need_recompute=false
+  if [[ -n "$c_total" && "$c_key" == "$key" ]]; then
+    printf -v "${prefix}_cost_usd" '%s' "$c_total"
+    if (( $(date +%s) - c_ts < ttl )); then
+      printf -v "${prefix}_need" '%s' false
+    fi
+  fi
+}
+
+write_cost_cache() {
+  mkdir -p "$INSTALL_DIR" 2>/dev/null || true
+  printf '%s\n%s\n%s\n' "$2" "$(date +%s)" "$3" > "$1" 2>/dev/null || true
+}
+
+# --- Daily ---
+daily_cost_usd=0
+daily_cache_file="${INSTALL_DIR}/.daily-cost-cache"
+read_cost_cache "$daily_cache_file" "$today_local" 60 daily
+if [[ "$daily_need" == "true" ]]; then
+  day_lo=$(local_midnight_epoch "$today_local")
+  if [[ -n "$day_lo" ]]; then
+    day_hi=$(( day_lo + 86400 ))
+    # 26h mtime window; only cache on success so a failure doesn't write 0.
+    if v=$(sum_cost_usd "$day_lo" "$day_hi" 1560); then
+      daily_cost_usd="$v"
+      write_cost_cache "$daily_cache_file" "$daily_cost_usd" "$today_local"
     fi
   fi
 fi
-if [[ "$need_recompute" == "true" ]]; then
-  # Local-day window expressed as UTC epoch bounds. BSD `date -j -f` (macOS)
-  # and GNU `date -d` use incompatible syntax for parsing a date string —
-  # try both so the script keeps working if anyone runs it on Linux. If
-  # neither succeeds we skip the recompute entirely rather than silently
-  # treating "epoch 0" as today (which would zero out the daily total).
-  day_lo=$(date -j -f '%Y-%m-%d %H:%M:%S' "${today_local} 00:00:00" '+%s' 2>/dev/null \
-    || date -d "${today_local} 00:00:00" '+%s' 2>/dev/null \
-    || echo "")
-  # recompute_ok stays false on any failure path (date parse failure, jq
-  # parse error on a half-written .jsonl). Only a successful recompute
-  # writes the cache — otherwise we'd clobber the last good value with 0
-  # and silently suppress the daily display for the full 60s TTL.
-  recompute_ok=false
-  if [[ -n "$day_lo" ]]; then
-    day_hi=$(( day_lo + 86400 ))
-    # Sonnet 5 launched on introductory pricing ($2/$10) that reverts to the
-    # standard $3/$15 on 2026-09-01. Gate on today's local date (ISO strings
-    # compare lexicographically) so the table self-corrects at the cutover
-    # without a manual edit — "2026-08-31" is the last introductory day.
-    if [[ "$today_local" > "2026-08-31" ]]; then s5_std=true; else s5_std=false; fi
-    projects_dir="${HOME}/.claude/projects"
-    jsonl_files=()
-    if [[ -d "$projects_dir" ]]; then
-      # 26h window of mtimes catches anything that could still be writing
-      # records inside today's local-time window.
-      while IFS= read -r f; do
-        [[ -n "$f" ]] && jsonl_files+=("$f")
-      done < <(find "$projects_dir" -type f -name '*.jsonl' -mmin -1560 2>/dev/null)
-    fi
-    if (( ${#jsonl_files[@]} > 0 )); then
-      # Pricing table — USD per 1M tokens. Source: https://www.anthropic.com/pricing
-      # Fable 5 / Mythos 5 ($10/$50) are the top tier, above Opus. Mythos 5
-      # (claude-mythos-5, Project Glasswing limited availability) shares Fable's
-      # rate, so one branch covers both via the `fable|mythos` test. Their ids
-      # have no `opus` substring, so ordering vs. the opus branches doesn't
-      # matter for correctness — they sit first so the priciest tier is easy to
-      # spot.
-      # Opus 4.5+ is priced 1/3 of older Opus (4.1, 3) — Anthropic dropped the
-      # rate for the newer models. The newer branch must be matched *before* the
-      # generic `opus` fallback so it wins for `claude-opus-4-7-…` etc. Sonnet 5+
-      # gets its own branch before the generic `sonnet` fallback because it
-      # launched on introductory pricing ($2/$10) — a date gate (bash `s5_std`,
-      # passed into jq as `$s5std`) swaps to the standard $3/$15 at the
-      # 2026-09-01 cutover, while Sonnet 4.6 and earlier stay $3/$15 throughout. Haiku
-      # 4.x is its own bucket ($1/$5 with 1h cache write $2 — note 2x not 2.5x).
-      # Haiku 3.5 is matched before legacy Haiku 3 so `claude-3-5-haiku-…`
-      # doesn't fall into the cheaper bucket. Any model with no row here returns
-      # null and is dropped by the `select(model_rate(...) != null)` filter — so
-      # an unpriced model silently *under-counts* the daily total (excluded, not
-      # zero-weighted). Keep this table current when Anthropic ships or re-prices
-      # a model, or that model's spend vanishes from the daily figure.
-      # Dedupe by message.id|requestId — Claude Code transcripts re-emit the
-      # same usage record multiple times (streaming progress events, session
-      # resume rewrites). Without dedup the same tokens get billed N times,
-      # inflating the daily total by 2–5x vs. tools like ccusage/goccc.
-      # Records missing both IDs are passed through un-deduped so they aren't
-      # collapsed into a single bucket (which would under-count).
-      #
-      # The `|| jq_exit=$?` is load-bearing: under `set -e` a non-zero exit
-      # from the command substitution would otherwise abort the script before
-      # we get a chance to handle the failure. With the `|| ...` guard the
-      # exit code is captured and the next block falls back to the cached
-      # value instead of crashing the render.
-      jq_exit=0
-      jq_raw=$(jq -n -r --argjson lo "$day_lo" --argjson hi "$day_hi" --argjson s5std "$s5_std" '
-        def model_rate($m):
-          ($m | ascii_downcase) as $lm
-          | if   ($lm | test("fable|mythos"))             then {i:10,   o:50,   cw5:12.50,  cw1h:20,    cr:1.00}
-            elif ($lm | test("opus-4-[5-9]|opus-[5-9]"))   then {i:5,    o:25,   cw5:6.25,   cw1h:10,    cr:0.50}
-            elif ($lm | test("opus"))                      then {i:15,   o:75,   cw5:18.75,  cw1h:30,    cr:1.50}
-            elif ($lm | test("sonnet-5|sonnet-[6-9]"))     then (if $s5std then {i:3, o:15, cw5:3.75, cw1h:6, cr:0.30}
-                                                                          else {i:2, o:10, cw5:2.50, cw1h:4, cr:0.20} end)
-            elif ($lm | test("sonnet"))                    then {i:3,    o:15,   cw5:3.75,   cw1h:6,     cr:0.30}
-            elif ($lm | test("haiku-4|haiku-[5-9]"))       then {i:1,    o:5,    cw5:1.25,   cw1h:2,     cr:0.10}
-            elif ($lm | test("3-5-haiku|haiku-3-5"))       then {i:0.80, o:4,    cw5:1,      cw1h:1.60,  cr:0.08}
-            elif ($lm | test("3-haiku|haiku-3"))           then {i:0.25, o:1.25, cw5:0.3125, cw1h:0.50,  cr:0.025}
-            elif ($lm | test("haiku"))                     then {i:1,    o:5,    cw5:1.25,   cw1h:2,     cr:0.10}
-            else null end;
-        [ inputs
-          | select(.timestamp != null and (.message.usage // null) != null and (.message.model // null) != null)
-          | (((.timestamp[0:19] + "Z") | fromdateiso8601?) // 0) as $ts
-          | select($ts >= $lo and $ts < $hi)
-          | select(model_rate(.message.model) != null)
-        ]
-        | (map(select((.message.id // "") != "" or (.requestId // "") != ""))
-            | unique_by((.message.id // "") + "|" + (.requestId // "")))
-          + map(select((.message.id // "") == "" and (.requestId // "") == ""))
-        | .[]
-        | model_rate(.message.model) as $r
-        | .message.usage as $u
-        | ((($u.input_tokens // 0)              * $r.i)
-          + (($u.output_tokens // 0)            * $r.o)
-          + (($u.cache_read_input_tokens // 0)  * $r.cr)
-          + (if ($u.cache_creation // null) != null
-               then (($u.cache_creation.ephemeral_5m_input_tokens // 0) * $r.cw5)
-                  + (($u.cache_creation.ephemeral_1h_input_tokens // 0) * $r.cw1h)
-               else (($u.cache_creation_input_tokens // 0) * $r.cw5)
-             end)) / 1000000
-      ' "${jsonl_files[@]}" 2>/dev/null) || jq_exit=$?
-      if [[ "$jq_exit" -eq 0 ]]; then
-        daily_cost_usd=$(printf '%s\n' "$jq_raw" | awk 'BEGIN{s=0} {s+=$1} END{printf "%.4f", s+0}')
-        recompute_ok=true
+
+# --- Weekly ---
+week_cost_usd=0
+weekly_cache_file="${INSTALL_DIR}/.weekly-cost-cache"
+days_back=$(( $(date +%u) - 1 ))
+week_start_local=$(date -v-"${days_back}"d '+%Y-%m-%d' 2>/dev/null \
+  || date -d "-${days_back} days" '+%Y-%m-%d' 2>/dev/null \
+  || echo "")
+[[ "$week_start_local" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || week_start_local=""
+if [[ -n "$week_start_local" ]]; then
+  read_cost_cache "$weekly_cache_file" "$week_start_local" 300 week
+  if [[ "$week_need" == "true" ]]; then
+    week_lo=$(local_midnight_epoch "$week_start_local")
+    if [[ -n "$week_lo" ]]; then
+      week_hi=$(( $(date +%s) + 86400 ))
+      # mtime window: week so far + 2h buffer.
+      week_mmin=$(( ($(date +%s) - week_lo) / 60 + 120 ))
+      if v=$(sum_cost_usd "$week_lo" "$week_hi" "$week_mmin"); then
+        week_cost_usd="$v"
+        write_cost_cache "$weekly_cache_file" "$week_cost_usd" "$week_start_local"
       fi
-    else
-      # No transcript files to scan — legitimate zero, safe to cache.
-      daily_cost_usd=0
-      recompute_ok=true
     fi
-  fi
-  if [[ "$recompute_ok" == "true" ]]; then
-    mkdir -p "$INSTALL_DIR" 2>/dev/null || true
-    printf '%s\n%s\n%s\n' "$daily_cost_usd" "$(date +%s)" "$today_local" \
-      > "$daily_cache_file" 2>/dev/null || true
   fi
 fi
 
 # --- Helper: format cost with color ---
-# Session vs daily spending have very different distributions — sessions are
+# Session vs daily vs weekly spending have very different distributions — sessions are
 # usually small with a long tail; daily totals are the aggregate.
 format_cost() {
   local cost=$1
-  local kind=${2:-session}  # session | daily
+  local kind=${2:-session}  # session | daily | weekly
   local yellow_at red_at
   case "$kind" in
     daily)  yellow_at=200; red_at=400 ;;
+    weekly) yellow_at=1000; red_at=2000 ;;
     *)      yellow_at=75;  red_at=150 ;;
   esac
   local formatted
@@ -387,6 +378,13 @@ if [[ -n "$daily_cost_usd" && "$daily_cost_usd" != "0" && "$daily_cost_usd" != "
   daily_cost_display="💰 $(format_cost "$daily_cost_val" daily) today"
 fi
 
+# --- Weekly cost (convert USD to local currency) ---
+week_cost_display=""
+if [[ -n "$week_cost_usd" && "$week_cost_usd" != "0" && "$week_cost_usd" != "0.0000" && "$week_cost_usd" != "null" ]]; then
+  week_cost_val=$(echo "$week_cost_usd $currency_rate" | awk '{printf "%.2f", $1 * $2}')
+  week_cost_display="🤑 $(format_cost "$week_cost_val" weekly) week"
+fi
+
 # --- Rate limit bar ---
 rate_display=""
 if [[ -n "$five_hour_pct" && "$five_hour_pct" != "null" ]]; then
@@ -434,7 +432,7 @@ if [[ "$total_input" != "0" && "$total_input" != "null" && "${total_input%.*}" -
 fi
 
 # --- Build two-line output ---
-# Line 1: folder, branch, model, thinking, session cost, daily cost, time-left
+# Line 1: folder, branch, model, thinking, session cost, daily cost, weekly cost, time-left
 line1_parts=()
 if [[ -n "$repo_name" ]]; then
   if [[ "$in_git_repo" == "true" ]]; then
@@ -449,6 +447,7 @@ fi
 [[ -n "$effort_display" ]] && line1_parts+=("$effort_display")
 [[ -n "$session_cost_local" ]] && line1_parts+=("$session_cost_local")
 [[ -n "$daily_cost_display" ]] && line1_parts+=("$daily_cost_display")
+[[ -n "$week_cost_display" ]] && line1_parts+=("$week_cost_display")
 [[ -n "$rate_display" ]] && line1_parts+=("$rate_display")
 
 # Line 2: context, tokens in, tokens out
