@@ -76,7 +76,6 @@
         "Bash(git push * --force*)"
         "Bash(git push * -f *)"
         "Bash(git push * --delete*)"
-        "Bash(git push * :* *)"
         "Bash(git reset --hard*)"
         "Bash(git clean*)"
         "Bash(git checkout -- *)"
