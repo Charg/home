@@ -36,16 +36,17 @@ tsv_line=$(echo "$stdin_data" | jq -j --arg us "$US" '
     (.rate_limits.five_hour.used_percentage // ""),
     (.rate_limits.five_hour.resets_at // ""),
     (.effort.level // ""),
-    (.thinking.enabled // false)
+    (.thinking.enabled // false),
+    (.transcript_path // "")
   ] | map(tostring) | join($us)
 ' 2>/dev/null || true)
 if [[ -z "$tsv_line" ]]; then
-  default_fields=("" "" "" 0 0 0 0 0 0 "" "" "" false)
+  default_fields=("" "" "" 0 0 0 0 0 0 "" "" "" false "")
   tsv_line=$(IFS="$US"; echo "${default_fields[*]}")
 fi
 IFS="$US" read -r cwd model_name model_id session_cost_usd duration_ms ctx_pct ctx_size \
   total_input total_output five_hour_pct five_hour_resets effort_level thinking_enabled \
-  <<< "$tsv_line"
+  transcript_path <<< "$tsv_line"
 
 # --- Gate numeric fields before they hit bash arithmetic ---
 # Values above come from Claude Code's own stdin JSON, but they still flow
@@ -66,6 +67,30 @@ validate_numeric total_input 0
 validate_numeric total_output 0
 validate_numeric five_hour_pct ""
 validate_numeric five_hour_resets ""
+
+# --- Session cache tokens (main transcript only; subagents live in other files) ---
+# Path must sit under ~/.claude/projects and contain no `..` segments.
+cache_read=0
+cache_write=0
+case "$transcript_path" in
+  "${HOME}/.claude/projects/"*.jsonl)
+    if [[ "$transcript_path" != *"/../"* && -r "$transcript_path" ]]; then
+      cache_line=$(jq -n -r '
+        [ inputs | select((.message.usage // null) != null) ]
+        | (map(select((.message.id // "") != "" or (.requestId // "") != ""))
+            | unique_by((.message.id // "") + "|" + (.requestId // "")))
+          + map(select((.message.id // "") == "" and (.requestId // "") == ""))
+        | map(.message.usage)
+        | "\(map(.cache_read_input_tokens // 0) | add // 0) \(map(.cache_creation_input_tokens // 0) | add // 0)"
+      ' "$transcript_path" 2>/dev/null || true)
+      read -r cache_read cache_write <<< "$cache_line" || true
+    fi
+    ;;
+esac
+validate_numeric cache_read 0
+validate_numeric cache_write 0
+[[ -n "$cache_read" ]] || cache_read=0
+[[ -n "$cache_write" ]] || cache_write=0
 
 # --- Currency, FX rate, and daily cost (self-contained — no external CLI) ---
 # Currency picked via STATUSLINE_CURRENCY (default USD). USD short-circuits the
@@ -422,13 +447,28 @@ if [[ "$ctx_size" != "0" && "$ctx_size" != "null" ]]; then
   fi
 fi
 
+# Token count → 352 | 45k | 1.2M
+fmt_tokens() {
+  local n=${1%.*}
+  if (( n >= 1000000 )); then
+    awk -v n="$n" 'BEGIN{printf "%.1fM", n/1000000}'
+  elif (( n >= 1000 )); then
+    printf '%dk' $(( n / 1000 ))
+  else
+    printf '%d' "$n"
+  fi
+}
+
 tokens_in_display=""
 tokens_out_display=""
 if [[ "$total_input" != "0" && "$total_input" != "null" && "${total_input%.*}" -gt 0 ]]; then
-  in_k=$(( ${total_input%.*} / 1000 ))
-  out_k=$(( ${total_output%.*} / 1000 ))
-  tokens_in_display="🧠 ${in_k}k in"
-  tokens_out_display="${out_k}k out"
+  tokens_in_display="🧠 $(fmt_tokens "$total_input") in"
+  tokens_out_display="$(fmt_tokens "${total_output:-0}") out"
+fi
+
+tokens_cache_display=""
+if (( ${cache_read%.*} > 0 || ${cache_write%.*} > 0 )); then
+  tokens_cache_display="♻️ $(fmt_tokens "$cache_read") read / $(fmt_tokens "$cache_write") write"
 fi
 
 # --- Build two-line output ---
@@ -450,11 +490,12 @@ fi
 [[ -n "$week_cost_display" ]] && line1_parts+=("$week_cost_display")
 [[ -n "$rate_display" ]] && line1_parts+=("$rate_display")
 
-# Line 2: context, tokens in, tokens out
+# Line 2: context, tokens in, tokens out, cache read/write
 line2_parts=()
 [[ -n "$ctx_display" ]] && line2_parts+=("$ctx_display")
 [[ -n "$tokens_in_display" ]] && line2_parts+=("$tokens_in_display")
 [[ -n "$tokens_out_display" ]] && line2_parts+=("$tokens_out_display")
+[[ -n "$tokens_cache_display" ]] && line2_parts+=("$tokens_cache_display")
 
 # Join parts within each line
 join_parts() {
