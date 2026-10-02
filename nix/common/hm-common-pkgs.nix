@@ -8,7 +8,7 @@
   # CLI Tools
   pkgs.age
   pkgs.bottom
-  inputs.colmena.packages.${pkgs.system}.colmena # NixOS multi-machine deployment tool
+  inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
   pkgs.codex # OpenAI Codex
   pkgs.crane # Tools for interacting with remote images and registries including crane and gcrane
   pkgs.dig
