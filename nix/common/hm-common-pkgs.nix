@@ -8,7 +8,6 @@
   # CLI Tools
   pkgs.age
   pkgs.bottom
-  inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
   pkgs.codex # OpenAI Codex
   pkgs.crane # Tools for interacting with remote images and registries including crane and gcrane
   pkgs.dig
@@ -23,27 +22,29 @@
   pkgs.just # Handy way to save and run project-specific commands
   pkgs.kube-prompt
   pkgs.lsof
-  pkgs.minikube
   pkgs.mermaid-cli # Renders mermaid diagrams to PNG/SVG (mmdc)
-  unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
+  pkgs.minikube
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
   pkgs.nixd # Nix LSP
   pkgs.nixfmt-rfc-style
   pkgs.nnn
   pkgs.nodejs
   pkgs.openssl
-  unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
   pkgs.python313
-  pkgs.sqlite-interactive # compiled with quality of additions like readline support
   pkgs.sops
+  pkgs.sqlite-interactive # compiled with quality of additions like readline support
   pkgs.tmux
   pkgs.trivy # Simple and comprehensive vulnerability scanner for containers, suitable for CI
   pkgs.unzip
   pkgs.uv
   pkgs.whois
-  unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
   pkgs.yubikey-manager
   pkgs.zoxide
+
+  inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
+  unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
+  unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
+  unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
 
   # Network Tools
   pkgs.ipcalc
