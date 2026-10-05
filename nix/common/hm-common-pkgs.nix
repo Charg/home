@@ -14,8 +14,9 @@
   pkgs.dig
   pkgs.dive # Tool for exploring each layer in a docker image
   pkgs.file
-  pkgs.git-crypt
   pkgs.gh # Github CLI tools
+  pkgs.git-crypt
+  pkgs.glow # Render markdown on the CLI, with pizzazz! - https://github.com/charmbracelet/glow
   pkgs.grype # Vulnerability scanner for container images and filesystems
   pkgs.htop
   pkgs.jq
