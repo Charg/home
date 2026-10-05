@@ -16,6 +16,8 @@
         controlPersist = "10m";
         forwardAgent = false;
         identitiesOnly = true;
+        serverAliveCountMax = 3;
+        serverAliveInterval = 30;
       };
 
       "github.com" = {
