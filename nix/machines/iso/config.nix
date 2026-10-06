@@ -27,5 +27,6 @@
     "flakes"
   ];
   services.openssh.enable = true;
+  boot.zfs.forceImportRoot = false;
   system.stateVersion = "23.11";
 }

@@ -6,6 +6,7 @@
     ../../common/system-packages.nix
     ./firewall.nix
     ../../common/synology-iscsi.nix
+    ../../common/initrd-ssh-unlock.nix
   ];
 
   users.users.nixos = {
@@ -37,20 +38,6 @@
   boot.kernel.sysctl = {
     "net.core.rmem_max" = 8388608;
     "net.core.wmem_max" = 8388608;
-  };
-
-  boot.kernelParams = [ "ip=dhcp" ];
-  boot.initrd.network.enable = true;
-  boot.initrd.network.ssh = {
-    enable = true;
-    port = 2222;
-    shell = "/bin/cryptsetup-askpass";
-    authorizedKeys = [
-      (builtins.readFile ../../common/keys/home.pub)
-    ];
-    hostKeys = [
-      "/etc/ssh/ssh_host_ed25519_key"
-    ];
   };
 
   services.openssh.enable = true;

@@ -8,7 +8,7 @@
   programs.claude-code = {
     enable = true;
 
-    skillsDir = ../../common/skills;
+    skills = ../../common/skills;
 
     settings = {
       autoCompactEnabled = true;

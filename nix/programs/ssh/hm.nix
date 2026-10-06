@@ -7,55 +7,55 @@
     enable = true;
     enableDefaultConfig = false;
     includes = [ "~/.ssh/config.d/*" ];
-    matchBlocks = {
+    settings = {
 
       "*" = {
-        addKeysToAgent = "yes";
-        controlMaster = "auto";
-        controlPath = "~/.ssh/sockets/%C";
-        controlPersist = "10m";
-        forwardAgent = false;
-        identitiesOnly = true;
-        serverAliveCountMax = 3;
-        serverAliveInterval = 30;
+        AddKeysToAgent = "yes";
+        ControlMaster = "auto";
+        ControlPath = "~/.ssh/sockets/%C";
+        ControlPersist = "10m";
+        ForwardAgent = false;
+        IdentitiesOnly = true;
+        ServerAliveCountMax = 3;
+        ServerAliveInterval = 30;
       };
 
       "github.com" = {
-        controlMaster = "auto";
-        controlPath = "~/.ssh/sockets/%C";
-        controlPersist = "10m";
-        hostname = "github.com";
-        identitiesOnly = true;
-        identityFile = "~/.ssh/github";
-        user = "git";
+        ControlMaster = "auto";
+        ControlPath = "~/.ssh/sockets/%C";
+        ControlPersist = "10m";
+        HostName = "github.com";
+        IdentitiesOnly = true;
+        IdentityFile = "~/.ssh/github";
+        User = "git";
       };
 
       "mpc00-unlock" = {
-        hostname = "192.168.74.11";
-        port = 2222;
-        user = "root";
-        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc00";
+        HostName = "192.168.74.11";
+        Port = 2222;
+        User = "root";
+        UserKnownHostsFile = "~/.ssh/known_hosts.d/mpc00";
       };
 
       "mpc00" = {
-        hostname = "192.168.74.11";
-        port = 22;
-        user = "nixos";
-        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc00";
+        HostName = "192.168.74.11";
+        Port = 22;
+        User = "nixos";
+        UserKnownHostsFile = "~/.ssh/known_hosts.d/mpc00";
       };
 
       "mpc01-unlock" = {
-        hostname = "192.168.74.12";
-        port = 2222;
-        user = "root";
-        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc01";
+        HostName = "192.168.74.12";
+        Port = 2222;
+        User = "root";
+        UserKnownHostsFile = "~/.ssh/known_hosts.d/mpc01";
       };
 
       "mpc01" = {
-        hostname = "192.168.74.12";
-        port = 22;
-        user = "nixos";
-        userKnownHostsFile = "~/.ssh/known_hosts.d/mpc01";
+        HostName = "192.168.74.12";
+        Port = 22;
+        User = "nixos";
+        UserKnownHostsFile = "~/.ssh/known_hosts.d/mpc01";
       };
 
     };
