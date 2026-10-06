@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: scryer
-          image: ghcr.io/scryer-media/scryer:0.19.4@sha256:e16af536abd122acdd172213b4ab8ff3bf873aac923f44cf8d6ffd54d8f5ab8e
+          image: ghcr.io/scryer-media/scryer:0.21.14@sha256:6a90d501e6b76f457836b2742dc81cf99bf5cc8b640b2a7bd42bde0e48d16319
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
