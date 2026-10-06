@@ -26,6 +26,10 @@
   security.sudo.wheelNeedsPassword = false;
   nixpkgs.config.allowUnfree = true;
 
+  # Join forces with the nuc01 cluster
+  services.k3s.serverAddr = "https://nuc01:6443";
+  services.k3s.tokenFile = "/etc/rancher/k3s/token";
+
   # Pin k3s's node address instead of relying on auto-detection: the node
   # registered with a stale, no-longer-valid address at first boot (before
   # the static DHCP reservation had taken effect) and k3s never re-detects
