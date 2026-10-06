@@ -6,6 +6,7 @@
 
     # Enable Python support
     withPython3 = true;
+    withRuby = false;
 
     extraConfig = ''
       " Display Settings
@@ -25,7 +26,7 @@
       set incsearch
     '';
 
-    extraLuaConfig = ''
+    initLua = ''
       -- ============================================================================
       -- CLIPBOARD CONFIGURATION (OSC 52 for remote sessions)
       -- ============================================================================

@@ -72,7 +72,6 @@ in
       pkgs.zathura # PDF Reader
 
       # Electron Apps
-      pkgs.anytype
       pkgs.bitwarden-desktop
       pkgs.discord
       pkgs.signal-desktop
@@ -112,6 +111,7 @@ in
   #
   programs.bat.enable = true;
   programs.firefox.enable = isLinux;
+  programs.firefox.configPath = ".mozilla/firefox";
 
   #
   # Services

@@ -26,7 +26,7 @@
   pkgs.minikube
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
   pkgs.nixd # Nix LSP
-  pkgs.nixfmt-rfc-style
+  pkgs.nixfmt
   pkgs.nnn
   pkgs.nodejs
   pkgs.openssl
@@ -53,7 +53,6 @@
   pkgs.wireshark
 
   # Desktop Apps
-  # pkgs.anytype # Create notes, tasks, databases, and chats that only you can access
   pkgs.bitwarden-desktop
   pkgs.dbeaver-bin
 ]

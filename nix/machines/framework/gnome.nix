@@ -13,10 +13,7 @@ in
   };
 
   services.desktopManager.gnome.enable = true;
-  services.displayManager.gdm = {
-    enable = true;
-    wayland = true;
-  };
+  services.displayManager.gdm.enable = true;
 
   # pop-shell's floating_exceptions/main.js is a standalone GTK3 GJS app,
   # but the GNOME session is GTK4-based and doesn't export a GTK3 typelib.

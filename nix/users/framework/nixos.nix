@@ -7,12 +7,11 @@
   # setting this there to work with the "shell" directive below
   programs.zsh.enable = true;
 
-  programs.adb.enable = true;
+  environment.systemPackages = [ pkgs.android-tools ];
 
   users.users.framework = {
     isNormalUser = true;
     extraGroups = [
-      "adbusers"
       "networkmanager"
       "wheel"
       "docker"
