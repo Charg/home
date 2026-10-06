@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ../../common/system-packages.nix
     ./firewall.nix
+    ../../common/synology-iscsi.nix
   ];
 
   users.users.nixos = {
