@@ -14,6 +14,7 @@ let
     2380 # etcd peer
     10250 # kubelet API
     7946 # metallb memberlist
+    9100 # node-exporter
   ];
   peerUdpPorts = [
     7946 # metallb memberlist
@@ -42,4 +43,12 @@ in
   ];
 
   networking.firewall.extraCommands = lib.concatStringsSep "\n" peerRules + "\n";
+
+  # Keep dhcpcd's IPv4LL addresses off CNI interfaces; a 169.254.x address on
+  # flannel.1 becomes the source for host-to-remote-pod traffic, which can't return.
+  networking.dhcpcd.denyInterfaces = [
+    "cni*"
+    "flannel*"
+    "veth*"
+  ];
 }
