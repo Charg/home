@@ -7,6 +7,7 @@
     ./firewall.nix
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
+    ../../common/synology-iscsi.nix
   ];
 
   home-manager.users.dev = ../../users/dev/home-manager.nix;
