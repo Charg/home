@@ -28,6 +28,7 @@
     history = {
       append = true;
       extended = true;
+      ignoreSpace = true;
       size = 99999;
     };
 
