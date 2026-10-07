@@ -12,6 +12,8 @@
       enter_accept = false;
       secrets_filter = true;
       update_check = false;
+      auto_sync = false;
+      sync_address = "http://127.0.0.1:9";
     };
   };
 }
