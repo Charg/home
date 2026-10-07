@@ -15,7 +15,7 @@ it.
 (node-local) PVC — see `pvc.yaml`. SQLite fsyncs on every write transaction; on
 `lookie`'s prior `synology-iscsi-storage` PVC, each of those fsyncs paid a network
 round-trip to the NAS. `lookie` is single-node, so `local-path`'s hostPath backing
-carries no scheduling risk, and it's already how `home-assistant`, `technitium-dnsserver`
+carries no scheduling risk, and it's already how `home-assistant`
 and `vaultwarden` store their state on this cluster.
 
 This trades away durability the iSCSI volume gave for free: `local-path`'s reclaim
