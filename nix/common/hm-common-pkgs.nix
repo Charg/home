@@ -6,6 +6,7 @@
 
 [
   # CLI Tools
+  pkgs.acli # Atlassian Command Line Interface
   pkgs.age
   pkgs.bottom
   pkgs.codex # OpenAI Codex
