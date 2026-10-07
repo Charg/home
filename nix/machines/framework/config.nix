@@ -677,7 +677,19 @@ in
       keep-outputs = true;
       keep-derivations = true;
     };
-    optimise.automatic = true;
+    optimise = {
+      automatic = true;
+      # Don't catch up a missed 03:45 run on resume from suspend.
+      persistent = false;
+    };
+  };
+
+  # Keep store optimisation out of the way of interactive use.
+  systemd.services.nix-optimise.serviceConfig = {
+    CPUWeight = "idle";
+    CPUQuota = "100%";
+    IOSchedulingClass = "idle";
+    Nice = 19;
   };
 
   # Weekly GC of old generations and unreferenced store paths.
