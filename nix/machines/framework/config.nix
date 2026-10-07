@@ -663,6 +663,10 @@ in
     emoji = [ "Noto Color Emoji" ];
   };
 
+  services.journald.extraConfig = ''
+    SystemMaxUse=1G
+  '';
+
   nix = {
     # package = pkgs.nixVersions.latest;
     settings = {
