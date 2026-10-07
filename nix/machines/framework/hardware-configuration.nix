@@ -25,11 +25,6 @@
     ];
     initrd.kernelModules = [ ];
     kernelModules = [ "kvm-amd" ];
-    kernelParams = [
-      # https://community.frame.work/t/fw13-amd-ui-freeze/64555
-      # Alleviates UI (amdgpu crashing) freezing issue
-      "amdgpu.dcdebugmask=0x10"
-    ];
   };
 
   fileSystems."/" = {

@@ -18,6 +18,7 @@
       copy-on-select = "clipboard";
       desktop-notifications = true;
       mouse-hide-while-typing = true;
+      font-family = "JetBrains Mono";
       font-feature = [
         "-calt"
         "-liga"

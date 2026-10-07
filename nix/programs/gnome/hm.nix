@@ -18,8 +18,6 @@ in
     pkgs.gnome-themes-extra
     pkgs.pop-gtk-theme
     pkgs.pop-icon-theme
-
-    # Fonts
     pkgs.adwaita-icon-theme
   ];
 
@@ -27,13 +25,13 @@ in
     enable = true;
 
     font = {
-      package = pkgs.pop-icon-theme;
-      name = "Adwaita Sans";
+      package = pkgs.inter;
+      name = "Inter";
       size = 12;
     };
 
     iconTheme = {
-      package = pkgs.adwaita-icon-theme;
+      package = pkgs.pop-icon-theme;
       name = "Pop";
     };
 
@@ -228,10 +226,12 @@ in
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
       cursor-theme = "Pop";
-      font-antialiasing = "rgba";
+      # Subpixel AA fringes on a HiDPI panel with fractional scaling.
+      font-antialiasing = "grayscale";
       font-hinting = "slight";
       gtk-theme = "Pop-dark";
       icon-theme = "Pop";
+      monospace-font-name = "JetBrains Mono 11";
     };
   };
 

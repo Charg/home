@@ -33,13 +33,11 @@
   pkgs.python313
   pkgs.sops
   pkgs.sqlite-interactive # compiled with quality of additions like readline support
-  pkgs.tmux
   pkgs.trivy # Simple and comprehensive vulnerability scanner for containers, suitable for CI
   pkgs.unzip
   pkgs.uv
   pkgs.whois
   pkgs.yubikey-manager
-  pkgs.zoxide
 
   inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
   unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust

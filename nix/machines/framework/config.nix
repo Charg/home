@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   inputs,
   ...
@@ -44,7 +45,9 @@ let
 in
 {
   imports = [
+    inputs.nixos-hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
+    ./alloy.nix
     ./gnome.nix
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
@@ -54,6 +57,7 @@ in
   # Bootloader
   #
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
   # resolves an issues with virtualbox 6.12. https://github.com/NixOS/nixpkgs/issues/363887#issuecomment-2536693220
   boot.kernelParams = [ "kvm.enable_virt_at_load=0" ];
@@ -71,6 +75,8 @@ in
 
   # Docker, Virtualbox, Podman, etc creates a NetworkManager connection profile for every bridge/veth
   # they own. Let them manage their own interfaces instead.
+  systemd.services.NetworkManager-wait-online.enable = false;
+
   networking.networkmanager.unmanaged = [
     "interface-name:docker*"
     "interface-name:br-*"
@@ -106,10 +112,9 @@ in
         # Shows battery charge of connected devices on supported
         # Bluetooth adapters. Defaults to 'false'.
         Experimental = true;
-        # When enabled other devices can connect faster to us, however
-        # the tradeoff is increased power consumption. Defaults to
-        # 'false'.
-        FastConnectable = true;
+        # Faster reconnects at the cost of more frequent page scanning,
+        # which shows up in idle power draw. Defaults to 'false'.
+        FastConnectable = false;
       };
       Policy = {
         # Enable all controllers when they are found. This includes
@@ -516,8 +521,15 @@ in
       }
     ];
   };
+  # The podman CLI doesn't need the API socket; start it by hand if a tool does.
+  systemd.sockets.podman.wantedBy = lib.mkForce [ ];
+  systemd.user.sockets.podman.wantedBy = lib.mkForce [ ];
+
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.host.enableExtensionPack = true;
+  # Don't bring up vboxnet0 at boot; VirtualBox creates host-only interfaces
+  # itself when a VM that uses one starts.
+  virtualisation.virtualbox.host.addNetworkInterface = false;
 
   # VirtualBox's built-in host-only allowlist (192.168.56.0/21) collides with the
   # same private ranges hotel/office Wi-Fi hands out. Restrict it to the same
@@ -530,9 +542,17 @@ in
   # The lid sensos is flakey atm. Ignore it until I can fix it.
   services.logind.settings.Login.HandleLidSwitch = "ignore";
 
+  # Hibernate is manual (`systemctl hibernate`). Note the kernel refuses it
+  # while any process holds memfd_secret memory (e.g. Bitwarden desktop).
+  boot.resumeDevice = "/dev/disk/by-uuid/6fdd768c-6af6-473c-b501-8fdd5fb79fe6";
+
   security.sudo.wheelNeedsPassword = false;
   # Pipewire - allows to use the realtime scheduler for increased performance.
   security.rtkit.enable = true;
+
+  # Goodix reader in the power button. GDM runs fingerprint and password auth
+  # in parallel; enrol with `fprintd-enroll`.
+  services.fprintd.enable = true;
 
   # Smart Card Reader Service
   # Used for YubiKey related operations.
@@ -594,6 +614,8 @@ in
 
   # List services that you want to enable:
   # Enable the OpenSSH daemon.
+  # Installed but not started at boot: `sudo systemctl start sshd` when needed.
+  systemd.services.sshd.wantedBy = lib.mkForce [ ];
   services.openssh = {
     enable = true;
     settings = {
@@ -621,18 +643,46 @@ in
   fonts.packages = with pkgs; [
     inter
     jetbrains-mono
+    nerd-fonts.symbols-only # icon glyphs as a fallback for any font (eza, starship)
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
   ];
 
+  # Without these, fontconfig resolves the generic families to DejaVu.
+  fonts.fontconfig.defaultFonts = {
+    sansSerif = [
+      "Inter"
+      "Noto Sans"
+    ];
+    serif = [ "Noto Serif" ];
+    monospace = [
+      "JetBrains Mono"
+      "Symbols Nerd Font Mono"
+    ];
+    emoji = [ "Noto Color Emoji" ];
+  };
+
   nix = {
     # package = pkgs.nixVersions.latest;
-    extraOptions = ''
-      experimental-features = nix-command flakes
-      keep-outputs = true
-      keep-derivations = true
-    '';
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      keep-outputs = true;
+      keep-derivations = true;
+    };
+    optimise.automatic = true;
+  };
+
+  # Weekly GC of old generations and unreferenced store paths.
+  programs.nh = {
+    enable = true;
+    clean = {
+      enable = true;
+      extraArgs = "--keep-since 14d --keep 5";
+    };
   };
 
   # This value determines the NixOS release from which the default

@@ -102,4 +102,6 @@ if onlyModules then
 else
   systemBuilder {
     inherit system modules;
+    # `_module.args` can't be used in `imports`; specialArgs can.
+    specialArgs = { inherit inputs; };
   }

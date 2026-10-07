@@ -45,7 +45,7 @@ in
     ../../programs/zsh/hm.nix
   ]
   ++ lib.optionals isLinux [
-    ../../programs/gnome/hm.nix # TODO: check if we are even using gnome
+    ../../programs/gnome/hm.nix
   ];
 
   #
@@ -66,13 +66,11 @@ in
       pkgs.feh # image viewer
       pkgs.kooha # screen recorder
       pkgs.satty
-      pkgs.slack
       pkgs.synology-drive-client
       pkgs.vlc
       pkgs.zathura # PDF Reader
 
       # Electron Apps
-      pkgs.bitwarden-desktop
       pkgs.discord
       pkgs.signal-desktop
       pkgs.slack
@@ -84,9 +82,6 @@ in
       pkgs.kubectl
       pkgs.kubernetes-helm
       pkgs.argocd
-
-      # Framework
-      pkgs.framework-tool # https://github.com/FrameworkComputer/framework-system
 
       # Network Tools
       # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error

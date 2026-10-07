@@ -53,6 +53,25 @@ write:
 gateway:
   enabled: false
 
+ingress:
+  enabled: true
+  ingressClassName: traefik-internal
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: loki.home.packet.fail
+  hosts:
+    - loki.home.packet.fail
+  paths:
+    distributor:
+      - /loki/api/v1/push
+    queryFrontend: []
+    ruler: []
+    compactor: []
+  tls:
+    - secretName: loki-home-tls
+      hosts:
+        - loki.home.packet.fail
+
 chunksCache:
   enabled: false
 

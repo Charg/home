@@ -41,6 +41,7 @@
           "chat.commandCenter.enabled" = true;
           "editor.formatOnSave" = true;
           "editor.minimap.enabled" = false;
+          "editor.fontFamily" = "'JetBrains Mono', 'Symbols Nerd Font Mono', monospace";
           "explorer.confirmDelete" = false;
           "files.autoSave" = "onFocusChange";
           "files.insertFinalNewline" = true;
