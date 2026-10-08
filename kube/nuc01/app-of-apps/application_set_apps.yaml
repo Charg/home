@@ -97,11 +97,6 @@ spec:
             chart: litellm-helm
             targetRevision: 1.100.0
             namespace: litellm
-          - name: technitium-operator
-            repoURL: ghcr.io/charg/charts
-            chart: technitium-operator
-            targetRevision: 1.0.2
-            namespace: technitium
   template:
     metadata:
       name: "{{ .name }}"
