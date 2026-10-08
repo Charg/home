@@ -1,0 +1,12 @@
+---
+apiVersion: dns.packet.fail/v1alpha1
+kind: Blocklist
+metadata:
+  name: dns
+spec:
+  serverRef:
+    name: dns
+  blockListUrls:
+    - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+    - https://small.oisd.nl
+  updateIntervalHours: 24
