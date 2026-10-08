@@ -80,7 +80,10 @@
         export MANPATH="/opt/homebrew/share/man''${MANPATH+:$MANPATH}";
         export INFOPATH="/opt/homebrew/share/info''${INFOPATH+:$INFOPATH}";
 
-
+        # Keychain stays locked over ssh; unlock so keychain-backed CLIs (pup, gh) work
+        if [[ -n $SSH_CONNECTION && -t 0 ]] && ! security show-keychain-info &>/dev/null; then
+          security unlock-keychain
+        fi
       fi
 
       #
