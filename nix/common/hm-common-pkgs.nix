@@ -40,11 +40,6 @@
   pkgs.whois
   pkgs.yubikey-manager
 
-  inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
-  unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
-  unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
-  unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
-
   # Network Tools
   pkgs.ipcalc
   pkgs.nmap
@@ -54,4 +49,11 @@
   # Desktop Apps
   pkgs.bitwarden-desktop
   pkgs.dbeaver-bin
+
+  # Unstable Packages
+  inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
+  unstable-pkgs.datadog-pup # CLI for Datadog's observability platform
+  unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
+  unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
+  unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
 ]
