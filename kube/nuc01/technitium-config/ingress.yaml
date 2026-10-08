@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dns
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
+    external-dns.alpha.kubernetes.io/hostname: dns.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: dns.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dns
+                port:
+                  name: api
+  tls:
+    - hosts:
+        - dns.home.packet.fail
+      secretName: dns-home-tls

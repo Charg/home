@@ -1,0 +1,12 @@
+---
+apiVersion: dns.packet.fail/v1alpha1
+kind: ServerSettings
+metadata:
+  name: dns
+spec:
+  serverRef:
+    name: dns
+  recursion:
+    policy: AllowOnlyForPrivateNetworks
+  logging:
+    useLocalTime: true

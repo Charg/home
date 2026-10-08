@@ -1,0 +1,8 @@
+# source: https://github.com/Charg/technitium-kube-operator/tree/main/charts/technitium-operator
+
+webhook:
+  enabled: true
+
+metrics:
+  serviceMonitor:
+    enabled: true
