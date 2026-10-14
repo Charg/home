@@ -19,6 +19,8 @@ spec:
         imagePullSecrets:
           - name: ghcr-pull-creds
         existingSecret: openveto-env
+        env:
+          CONGRESS_API_RATE_LIMIT_DELAY: '0.8'
         migrations:
           enabled: false
         web:
