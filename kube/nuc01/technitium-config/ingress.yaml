@@ -5,11 +5,11 @@ metadata:
   name: dns
   annotations:
     cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
-    external-dns.alpha.kubernetes.io/hostname: dns.home.packet.fail
+    external-dns.alpha.kubernetes.io/hostname: technitium.home.packet.fail
 spec:
   ingressClassName: traefik-internal
   rules:
-    - host: dns.home.packet.fail
+    - host: technitium.home.packet.fail
       http:
         paths:
           - path: /
@@ -21,5 +21,5 @@ spec:
                   name: api
   tls:
     - hosts:
-        - dns.home.packet.fail
-      secretName: dns-home-tls
+        - technitium.home.packet.fail
+      secretName: technitium-home-tls
