@@ -33,7 +33,7 @@ spec:
               memory: 384Mi
             limits:
               cpu: 1000m
-              memory: 1Gi
+              memory: 2Gi
         backfillWorker:
           enabled: true
           resources:
@@ -42,7 +42,7 @@ spec:
               memory: 256Mi
             limits:
               cpu: 500m
-              memory: 768Mi
+              memory: 2Gi
         watermarkCheck:
           enabled: true
           resources:
