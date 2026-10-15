@@ -1,7 +1,7 @@
 # https://github.com/argoproj/argo-helm/blob/main/charts/argo-cd/values.yaml
 
 global:
-  domain: argo-nuc01.packet.fail
+  domain: argo.home.packet.fail
 configs:
   cm:
     # Child-Application health, used by app-of-apps sync waves.
@@ -179,7 +179,8 @@ server:
   ingress:
     enabled: true
     annotations:
-      cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
-      external-dns.alpha.kubernetes.io/hostname: argo-nuc01.packet.fail
+      external-dns.alpha.kubernetes.io/hostname: argo.home.packet.fail
     ingressClassName: traefik-internal
-    tls: true
+    extraTls:
+      - hosts:
+          - argo.home.packet.fail

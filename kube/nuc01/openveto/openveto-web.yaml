@@ -40,17 +40,15 @@ spec:
           enabled: true
           className: traefik-internal
           annotations:
-            cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
-            external-dns.alpha.kubernetes.io/hostname: openveto-nuc01.packet.fail
+            external-dns.alpha.kubernetes.io/hostname: openveto.home.packet.fail
           hosts:
-            - host: openveto-nuc01.packet.fail
+            - host: openveto.home.packet.fail
               paths:
                 - path: /
                   pathType: Prefix
           tls:
-            - secretName: openveto-nuc01-tls
-              hosts:
-                - openveto-nuc01.packet.fail
+            - hosts:
+                - openveto.home.packet.fail
   destination:
     namespace: ov
     server: https://kubernetes.default.svc

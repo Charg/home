@@ -38,17 +38,15 @@ spec:
           enabled: true
           className: traefik-internal
           annotations:
-            cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
-            external-dns.alpha.kubernetes.io/hostname: accord-nuc01.packet.fail
+            external-dns.alpha.kubernetes.io/hostname: accord.home.packet.fail
           hosts:
-            - host: accord-nuc01.packet.fail
+            - host: accord.home.packet.fail
               paths:
                 - path: /
                   pathType: Prefix
           tls:
-            - secretName: accord-nuc01-tls
-              hosts:
-                - accord-nuc01.packet.fail
+            - hosts:
+                - accord.home.packet.fail
   destination:
     namespace: ac
     server: https://kubernetes.default.svc

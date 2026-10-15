@@ -121,11 +121,9 @@ web:
     enabled: true
     className: traefik-internal
     annotations:
-      cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
-      external-dns.alpha.kubernetes.io/hostname: temporal-nuc01.packet.fail
+      external-dns.alpha.kubernetes.io/hostname: temporal.home.packet.fail
     hosts:
-      - "temporal-nuc01.packet.fail/"
+      - "temporal.home.packet.fail/"
     tls:
-      - secretName: temporal-nuc01-tls
-        hosts:
-          - temporal-nuc01.packet.fail
+      - hosts:
+          - temporal.home.packet.fail

@@ -57,7 +57,6 @@ ingress:
   enabled: true
   ingressClassName: traefik-internal
   annotations:
-    cert-manager.io/cluster-issuer: lets-encrypt-packet-fail
     external-dns.alpha.kubernetes.io/hostname: loki.home.packet.fail
   hosts:
     - loki.home.packet.fail
@@ -68,8 +67,7 @@ ingress:
     ruler: []
     compactor: []
   tls:
-    - secretName: loki-home-tls
-      hosts:
+    - hosts:
         - loki.home.packet.fail
 
 chunksCache:
