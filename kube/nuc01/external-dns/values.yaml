@@ -10,6 +10,14 @@ resources:
 
 provider:
   name: cloudflare
+
+# Public zones only. home.packet.fail is served on the LAN by Technitium (see external-dns-technitium).
+domainFilters:
+  - packet.fail
+  - openveto.com
+excludeDomains:
+  - home.packet.fail
+
 env:
   - name: CF_API_TOKEN
     valueFrom:
