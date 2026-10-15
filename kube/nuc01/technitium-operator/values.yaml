@@ -6,3 +6,10 @@ webhook:
 metrics:
   serviceMonitor:
     enabled: true
+
+externalDNS:
+  rbac:
+    create: true
+    serviceAccount:
+      name: external-dns-technitium
+      namespace: external-dns

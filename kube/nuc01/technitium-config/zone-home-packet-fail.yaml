@@ -1,0 +1,10 @@
+---
+apiVersion: dns.packet.fail/v1alpha1
+kind: Zone
+metadata:
+  name: home-packet-fail
+spec:
+  zoneName: home.packet.fail
+  serverRef:
+    name: dns
+  type: Primary

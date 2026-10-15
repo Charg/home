@@ -38,6 +38,11 @@ spec:
             chart: external-dns
             targetRevision: 1.21.1
             namespace: external-dns
+          - name: external-dns-technitium
+            repoURL: https://kubernetes-sigs.github.io/external-dns/
+            chart: external-dns
+            targetRevision: 1.21.1
+            namespace: external-dns
           - name: cert-manager
             repoURL: https://charts.jetstack.io
             chart: cert-manager
