@@ -16,7 +16,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: dns
+                name: dns-primary
                 port:
                   name: api
   tls:

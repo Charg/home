@@ -15,6 +15,9 @@ spec:
     retentionPolicy: Retain
   service:
     type: ClusterIP
+    # Console Ingress targets the Primary only: Technitium sessions are per replica.
+    primary:
+      enabled: true
     perReplica:
       type: LoadBalancer
       externalTrafficPolicy: Local
