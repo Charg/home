@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: home-packet-fail-wildcard
+  namespace: traefik-internal
+spec:
+  secretName: home-packet-fail-wildcard-tls
+  dnsNames:
+    - "*.home.packet.fail"
+  issuerRef:
+    kind: ClusterIssuer
+    name: lets-encrypt-packet-fail

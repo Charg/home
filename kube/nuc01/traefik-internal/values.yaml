@@ -24,3 +24,8 @@ resources:
 ingressRoute:
   dashboard:
     enabled: true
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: home-packet-fail-wildcard-tls
