@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: melon-server
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/charg/charts
+    chart: melon-server
+    # The image tag follows the chart's appVersion, so this is the only version to bump.
+    targetRevision: 0.3.0
+    helm:
+      valuesObject:
+        imagePullSecrets:
+          - name: ghcr-pull-creds
+        existingSecret: melon-server-env
+        # The volume is the only copy of the data: keep it on the NAS with Retain rather than
+        # the node-local, Delete-on-release local-path default.
+        persistence:
+          storageClass: synology-iscsi-storage
+          size: 5Gi
+        ingress:
+          enabled: true
+          className: traefik-internal
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: melon.home.packet.fail
+          hosts:
+            - host: melon.home.packet.fail
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - melon.home.packet.fail
+  destination:
+    namespace: melon
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

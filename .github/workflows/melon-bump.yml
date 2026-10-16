@@ -1,0 +1,70 @@
+name: Bump melon version
+
+on:
+  repository_dispatch:
+    types: [melon-release]
+
+permissions: {}
+
+concurrency:
+  group: melon-bump-${{ github.event.client_payload.version }}
+  cancel-in-progress: true
+
+jobs:
+  bump:
+    name: Bump melon version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to commit the version bump
+      pull-requests: write # to open, label, and auto-merge the PR
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Bump version strings
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VERSION:-}" ]; then
+            echo "client_payload.version is required" >&2
+            exit 1
+          fi
+
+          # The chart's appVersion sets the image tag, so the chart version is the only string.
+          sed -i -E "s/^(\s*targetRevision:\s*).*/\1${VERSION}/" kube/nuc01/melon/melon-server.yaml
+
+      - name: Ensure label exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create "🤖 agent" --repo "$GITHUB_REPOSITORY" \
+            --description "Agent Authored" --color C4C4C4 || true
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        with:
+          commit-message: "chore(kube): nuc01 - melon bump to ${{ github.event.client_payload.version }}"
+          title: "chore(kube): nuc01 - melon bump to ${{ github.event.client_payload.version }}"
+          body: |
+            Automated version bump triggered by a release in the fitness repo (melon-server).
+
+            Bumps the melon-server chart's `targetRevision` to
+            `${{ github.event.client_payload.version }}`; the image tag follows
+            the chart's appVersion. Auto-merge is enabled; ArgoCD will sync once
+            this merges to `main`.
+          branch: "chore/melon-bump-${{ github.event.client_payload.version }}"
+          base: main
+          draft: false
+          labels: "🤖 agent"
+          delete-branch: true
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          gh pr merge --auto --squash "${PR_NUMBER}"
