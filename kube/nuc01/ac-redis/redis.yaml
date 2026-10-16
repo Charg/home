@@ -5,7 +5,7 @@ metadata:
   name: ac-redis
 spec:
   kubernetesConfig:
-    image: quay.io/opstree/redis:v8.6.2
+    image: quay.io/opstree/redis:v8.6.2@sha256:5f79911253cb74636e8e97555b08095902d46a835c6423adb123295b00ba70d7
     imagePullPolicy: IfNotPresent
     redisSecret:
       name: redis-credentials
@@ -27,4 +27,4 @@ spec:
             storage: 1Gi
   redisExporter:
     enabled: false
-    image: quay.io/opstree/redis-exporter:v1.82.0
+    image: quay.io/opstree/redis-exporter:v1.82.0@sha256:bce422b4bba8721bef04d5ca491eeec2b53278698b4bd9790f81fbb287cdfe88
