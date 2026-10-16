@@ -3,7 +3,7 @@
 Ephemeral per-pull-request environments for [Charg/accord](https://github.com/Charg/accord).
 
 Labelling a PR `preview` makes an environment appear at
-`https://pr-<n>.accord.packet.fail` (tailnet only) within a couple of minutes.
+`https://accord-pr-<n>.home.packet.fail` (internal only) within a couple of minutes.
 Removing the label, or closing the PR, deletes it.
 
 ## How it works
