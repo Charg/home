@@ -151,7 +151,7 @@ in
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vicinae" = {
       binding = "<Alt><Super>space";
-      command = "vicinae";
+      command = "vicinae toggle";
       name = "Launch Vicinae";
     };
 
