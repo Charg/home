@@ -24,6 +24,7 @@ in
       "--advertise-address=${nodeIP}"
       "--tls-san=${nodeIP}"
       "--etcd-expose-metrics"
+      "--kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark"
     ];
   };
 
