@@ -229,7 +229,7 @@ spec:
             limits: { memory: 192Mi }
       containers:
         - name: qbittorrent
-          image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+          image: ghcr.io/home-operations/qbittorrent:5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
           securityContext:
             # The image defaults to uid 65534. Pinned to 1000 to match the
             # shared plex-media tree, which is owned 1000:1000 with directories
@@ -281,7 +281,7 @@ spec:
         # runtime anyway. It talks to the WebUI over loopback in this pod's own
         # network namespace, so it needs no credentials and no port.
         - name: share-limits
-          image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+          image: ghcr.io/home-operations/qbittorrent:5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
           securityContext:
             # Same uid as qBittorrent, and specifically so the hardlink test can
             # traverse the whole tree. A directory this container cannot read
