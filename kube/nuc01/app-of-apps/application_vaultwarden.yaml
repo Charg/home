@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vaultwarden
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/charg
+    chart: vaultwarden
+    targetRevision: 0.1.0
+    helm:
+      valuesObject:
+        domain: https://vault.home.packet.fail
+        signups:
+          allowed: false
+        invitations:
+          allowed: true
+        env:
+          DISABLE_ICON_DOWNLOAD: "true"
+        persistence:
+          existingClaim: vaultwarden-data
+        ingress:
+          enabled: true
+          className: traefik-internal
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: vault.home.packet.fail
+          hosts:
+            - host: vault.home.packet.fail
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - vault.home.packet.fail
+  destination:
+    namespace: vaultwarden
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
