@@ -8,6 +8,7 @@ let
   peerTcpPorts = [
     2379 # etcd client
     2380 # etcd peer
+    2381 # etcd metrics
     10250 # kubelet API
     7946 # metallb memberlist
     9100 # node-exporter

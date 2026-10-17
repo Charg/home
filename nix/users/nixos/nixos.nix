@@ -23,6 +23,7 @@ in
       "--node-ip=${nodeIP}"
       "--advertise-address=${nodeIP}"
       "--tls-san=${nodeIP}"
+      "--etcd-expose-metrics"
     ];
   };
 

@@ -310,6 +310,12 @@ alertmanager:
         cpu: 100m
         memory: 128Mi
 
+kubeEtcd:
+  endpoints:
+    - 192.168.74.120
+    - 192.168.74.11
+    - 192.168.74.12
+
 nodeExporter:
   enabled: true
 
