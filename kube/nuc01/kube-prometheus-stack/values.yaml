@@ -289,6 +289,13 @@ prometheus:
         - deployment.environment.name
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+    additionalScrapeConfigs:
+      - job_name: kube-etcd
+        static_configs:
+          - targets:
+              - 192.168.74.120:2381
+              - 192.168.74.11:2381
+              - 192.168.74.12:2381
 
 alertmanager:
   enabled: true
@@ -311,10 +318,10 @@ alertmanager:
         memory: 128Mi
 
 kubeEtcd:
-  endpoints:
-    - 192.168.74.120
-    - 192.168.74.11
-    - 192.168.74.12
+  service:
+    enabled: false
+  serviceMonitor:
+    enabled: false
 
 nodeExporter:
   enabled: true
