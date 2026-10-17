@@ -1,4 +1,8 @@
-{ pkgs, inputs, ... }:
+{ config, ... }:
+
+let
+  nodeIP = (import ../../common/k3s-nodes.nix).${config.networking.hostName};
+in
 
 {
   users.users.nixos = {
@@ -14,7 +18,12 @@
       "servicelb"
       "metrics-server"
     ];
-    extraFlags = "--disable=traefik --disable=servicelb";
+    # Pin the node address; k3s never re-detects it after first registration.
+    extraFlags = [
+      "--node-ip=${nodeIP}"
+      "--advertise-address=${nodeIP}"
+      "--tls-san=${nodeIP}"
+    ];
   };
 
 }

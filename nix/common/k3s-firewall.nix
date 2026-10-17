@@ -1,11 +1,7 @@
 { config, lib, ... }:
 
 let
-  nodes = {
-    nuc01 = "192.168.74.120";
-    mpc00 = "192.168.74.11";
-    mpc01 = "192.168.74.12";
-  };
+  nodes = import ./k3s-nodes.nix;
 
   peers = lib.attrValues (lib.filterAttrs (name: _: name != config.networking.hostName) nodes);
 
