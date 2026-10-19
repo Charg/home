@@ -107,6 +107,17 @@ spec:
             chart: technitium-operator
             targetRevision: 1.4.0
             namespace: technitium
+          - name: pod-gateway
+            repoURL: https://angelnu.github.io/helm-charts/
+            chart: pod-gateway
+            targetRevision: 7.1.1
+            namespace: media
+            respectIgnoreDifferences: true
+            ignoreDifferences:
+              - group: admissionregistration.k8s.io
+                kind: MutatingWebhookConfiguration
+                jqPathExpressions:
+                  - .webhooks[].clientConfig.caBundle
   template:
     metadata:
       name: "{{ .name }}"
@@ -146,3 +157,8 @@ spec:
         syncOptions:
           - CreateNamespace={{ dig "createNamespace" "true" . }}
           - ServerSideApply={{ dig "serverSideApply" "true" . }}
+          - RespectIgnoreDifferences={{ dig "respectIgnoreDifferences" "false" . }}
+      {{- with dig "ignoreDifferences" (list) . }}
+      ignoreDifferences:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}

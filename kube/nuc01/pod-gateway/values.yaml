@@ -1,0 +1,179 @@
+---
+# See kube/nuc01/media-config/README.md before changing anything here.
+
+controllers:
+  main:
+    strategy: Recreate
+
+    pod:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+
+      # Per-controller only, never defaultPodOptions: the webhook copies its own
+      # resolv.conf into every client pod.
+      dnsPolicy: None
+      dnsConfig:
+        nameservers: ["127.0.0.2"]
+        searches:
+          - media.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - { name: ndots, value: "5" }
+
+    containers:
+      main:
+        resources:
+          requests: { cpu: 25m, memory: 32Mi }
+          limits: { memory: 128Mi }
+
+      coredns:
+        image:
+          repository: registry.k8s.io/coredns/coredns
+          tag: v1.14.6@sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea
+        args: ["-conf", "/etc/coredns/Corefile"]
+        securityContext:
+          runAsUser: 65534
+          runAsGroup: 65534
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+            add: [NET_BIND_SERVICE]
+        resources:
+          requests: { cpu: 25m, memory: 32Mi }
+          limits: { memory: 128Mi }
+
+      gluetun:
+        enabled: true
+        dependsOn: [main, coredns]
+        image:
+          repository: ghcr.io/qdm12/gluetun
+          tag: v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+            add: [NET_ADMIN]
+        env:
+          PUID: "0"
+          PGID: "0"
+          VPN_SERVICE_PROVIDER: protonvpn
+          VPN_TYPE: wireguard
+          VPN_INTERFACE: wg0
+          WIREGUARD_PRIVATE_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: pod-gateway-wireguard
+                key: privatekey
+          SERVER_COUNTRIES: Switzerland
+          WIREGUARD_MTU: "1320"
+          FIREWALL_INPUT_PORTS: "4789"
+          FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/16,10.43.0.0/16,192.168.74.0/24,172.16.0.0/24"
+          HTTP_CONTROL_SERVER_ADDRESS: "127.0.0.1:8000"
+          HEALTH_TARGET_ADDRESSES: "1.1.1.1:443"
+          DNS_SERVER: "off"
+          DNS_KEEP_NAMESERVER: "on"
+          VPN_PORT_FORWARDING: "off"
+          TZ: America/Los_Angeles
+        probes:
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command: [/gluetun-entrypoint, healthcheck]
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              failureThreshold: 36
+          liveness:
+            enabled: false
+          readiness:
+            enabled: false
+        resources:
+          requests: { cpu: 50m, memory: 64Mi }
+          limits: { memory: 192Mi }
+
+persistence:
+  coredns-config:
+    enabled: true
+    type: configMap
+    name: pod-gateway-coredns
+    advancedMounts:
+      main:
+        coredns:
+          - path: /etc/coredns
+            readOnly: true
+  gluetun-post-rules:
+    enabled: true
+    type: configMap
+    name: pod-gateway-iptables
+    advancedMounts:
+      main:
+        gluetun:
+          - path: /iptables
+            readOnly: true
+  gluetun-tmp:
+    enabled: true
+    type: emptyDir
+    advancedMounts:
+      main:
+        gluetun:
+          - path: /tmp/gluetun
+
+# Lowercase key; `networkPolicies` silently renders nothing.
+networkpolicies:
+  main:
+    enabled: true
+    controller: main
+    policyTypes:
+      - Egress
+    rules:
+      egress:
+        - to:
+            - ipBlock:
+                cidr: 0.0.0.0/0
+          ports:
+            - port: 51820
+              protocol: UDP
+        - to:
+            - ipBlock:
+                cidr: 10.42.0.0/16
+            - ipBlock:
+                cidr: 10.43.0.0/16
+
+DNS: 172.16.0.1
+DNSPolicy: None
+clusterName: cluster.local
+publicPorts: []
+
+# Empty: the chart always adds the release namespace, and the clients live in it.
+routed_namespaces: []
+
+settings:
+  NOT_ROUTED_TO_GATEWAY_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.74.0/24"
+  VXLAN_ID: 42
+  VXLAN_IP_NETWORK: "172.16.0"
+  VXLAN_PORT: "4789"
+  VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
+  VPN_INTERFACE: wg0
+  VPN_BLOCK_OTHER_TRAFFIC: true
+  VPN_TRAFFIC_PORT: 51820
+  VPN_LOCAL_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.74.0/24"
+  DNS_LOCAL_CIDRS: "local 10.in-addr.arpa 168.192.in-addr.arpa"
+  DNS_LOCAL_SERVER: "10.43.0.10"
+  GATEWAY_ENABLE_DNSSEC: false
+  CONNECTION_RETRY_COUNT: 10
+  VPN_INTERFACE_MTU: 1320
+
+# Inert on purpose; media-config/mutatingwebhookconfiguration.yaml does the real work.
+webhook:
+  namespaceSelector:
+    type: custom
+    custom:
+      matchLabels:
+        pod-gateway.angelnu.com/inert: "matches-nothing"
+  gatewayDefault: false
+  gatewayLabel: setGateway
+  sidecarAsInit: true

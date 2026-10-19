@@ -1,0 +1,32 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: pod-gateway-routed
+  annotations:
+    cert-manager.io/inject-ca-from: media/pod-gateway-webhook-tls
+webhooks:
+  - name: pod-gateway-routed.svc.cluster.local
+    failurePolicy: Fail
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: media
+    objectSelector:
+      matchExpressions:
+        - key: setGateway
+          operator: Exists
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    clientConfig:
+      service:
+        namespace: media
+        name: pod-gateway-webhook
+        path: /wh/mutating/setgateway
+        port: 8080
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 5
