@@ -48,6 +48,21 @@ spec:
             chart: cert-manager
             targetRevision: v1.21.1
             namespace: cert-manager
+          - name: node-feature-discovery
+            repoURL: registry.k8s.io/nfd/charts
+            chart: node-feature-discovery
+            targetRevision: 0.18.3
+            namespace: node-feature-discovery
+          - name: intel-operator
+            repoURL: https://intel.github.io/helm-charts
+            chart: intel-device-plugins-operator
+            targetRevision: 0.36.0
+            namespace: intel-operator
+          - name: intel-operator-gpu
+            repoURL: https://intel.github.io/helm-charts
+            chart: intel-device-plugins-gpu
+            targetRevision: 0.36.0
+            namespace: intel-operator
           # NOTE: bumping this chart restarts postgres — the cnpg operator
           # rolls managed Cluster instances (primary switchover + replica
           # restarts) whenever its own version changes. Plan upgrades for a
