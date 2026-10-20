@@ -26,6 +26,12 @@ let
       lib.concatMapStringsSep "," toString peerUdpPorts
     } -j nixos-fw-accept"
   ]) peers;
+
+  # Agents only need flannel VXLAN in; they reach the apiserver on 6443 like
+  # any other client.
+  agentRules = map (
+    agent: "iptables -w -A nixos-fw -p udp -s ${agent} --dport 8472 -j nixos-fw-accept"
+  ) (lib.attrValues (import ./k3s-agents.nix));
 in
 {
   assertions = [
@@ -39,7 +45,7 @@ in
     6443 # k3s apiserver
   ];
 
-  networking.firewall.extraCommands = lib.concatStringsSep "\n" peerRules + "\n";
+  networking.firewall.extraCommands = lib.concatStringsSep "\n" (peerRules ++ agentRules) + "\n";
 
   # Keep dhcpcd's IPv4LL addresses off CNI interfaces; a 169.254.x address on
   # flannel.1 becomes the source for host-to-remote-pod traffic, which can't return.

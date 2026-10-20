@@ -9,6 +9,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./k3s.nix
     ../../common/alloy.nix
     ../../common/fonts.nix
     ../../common/gnome.nix
