@@ -9,6 +9,7 @@ name:
 {
   system,
   user,
+  profile ? user,
   darwin ? false,
   wsl ? false,
 }:
@@ -34,6 +35,6 @@ home-manager.lib.homeManagerConfiguration {
       home.username = user;
       home.homeDirectory = if darwin then "/Users/${user}" else "/home/${user}";
     }
-    ../users/${user}/home-manager.nix
+    ../users/${profile}/home-manager.nix
   ];
 }

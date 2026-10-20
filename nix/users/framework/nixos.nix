@@ -1,4 +1,9 @@
-{ pkgs, inputs, ... }:
+{
+  pkgs,
+  inputs,
+  currentSystemUser,
+  ...
+}:
 
 {
   # Add ~/.local/bin to PATH
@@ -9,7 +14,7 @@
 
   environment.systemPackages = [ pkgs.android-tools ];
 
-  users.users.framework = {
+  users.users.${currentSystemUser} = {
     isNormalUser = true;
     extraGroups = [
       "networkmanager"

@@ -8,6 +8,9 @@ name:
 {
   system,
   user,
+  # Which nix/users/<profile> config to apply; lets a host reuse a profile
+  # under a different account name.
+  profile ? user,
   darwin ? false,
   wsl ? false,
 
@@ -32,8 +35,8 @@ let
 
   # The config files for this system.
   machineConfig = ../machines/${name}/config.nix;
-  userOSConfig = ../users/${user}/${if isDarwin then "darwin" else "nixos"}.nix;
-  userHMConfig = ../users/${user}/home-manager.nix;
+  userOSConfig = ../users/${profile}/${if isDarwin then "darwin" else "nixos"}.nix;
+  userHMConfig = ../users/${profile}/home-manager.nix;
 
   # System function to call in the end. Either darwinSystem or nixosSystem, depending on the platform.
   systemBuilder = if isDarwin then inputs.darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;

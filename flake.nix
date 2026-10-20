@@ -74,6 +74,7 @@
         name: cfg:
         mkSystem name {
           inherit (cfg) system user;
+          profile = cfg.profile or cfg.user;
           darwin = isDarwin cfg;
           wsl = cfg.wsl or false;
         };
@@ -140,6 +141,7 @@
         name = "${cfg.user}@${name}";
         value = mkHome name {
           inherit (cfg) system user;
+          profile = cfg.profile or cfg.user;
           darwin = isDarwin cfg;
           wsl = cfg.wsl or false;
         };
