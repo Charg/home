@@ -136,6 +136,21 @@
   virtualisation.docker.package = pkgs.docker_29;
   virtualisation.docker.autoPrune.enable = true;
 
+  # Exposes the GPU to containers via CDI: `docker run --device nvidia.com/gpu=all ...`
+  hardware.nvidia-container-toolkit.enable = true;
+
+  #
+  # Gaming
+  #
+  programs.steam = {
+    enable = true;
+    gamescopeSession.enable = true;
+  };
+
+  # Run games with `gamemoderun %command%` (Steam launch options) for a
+  # performance governor and higher scheduling priority while playing.
+  programs.gamemode.enable = true;
+
   security.sudo.wheelNeedsPassword = false;
   security.rtkit.enable = true;
 
@@ -171,6 +186,15 @@
   };
 
   services.fwupd.enable = true;
+
+  # SMART health monitoring for both NVMe drives; failures surface as GNOME
+  # desktop notifications.
+  services.smartd = {
+    enable = true;
+    notifications.systembus-notify.enable = true;
+    notifications.wall.enable = true;
+  };
+  environment.systemPackages = [ pkgs.smartmontools ];
 
   fonts.packages = with pkgs; [
     inter
