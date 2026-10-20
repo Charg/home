@@ -14,7 +14,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: create-buckets
-          image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+          image: cgr.dev/chainguard/minio-client:latest-dev@sha256:4ded9b0773ebf1afded36c4e91efad0d4e7dee91c6b3d5d29455732095afb2d0
           env:
             - name: RUSTFS_ACCESS_KEY
               valueFrom:
