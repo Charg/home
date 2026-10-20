@@ -26,6 +26,7 @@
               passwordFile = "/tmp/luks.txt";
               settings = {
                 allowDiscards = true;
+                bypassWorkqueues = true;
               };
               content = {
                 type = "filesystem";
