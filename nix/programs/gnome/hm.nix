@@ -238,7 +238,9 @@ in
     };
   };
 
-  # pop-shell configuration
+  # pop-shell configuration. Classes are case-insensitive regexes. Games
+  # float rather than tile: Wine/Proton windows are classed by their exe
+  # (e.g. "bg3.exe", including Lutris games), Steam games as steam_app_<id>.
   home.file.".config/pop-shell/config.json".text = ''
     {
       "float": [
@@ -267,6 +269,15 @@ in
         },
         {
           "class": "io.github.bugaevc.wl-clipboard"
+        },
+        {
+          "class": "\\.exe$"
+        },
+        {
+          "class": "^steam_app_"
+        },
+        {
+          "class": "^gamescope$"
         }
       ],
       "skiptaskbarhidden": [],
