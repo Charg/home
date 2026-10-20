@@ -93,6 +93,13 @@
           wsl = true;
         };
 
+        tortuga = {
+          system = "x86_64-linux";
+          user = "chris";
+          profile = "framework";
+          home = true;
+        };
+
         nuc01 = {
           system = "x86_64-linux";
           user = "nixos";
