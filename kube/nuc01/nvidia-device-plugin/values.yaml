@@ -1,0 +1,32 @@
+# source: https://github.com/NVIDIA/k8s-device-plugin/blob/main/deployments/helm/nvidia-device-plugin/values.yaml
+#
+# Advertises tortuga's RTX 4080 SUPER as nvidia.com/gpu. tortuga is an
+# on-demand k3s agent (nix/machines/tortuga/k3s.nix); the chart's default
+# affinity and tolerations already match its nvidia.com/gpu.present label and
+# nvidia.com/gpu taint.
+#
+# GPU pods need all three of:
+#   runtimeClassName: nvidia
+#   tolerations: [{key: nvidia.com/gpu, operator: Exists, effect: NoSchedule}]
+#   resources.limits: {nvidia.com/gpu: 1}
+
+# Run the plugin itself through nvidia-container-runtime so NVML is injected.
+runtimeClassName: nvidia
+
+# NixOS generates the CDI spec with index names (nvidia.com/gpu=0), so hand
+# the runtime indexes rather than UUIDs.
+deviceIDStrategy: index
+
+# Time-slice the one GPU so an LLM server and an image stack can be scheduled
+# together. Slices share the 16 GB of VRAM with no isolation; workloads have
+# to fit (or unload idle models) between them.
+config:
+  default: default
+  map:
+    default: |-
+      version: v1
+      sharing:
+        timeSlicing:
+          resources:
+            - name: nvidia.com/gpu
+              replicas: 4

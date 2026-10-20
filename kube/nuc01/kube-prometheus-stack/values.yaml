@@ -327,6 +327,15 @@ nodeExporter:
   enabled: true
 
 prometheus-node-exporter:
+  # On-demand nodes (tortuga) already push host metrics via Alloy
+  # (nix/common/alloy.nix) and would show up as TargetDown whenever they're off.
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: home.packet.fail/on-demand
+                operator: DoesNotExist
   resources:
     requests:
       cpu: 10m
