@@ -52,7 +52,32 @@
           "dmask=0077"
         ];
       };
-    };
+    }
+    # Windows NTFS volumes, via the in-kernel ntfs3 driver. Mounted on first
+    # access so a missing/dirty volume never blocks boot. If Windows Fast
+    # Startup is ever re-enabled, ntfs3 will refuse these read-write.
+    //
+      lib.mapAttrs
+        (_: uuid: {
+          device = "/dev/disk/by-uuid/${uuid}";
+          fsType = "ntfs3";
+          options = [
+            "uid=1000"
+            "gid=100"
+            "umask=022"
+            "noatime"
+            "windows_names"
+            "nofail"
+            "noauto"
+            "x-systemd.automount"
+            "x-systemd.idle-timeout=10min"
+            "x-gvfs-show"
+          ];
+        })
+        {
+          "/mnt/windows" = "CE8EE5AA8EE58AF3"; # C: (nvme0n1p3)
+          "/mnt/extras" = "521A02351A02169F"; # "Extras" (nvme1n1p2)
+        };
 
   services.btrfs.autoScrub.enable = true;
 
