@@ -22,9 +22,9 @@ ingress:
     - ha.packet.fail
 resources:
   limits:
-    akri.sh/zigbee: '1'
+    devic.es/zigbee: '1'
   requests:
-    akri.sh/zigbee: '1'
+    devic.es/zigbee: '1'
 configuration:
   enabled: true
   forceInit: true
