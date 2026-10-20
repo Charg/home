@@ -247,6 +247,10 @@
         CLAUDE_CODE_DISABLE_ERROR_REPORTING = "1";
         CLAUDE_CODE_DISABLE_FEEDBACK_COMMAND = "1";
         CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY = "1";
+
+        # Claude Code's Bash tool replays a shell snapshot, which puts zoxide's
+        # hook out of order and makes it print a config warning on every call.
+        _ZO_DOCTOR = "0";
       };
 
       statusLine = {
