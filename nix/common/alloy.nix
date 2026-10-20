@@ -9,6 +9,13 @@ in
     extraFlags = [ "--disable-reporting" ];
   };
 
+  # SMART health/wear for all disks, autodiscovered. Scraped by the Alloy
+  # config below; listens on localhost only.
+  services.prometheus.exporters.smartctl = {
+    enable = true;
+    listenAddress = "127.0.0.1";
+  };
+
   environment.etc."alloy/config.alloy".text = ''
     prometheus.exporter.unix "host" {
       enable_collectors = ["systemd"]
@@ -35,6 +42,16 @@ in
       forward_to      = [prometheus.remote_write.nuc01.receiver]
     }
 
+    prometheus.scrape "smartctl" {
+      targets = [{
+        __address__ = "127.0.0.1:${toString config.services.prometheus.exporters.smartctl.port}",
+        job         = "smartctl",
+        instance    = "${hostName}",
+      }]
+      scrape_interval = "60s"
+      forward_to      = [prometheus.remote_write.nuc01.receiver]
+    }
+
     prometheus.remote_write "nuc01" {
       endpoint {
         url = "https://prometheus.home.packet.fail/api/v1/write"
@@ -58,7 +75,18 @@ in
       max_age       = "12h"
       relabel_rules = loki.relabel.journal.rules
       labels        = { host = "${hostName}", job = "systemd-journal" }
-      forward_to    = [loki.write.nuc01.receiver]
+      forward_to    = [loki.process.journal.receiver]
+    }
+
+    // NixOS lists each dbus package both as an explicit <servicedir> and via
+    // XDG_DATA_DIRS, so dbus-broker logs ~100 "Ignoring duplicate name" lines
+    // at error priority on every reload. Harmless; drop them.
+    loki.process "journal" {
+      stage.drop {
+        expression          = "^Ignoring duplicate name '.*' in service file"
+        drop_counter_reason = "dbus_duplicate_name"
+      }
+      forward_to = [loki.write.nuc01.receiver]
     }
 
     loki.write "nuc01" {
