@@ -122,6 +122,11 @@ spec:
             chart: technitium-operator
             targetRevision: 1.4.0
             namespace: technitium
+          - name: home-assistant
+            repoURL: https://pajikos.github.io/home-assistant-helm-chart/
+            chart: home-assistant
+            targetRevision: 0.3.78
+            namespace: home-assistant
           - name: pod-gateway
             repoURL: https://angelnu.github.io/helm-charts/
             chart: pod-gateway

@@ -1,0 +1,32 @@
+# https://github.com/pajikos/home-assistant-helm-chart/tree/main/charts/home-assistant
+
+replicaCount: 0
+ingress:
+  enabled: true
+  className: traefik-internal
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: ha.home.packet.fail
+  hosts:
+  - host: ha.home.packet.fail
+    paths:
+    - path: /
+      pathType: ImplementationSpecific
+      backend:
+        service:
+          name: home-assistant
+          port:
+            number: 8080
+  tls:
+  - hosts:
+    - ha.home.packet.fail
+resources:
+  limits:
+    devic.es/zigbee: '1'
+  requests:
+    devic.es/zigbee: '1'
+configuration:
+  enabled: true
+  forceInit: true
+persistence:
+  enabled: true
+  storageClass: synology-iscsi-storage
