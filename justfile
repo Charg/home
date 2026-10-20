@@ -1,6 +1,10 @@
 default:
     @just --list
 
+# Import Windows games from the NTFS drives into Lutris (dry run unless --apply)
+lutris-import *args:
+    ./scripts/lutris-import.py {{args}}
+
 update-claude-code:
     #!/usr/bin/env bash
     set -euo pipefail
