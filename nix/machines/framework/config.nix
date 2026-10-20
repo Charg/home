@@ -48,7 +48,8 @@ in
     inputs.nixos-hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
     ./alloy.nix
-    ./gnome.nix
+    ../../common/fonts.nix
+    ../../common/gnome.nix
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
   ];
@@ -639,29 +640,6 @@ in
   # Enable power-profiles-daemon, a DBus daemon
   # Recommended at https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13
   services.power-profiles-daemon.enable = true;
-
-  fonts.packages = with pkgs; [
-    inter
-    jetbrains-mono
-    nerd-fonts.symbols-only # icon glyphs as a fallback for any font (eza, starship)
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-color-emoji
-  ];
-
-  # Without these, fontconfig resolves the generic families to DejaVu.
-  fonts.fontconfig.defaultFonts = {
-    sansSerif = [
-      "Inter"
-      "Noto Sans"
-    ];
-    serif = [ "Noto Serif" ];
-    monospace = [
-      "JetBrains Mono"
-      "Symbols Nerd Font Mono"
-    ];
-    emoji = [ "Noto Color Emoji" ];
-  };
 
   services.journald.extraConfig = ''
     SystemMaxUse=1G

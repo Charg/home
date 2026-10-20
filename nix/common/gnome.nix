@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  gnomeExtensionVicinae = pkgs.callPackage ../../packages/gnome-shell-extension-vicinae.nix { };
+  gnomeExtensionVicinae = pkgs.callPackage ../packages/gnome-shell-extension-vicinae.nix { };
 in
 {
 

@@ -8,7 +8,8 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../framework/gnome.nix
+    ../../common/fonts.nix
+    ../../common/gnome.nix
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
   ];
@@ -204,28 +205,6 @@
     heroic
     protonplus
   ];
-
-  fonts.packages = with pkgs; [
-    inter
-    jetbrains-mono
-    nerd-fonts.symbols-only
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-color-emoji
-  ];
-
-  fonts.fontconfig.defaultFonts = {
-    sansSerif = [
-      "Inter"
-      "Noto Sans"
-    ];
-    serif = [ "Noto Serif" ];
-    monospace = [
-      "JetBrains Mono"
-      "Symbols Nerd Font Mono"
-    ];
-    emoji = [ "Noto Color Emoji" ];
-  };
 
   services.journald.extraConfig = ''
     SystemMaxUse=1G
