@@ -194,7 +194,16 @@
     notifications.systembus-notify.enable = true;
     notifications.wall.enable = true;
   };
-  environment.systemPackages = [ pkgs.smartmontools ];
+  environment.systemPackages = with pkgs; [
+    smartmontools
+
+    # Gaming: Lutris is the unified library (Steam/GOG/Battle.net/local
+    # exes); Heroic covers Epic/GOG titles Lutris handles poorly; ProtonPlus
+    # installs GE-Proton and other compatibility tools.
+    lutris
+    heroic
+    protonplus
+  ];
 
   fonts.packages = with pkgs; [
     inter
