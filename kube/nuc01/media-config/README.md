@@ -30,6 +30,26 @@ Add `setGateway: "true"` to `spec.template.metadata.labels`. Never to
   NetworkPolicy. VXLAN return traffic is a separate conntrack flow, not a reply,
   so `ESTABLISHED` does not cover it. Without the rule the injected init
   container passes its ping to the gateway and then hangs on DHCP.
+- **Each routed app needs egress rules for every in-cluster destination it
+  calls.** The backstop policy selects every routed pod and allows only the
+  gateway and kube-dns, so once a pod is labelled, all other in-cluster traffic
+  is denied. Policies are additive, so the app's own NetworkPolicy adds what it
+  needs. A missing rule fails fast with `Connection refused`, not a timeout.
+  Internet destinations need no rule; that traffic is inside the tunnel.
+
+  ```yaml
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: <namespace>
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: <app>
+  ```
+
+  Select the destination pods, not the Service: policy is evaluated after
+  ClusterIP translation.
 - A routed pod cannot be served to public clients (public Traefik, or
   `externalTrafficPolicy: Local`): replies to public addresses go down the
   tunnel and are dropped. Internal Traefik and kubelet probes are unaffected.
@@ -67,7 +87,9 @@ pod keeps its default route but has no permission to use it.
 
 It allows only the gateway pod (no port restriction, because the client scripts
 also ping it) and kube-dns on 53 (the client resolves the gateway by name before
-the tunnel exists). Egress only, so it never changes a routed app's ingress.
+the tunnel exists). Nothing else in the cluster is reachable until the app's own
+policy allows it, see [Opting a pod in](#opting-a-pod-in). Egress only, so it
+never changes a routed app's ingress.
 
 ## Settings that are traps, not tuning
 
@@ -120,9 +142,10 @@ not add `Ingress` to it without allowing UDP/4789 from the pod CIDR.
 ## Failure behaviour
 
 - **Gateway down:** routed pods lose egress; there is no fallback route. They
-  recover without restarting once the gateway is back, after up to about half a
-  minute (`CONNECTION_RETRY_COUNT` trades reconnect speed for cold-boot
-  tolerance), on a new exit address.
+  recover without restarting, typically within a minute of the gateway pod
+  being deleted (`CONNECTION_RETRY_COUNT` trades reconnect speed for cold-boot
+  tolerance), on a new exit address. This holds when the gateway reschedules
+  to a different node.
 - **Clients created while the gateway is down** sit in `Init` under kubelet
   backoff and can take minutes to recover after the gateway is healthy.
 - **Webhook down:** opted-in pods are rejected at admission; every other pod in
