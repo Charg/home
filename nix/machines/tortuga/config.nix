@@ -204,7 +204,19 @@
     # Gaming: Lutris is the unified library (Steam/GOG/Battle.net/local
     # exes); Heroic covers Epic/GOG titles Lutris handles poorly; ProtonPlus
     # installs GE-Proton and other compatibility tools.
-    lutris
+    # Lutris is wrapped so Proton games use Wine's native Wayland driver
+    # (XWayland can't carry HDR) and output HDR when the game enables it.
+    # Override per game in Lutris' environment variables if one misbehaves.
+    (pkgs.symlinkJoin {
+      name = "lutris";
+      paths = [ lutris ];
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/lutris \
+          --set-default PROTON_ENABLE_WAYLAND 1 \
+          --set-default PROTON_ENABLE_HDR 1
+      '';
+    })
     heroic
     protonplus
   ];
