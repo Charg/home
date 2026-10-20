@@ -7,7 +7,7 @@
   # upscales to its native 5120x1440 and blurs text. 1.25 keeps the UI
   # roughly the size it was at 3840x1080 while rendering at native res.
   # 240 Hz is only offered as a VRR mode over HDMI; fixed 120 Hz avoids
-  # OLED VRR flicker. GNOME can't persist display changes made in Settings
+  # OLED VRR flicker. bt2100 is GNOME's HDR mode. GNOME can't persist display changes made in Settings
   # while this file is managed here.
   xdg.configFile."monitors.xml".text = ''
     <monitors version="2">
@@ -30,6 +30,7 @@
               <height>1440</height>
               <rate>119.999755859375</rate>
             </mode>
+            <colormode>bt2100</colormode>
           </monitor>
         </logicalmonitor>
       </configuration>
