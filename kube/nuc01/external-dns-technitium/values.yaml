@@ -15,7 +15,7 @@ provider:
   webhook:
     image:
       repository: ghcr.io/charg/technitium-kube-operator
-      tag: 1.4.0
+      tag: 1.4.0@sha256:18d7f349e5f25f6e969b4076081c92c6582fc0035bdd5c3deea53bfdd3196115
     args:
       - external-dns-webhook
       - --server-ref=dns
