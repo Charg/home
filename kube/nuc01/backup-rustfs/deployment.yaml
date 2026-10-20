@@ -6,6 +6,10 @@ metadata:
   namespace: backup
 spec:
   replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: backup-rustfs
@@ -35,6 +39,8 @@ spec:
                   key: secret-key
             - name: RUSTFS_OBS_ENDPOINT
               value: "http://opentelemetry-collector.monitoring.svc.cluster.local:4318"
+            - name: RUSTFS_OBS_SERVICE_NAME
+              value: "backup-rustfs"
             - name: RUSTFS_CONSOLE_ENABLE
               value: "true"
             - name: RUSTFS_CONSOLE_ADDRESS
