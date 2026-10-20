@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prowlarr-internal
+  namespace: media
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: prowlarr.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: prowlarr.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prowlarr
+                port:
+                  number: 9696
+  tls:
+    - hosts:
+        - prowlarr.home.packet.fail

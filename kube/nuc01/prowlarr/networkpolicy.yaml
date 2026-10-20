@@ -1,0 +1,63 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prowlarr
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-internal
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 9696
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: scryer
+      ports:
+        - protocol: TCP
+          port: 9696
+    # VXLAN return traffic from the gateway is a separate conntrack flow, not a
+    # reply. Required; see kube/nuc01/media-config/README.md.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: trawl
+      ports:
+        - protocol: TCP
+          port: 8191
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: pod-gateway
+              app.kubernetes.io/controller: main

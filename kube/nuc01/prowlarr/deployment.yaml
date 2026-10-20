@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: media
+  labels:
+    app.kubernetes.io/name: prowlarr
+spec:
+  replicas: 1
+  # prowlarr.db is SQLite on a RWO volume; never two writers.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prowlarr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prowlarr
+        # Routes non-cluster egress through the WireGuard gateway. See
+        # kube/nuc01/media-config/README.md.
+        setGateway: "true"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prowlarr
+          image: ghcr.io/home-operations/prowlarr:2.5.2.5491@sha256:9dc56404214b8617d26af4af0a2df93ceb73fb4f2e1cb5383f5c2154f5fd98a2
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: TZ
+              value: America/Los_Angeles
+            - name: PROWLARR__AUTH__APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: prowlarr-api-key
+                  key: api-key
+          ports:
+            - name: http
+              containerPort: 9696
+              protocol: TCP
+          volumeMounts:
+            - name: prowlarr-config
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 9696
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 9696
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      volumes:
+        - name: prowlarr-config
+          persistentVolumeClaim:
+            claimName: prowlarr-config
