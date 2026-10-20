@@ -363,3 +363,90 @@ prometheusOperator:
     limits:
       cpu: 200m
       memory: 256Mi
+
+# Extra rules for the NixOS workstations (framework13, tortuga) that push via
+# Alloy (nix/common/alloy.nix). Workstations are the node-exporter instances
+# labelled with a hostname rather than ip:port. Disk-fill prediction, failed
+# systemd units and memory utilisation are already covered by the bundled
+# node-exporter rules.
+additionalPrometheusRulesMap:
+  home-workstations:
+    groups:
+      - name: home-workstations
+        rules:
+          - alert: WorkstationCPUHot
+            expr: |
+              max by (instance) (
+                node_hwmon_temp_celsius{job="node-exporter", instance!~".+:[0-9]+", chip="pci0000:00_0000:00:18_3", sensor="temp1"}
+              ) > 95
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.instance }} CPU at {{ $value | humanize }}°C"
+              description: "AMD Tctl has been above 95°C for 5 minutes; the CPU is at or near its throttle point."
+          - alert: WorkstationMemoryPressure
+            expr: |
+              rate(node_pressure_memory_waiting_seconds_total{job="node-exporter", instance!~".+:[0-9]+"}[5m]) > 0.10
+            for: 10m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.instance }} stalled on memory {{ $value | humanizePercentage }} of the time"
+              description: "Tasks have spent over 10% of wall time waiting on memory for 10 minutes; expect sluggishness or OOM kills."
+          - alert: WorkstationOOMKill
+            expr: |
+              increase(node_vmstat_oom_kill{job="node-exporter", instance!~".+:[0-9]+"}[15m]) > 0
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.instance }} OOM killer fired"
+              description: "The kernel OOM killer terminated a process in the last 15 minutes. Check the journal for the victim."
+          - alert: WorkstationNVMeHot
+            expr: |
+              node_hwmon_temp_celsius{job="node-exporter", instance!~".+:[0-9]+", chip=~"nvme_.+", sensor="temp1"} > 70
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.instance }} {{ $labels.chip }} at {{ $value | humanize }}°C"
+              description: "NVMe composite temperature above 70°C for 15 minutes; sustained heat shortens drive life and causes throttling."
+      - name: home-smart
+        rules:
+          - alert: DiskSmartFailed
+            expr: smartctl_device_smart_status{job="smartctl"} != 1
+            labels:
+              severity: critical
+            annotations:
+              summary: "{{ $labels.instance }} {{ $labels.device }} failed its SMART health check"
+              description: "The drive reports overall SMART status FAILED. Back up now and plan a replacement."
+          - alert: NVMeCriticalWarning
+            expr: smartctl_device_critical_warning{job="smartctl"} > 0
+            labels:
+              severity: critical
+            annotations:
+              summary: "{{ $labels.instance }} {{ $labels.device }} raised an NVMe critical warning ({{ $value }})"
+              description: "Bitfield: 1 spare low, 2 temperature, 4 reliability degraded, 8 read-only, 16 volatile backup failed."
+          - alert: NVMeSpareLow
+            expr: |
+              smartctl_device_available_spare{job="smartctl"}
+                <= on (instance, device) smartctl_device_available_spare_threshold{job="smartctl"}
+            labels:
+              severity: critical
+            annotations:
+              summary: "{{ $labels.instance }} {{ $labels.device }} spare blocks at {{ $value }}%"
+              description: "Available spare is at or below the manufacturer threshold; the drive is near end of life."
+          - alert: NVMeWearHigh
+            expr: smartctl_device_percentage_used{job="smartctl"} >= 80
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.instance }} {{ $labels.device }} is {{ $value }}% through its rated endurance"
+              description: "Percentage used is a vendor estimate of consumed write endurance. Plan a replacement before 100%."
+          - alert: DiskMediaErrors
+            expr: increase(smartctl_device_media_errors{job="smartctl"}[1h]) > 0
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.instance }} {{ $labels.device }} logged new media errors"
+              description: "Unrecovered data integrity errors increased in the last hour."
