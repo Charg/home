@@ -25,7 +25,7 @@
   #
   # Disks
   #
-  # Partitioned by hand next to Windows (see README.md), so referenced by GPT
+  # Partitioned by hand next to Windows, so referenced by GPT
   # partition label rather than managed by disko.
   boot.initrd.luks.devices.cryptroot = {
     device = "/dev/disk/by-partlabel/nixos-root";
@@ -33,19 +33,28 @@
     bypassWorkqueues = true;
   };
 
-  fileSystems."/" = {
-    device = "/dev/mapper/cryptroot";
-    fsType = "ext4";
-  };
+  fileSystems =
+    lib.genAttrs [ "/" "/home" "/nix" ] (mount: {
+      device = "/dev/mapper/cryptroot";
+      fsType = "btrfs";
+      options = [
+        "subvol=${if mount == "/" then "root" else lib.removePrefix "/" mount}"
+        "compress=zstd"
+        "noatime"
+      ];
+    })
+    // {
+      "/boot" = {
+        device = "/dev/disk/by-partlabel/nixos-esp";
+        fsType = "vfat";
+        options = [
+          "fmask=0077"
+          "dmask=0077"
+        ];
+      };
+    };
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-partlabel/nixos-esp";
-    fsType = "vfat";
-    options = [
-      "fmask=0077"
-      "dmask=0077"
-    ];
-  };
+  services.btrfs.autoScrub.enable = true;
 
   zramSwap.enable = true;
 
