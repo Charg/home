@@ -47,7 +47,7 @@ in
   imports = [
     inputs.nixos-hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
-    ./alloy.nix
+    ../../common/alloy.nix
     ../../common/fonts.nix
     ../../common/gnome.nix
     ../../common/nix-ld.nix

@@ -9,6 +9,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../common/alloy.nix
     ../../common/fonts.nix
     ../../common/gnome.nix
     ../../common/nix-ld.nix
@@ -120,6 +121,26 @@
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
+
+  # GPU temperature, fan speed, power and utilisation, scraped by the shared
+  # Alloy config (common/alloy.nix) and remote-written to nuc01. Listens on
+  # localhost only; the firewall stays closed.
+  services.prometheus.exporters.nvidia-gpu = {
+    enable = true;
+    listenAddress = "127.0.0.1";
+  };
+
+  environment.etc."alloy/nvidia-gpu.alloy".text = ''
+    prometheus.scrape "nvidia_gpu" {
+      targets = [{
+        __address__ = "127.0.0.1:${toString config.services.prometheus.exporters.nvidia-gpu.port}",
+        job         = "nvidia-gpu",
+        instance    = "${config.networking.hostName}",
+      }]
+      scrape_interval = "15s"
+      forward_to      = [prometheus.remote_write.nuc01.receiver]
+    }
+  '';
 
   #
   # System
