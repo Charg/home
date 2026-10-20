@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  currentSystemUser,
   ...
 }:
 
@@ -13,6 +14,8 @@
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
   ];
+
+  home-manager.users.${currentSystemUser}.imports = [ ./hm.nix ];
 
   #
   # Bootloader

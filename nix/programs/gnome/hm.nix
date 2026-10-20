@@ -226,7 +226,10 @@ in
     "org/gnome/desktop/interface" = {
       color-scheme = "prefer-dark";
       cursor-theme = "Pop";
-      # Subpixel AA fringes on a HiDPI panel with fractional scaling.
+      document-font-name = "Inter 12";
+      # Grayscale on purpose: subpixel AA fringes on framework's HiDPI panel
+      # with fractional scaling, and on tortuga's QD-OLED, whose triangular
+      # subpixel layout doesn't match any rgba order.
       font-antialiasing = "grayscale";
       font-hinting = "slight";
       gtk-theme = "Pop-dark";
