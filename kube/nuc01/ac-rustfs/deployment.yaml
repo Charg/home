@@ -32,7 +32,7 @@ spec:
                   name: rustfs-credentials
                   key: secret-key
             - name: RUSTFS_OBS_ENDPOINT
-              value: "http://opentelemetry-collector.monitoring.svc.cluster.local:4317"
+              value: "http://opentelemetry-collector.monitoring.svc.cluster.local:4318"
             - name: RUSTFS_CONSOLE_ENABLE
               value: "true"
             - name: RUSTFS_CONSOLE_ADDRESS
