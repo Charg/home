@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   currentSystemUser,
   ...
 }:
@@ -10,6 +11,7 @@
   imports = [
     ./hardware-configuration.nix
     ./k3s.nix
+    inputs.lanzaboote.nixosModules.lanzaboote
     ../../common/alloy.nix
     ../../common/fonts.nix
     ../../common/gnome.nix
@@ -24,8 +26,17 @@
   #
   # NixOS has its own ESP; Windows keeps its original one. Pick Windows from the
   # firmware boot menu.
-  boot.loader.systemd-boot.enable = true;
+  #
+  # Secure Boot via lanzaboote, which replaces the systemd-boot installer and
+  # signs boot files with the sbctl keys. Keys are created with
+  # `sbctl create-keys` and enrolled with `sbctl enroll-keys --microsoft`;
+  # the Microsoft keys must stay enrolled for Windows and the GPU option ROM.
+  boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.systemd-boot.configurationLimit = 10;
+  boot.lanzaboote = {
+    enable = true;
+    pkiBundle = "/var/lib/sbctl";
+  };
   boot.loader.efi.canTouchEfiVariables = true;
 
   #
@@ -222,6 +233,7 @@
   };
   environment.systemPackages = with pkgs; [
     smartmontools
+    sbctl # Secure Boot key management for lanzaboote
 
     # Gaming: Lutris is the unified library (Steam/GOG/Battle.net/local
     # exes); Heroic covers Epic/GOG titles Lutris handles poorly; ProtonPlus
