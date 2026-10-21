@@ -13,6 +13,7 @@
     ./k3s.nix
     inputs.lanzaboote.nixosModules.lanzaboote
     ../../common/alloy.nix
+    ../../common/bluetooth.nix
     ../../common/fonts.nix
     ../../common/gnome.nix
     ../../common/nix-ld.nix
@@ -192,11 +193,6 @@
   time.timeZone = "America/Los_Angeles";
 
   i18n.defaultLocale = "en_US.UTF-8";
-
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-  };
 
   # The onboard MediaTek MT7922 (Wi-Fi over PCIe, Bluetooth over USB) is the
   # main suspect for the machine hanging in S3 and needing a hard power-off.

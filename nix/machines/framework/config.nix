@@ -48,6 +48,7 @@ in
     inputs.nixos-hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
     ../../common/alloy.nix
+    ../../common/bluetooth.nix
     ../../common/fonts.nix
     ../../common/gnome.nix
     ../../common/nix-ld.nix
@@ -105,27 +106,6 @@ in
   #
   # Hardware
   #
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-    settings = {
-      General = {
-        # Shows battery charge of connected devices on supported
-        # Bluetooth adapters. Defaults to 'false'.
-        Experimental = true;
-        # Faster reconnects at the cost of more frequent page scanning,
-        # which shows up in idle power draw. Defaults to 'false'.
-        FastConnectable = false;
-      };
-      Policy = {
-        # Enable all controllers when they are found. This includes
-        # adapters present on start as well as adapters that are plugged
-        # in later on. Defaults to 'true'.
-        AutoEnable = true;
-      };
-    };
-  };
-
   # Disable autosuspend for Elgato Wave XLR to prevent USB drops (-110 errors)
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0fd9", ATTR{idProduct}=="007d", ATTR{power/control}="on"
