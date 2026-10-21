@@ -160,6 +160,10 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
+  # Mutter reads monitors.xml from the system config dirs too, so the GDM
+  # greeter comes up in the same mode as the user session.
+  environment.etc."xdg/monitors.xml".text = import ./monitors.nix { inherit lib; };
+
   # GPU temperature, fan speed, power and utilisation, scraped by the shared
   # Alloy config (common/alloy.nix) and remote-written to nuc01. Listens on
   # localhost only; the firewall stays closed.

@@ -57,6 +57,8 @@ in
   # List of Gnome specific packages
   environment.systemPackages = with pkgs; [
     dconf2nix
+    # appindicator spawns `gjs` from PATH to find existing tray icons.
+    gjs
     gnomeExtensions.appindicator
     gnomeExtensions.clipboard-history
     gnomeExtensions.pop-shell # https://github.com/pop-os/shell
