@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-swap
+  namespace: ai
+  labels:
+    app.kubernetes.io/name: llama-swap
+spec:
+  replicas: 1
+  # One GPU slice and a hostPath model store; a second pod during a roll
+  # would only compete for VRAM.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: llama-swap
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: llama-swap
+    spec:
+      automountServiceAccountToken: false
+      # tortuga, the on-demand GPU node (nix/machines/tortuga/k3s.nix). While
+      # it's off this pod sits Pending.
+      runtimeClassName: nvidia
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      # Matches the upstream rootless image's user, which only ships floating
+      # tags; /models is created with this owner by tortuga's NixOS config.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+      containers:
+        - name: llama-swap
+          image: ghcr.io/mostlygeek/llama-swap:unified-cuda13-265@sha256:6fe60085a65acd61cc05b96a97cfe8b1c397ac84a5334c11a2598a21042a3213
+          env:
+            - name: LLAMA_SWAP_CONFIG
+              value: /etc/llama-swap/config/config.yaml
+            - name: LLAMA_CACHE
+              value: /models
+            - name: HOME
+              value: /tmp
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/llama-swap/config
+              readOnly: true
+            - name: models
+              mountPath: /models
+            - name: dshm
+              mountPath: /dev/shm
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              # Headroom for --fit spilling layers to system RAM.
+              memory: 16Gi
+              nvidia.com/gpu: 1
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: config
+          configMap:
+            name: llama-swap-config
+        - name: models
+          hostPath:
+            path: /var/lib/llama-swap/models
+            type: Directory
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi

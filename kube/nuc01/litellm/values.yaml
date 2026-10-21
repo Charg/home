@@ -29,6 +29,24 @@ proxy_config:
       litellm_params:
         model: openai/gpt-4o
         api_key: os.environ/OPENAI_API_KEY
+    # Local models via llama-swap (kube/nuc01/llama-swap) on tortuga's GPU.
+    # Unavailable while the node is off; the first request after idle waits
+    # for the model to load, hence the long timeout. llama-swap has no auth,
+    # but the OpenAI client insists on a key.
+    - model_name: gemma-4-12b
+      litellm_params: &llama-swap
+        model: openai/gemma-4-12b
+        api_base: http://llama-swap.ai.svc:8080/v1
+        api_key: none
+        timeout: 600
+    - model_name: gpt-oss-20b
+      litellm_params:
+        <<: *llama-swap
+        model: openai/gpt-oss-20b
+    - model_name: qwen3.5-9b
+      litellm_params:
+        <<: *llama-swap
+        model: openai/qwen3.5-9b
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
 

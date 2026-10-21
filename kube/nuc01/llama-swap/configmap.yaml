@@ -1,0 +1,54 @@
+---
+# llama-swap starts a llama-server per model on first request and stops it
+# after `globalTTL` idle seconds, so the GPU is shared with ComfyUI and the
+# desktop. Only one model runs at a time (llama-swap's default).
+#
+# Models download from Hugging Face on first load into /models (a hostPath on
+# tortuga); the first request for a new model waits for the download.
+#
+# llama-server's default --fit sizes GPU offload to the VRAM free at load
+# time, spilling layers to system RAM (much slower) when a model doesn't fit.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama-swap-config
+  namespace: ai
+  labels:
+    app.kubernetes.io/name: llama-swap
+data:
+  config.yaml: |
+    # Long enough for a first-load download of a ~20 GB model.
+    healthCheckTimeout: 1800
+    logToStdout: proxy
+    globalTTL: 300
+
+    macros:
+      "llama-server": >
+        llama-server
+        --host 127.0.0.1
+        --port ${PORT}
+
+    models:
+      "gemma-4-12b":
+        name: "Gemma 4 12B"
+        cmd: |
+          ${llama-server}
+          -hf unsloth/gemma-4-12b-it-GGUF:Q6_K
+          --ctx-size 32768
+
+      # MoE with ~3.6B active parameters, entirely in VRAM: the fastest here.
+      "gpt-oss-20b":
+        name: "gpt-oss 20B"
+        cmd: |
+          ${llama-server}
+          -hf ggml-org/gpt-oss-20b-GGUF:MXFP4
+          --ctx-size 32768
+
+      # Hybrid attention (8 of 32 layers full), so 32K of context is only
+      # ~1 GB of KV cache and Q8_0 still fits alongside the vision projector.
+      "qwen3.5-9b":
+        name: "Qwen3.5 9B"
+        cmd: |
+          ${llama-server}
+          -hf unsloth/Qwen3.5-9B-GGUF:Q8_0
+          --ctx-size 32768

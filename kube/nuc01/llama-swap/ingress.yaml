@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llama-swap-internal
+  namespace: ai
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: llama.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: llama.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: llama-swap
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - llama.home.packet.fail
