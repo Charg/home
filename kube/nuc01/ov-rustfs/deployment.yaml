@@ -45,6 +45,19 @@ spec:
               value: "true"
             - name: RUSTFS_CONSOLE_ADDRESS
               value: ":9001"
+            # The default scanner preset restarts a full metadata walk 60s
+            # after the previous one finishes, so on a large bucket it never
+            # stops and saturates nuc01's NVMe with reads. This store is low
+            # use, so scan weekly, as slowly as possible, and skip the
+            # bitrot deep scan (single drive, no parity to heal from anyway).
+            - name: RUSTFS_SCANNER_SPEED
+              value: "slowest"
+            - name: RUSTFS_SCANNER_CYCLE
+              value: "604800"
+            - name: RUSTFS_SCANNER_START_DELAY_SECS
+              value: "3600"
+            - name: RUSTFS_SCANNER_BITROT_CYCLE_SECS
+              value: "off"
           volumeMounts:
             - name: data
               mountPath: /data
