@@ -100,6 +100,14 @@
 
   zramSwap.enable = true;
 
+  # zram swap is compressed RAM, not disk: swapping out is cheap, so favour it
+  # over dropping page cache, and skip readahead, which only helps seek-bound
+  # disks.
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 180;
+    "vm.page-cluster" = 0;
+  };
+
   #
   # Networking
   #
