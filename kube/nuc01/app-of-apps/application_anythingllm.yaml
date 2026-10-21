@@ -1,0 +1,79 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: anythingllm
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/charg
+    chart: anythingllm
+    targetRevision: 0.1.0
+    helm:
+      valuesObject:
+        # Credentials: anythingllm-config/anythingllm-credentials.enc.yaml
+        auth:
+          jwtSecretExistingSecret:
+            name: anythingllm-credentials
+          passwordExistingSecret:
+            name: anythingllm-credentials
+        encryption:
+          existingSecret:
+            name: anythingllm-credentials
+        # Chat goes through LiteLLM (kube/nuc01/litellm) with its own virtual
+        # key. Embeddings use the built-in CPU embedder until LiteLLM serves an
+        # embedding model. These win over the UI after a restart.
+        env:
+          LLM_PROVIDER: litellm
+          LITE_LLM_BASE_PATH: http://litellm.litellm.svc:4000
+          LITE_LLM_MODEL_PREF: gemma-4-12b
+          LITE_LLM_MODEL_TOKEN_LIMIT: "32768"
+          EMBEDDING_ENGINE: native
+          VECTOR_DB: lancedb
+          # Chromium (web scraping) without SYS_ADMIN.
+          ANYTHINGLLM_CHROMIUM_ARGS: --no-sandbox,--disable-setuid-sandbox
+        extraEnvVars:
+          - name: LITE_LLM_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: anythingllm-credentials
+                key: litellm-api-key
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        persistence:
+          existingClaim: anythingllm-data
+        ingress:
+          enabled: true
+          className: traefik-internal
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: allm.home.packet.fail
+          hosts:
+            - host: allm.home.packet.fail
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - allm.home.packet.fail
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            memory: 3Gi
+  destination:
+    namespace: ai
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
