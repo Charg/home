@@ -50,6 +50,11 @@
       ${lib.concatMapStrings configuration connectors}</monitors>
     '';
 
+  # At scale 1 and ~109 PPI, the shared Inter 12 renders at ~16px; GNOME's
+  # layouts are designed around its 11pt default.
+  gtk.font.size = lib.mkForce 11;
+  dconf.settings."org/gnome/desktop/interface".document-font-name = lib.mkForce "Inter 11";
+
   dconf.settings."org/gnome/mutter".experimental-features = [
     # Needed for blur-free fractional scaling; inert at scale 1.
     "scale-monitor-framebuffer"
