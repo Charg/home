@@ -112,5 +112,12 @@ in
     "interface-name:flannel*"
   ];
 
+  # Model store for kube/nuc01/llama-swap (hostPath). Owned by the pod's UID;
+  # lives outside k3s' data so `k3s-killall.sh` and PVC deletion can't touch it.
+  systemd.tmpfiles.rules = [
+    "d /var/lib/llama-swap 0755 root root -"
+    "d /var/lib/llama-swap/models 0750 10001 10001 -"
+  ];
+
   environment.systemPackages = [ gpu-node ];
 }
