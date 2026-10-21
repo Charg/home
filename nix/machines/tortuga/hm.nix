@@ -55,6 +55,15 @@
   gtk.font.size = lib.mkForce 11;
   dconf.settings."org/gnome/desktop/interface".document-font-name = lib.mkForce "Inter 11";
 
+  # Blank the OLED quickly to limit burn-in, but keep the machine awake
+  # far longer than GNOME's 15-minute default so downloads, builds and the
+  # GPU node keep running.
+  dconf.settings."org/gnome/desktop/session".idle-delay = lib.hm.gvariant.mkUint32 300;
+  dconf.settings."org/gnome/settings-daemon/plugins/power" = {
+    sleep-inactive-ac-type = "suspend";
+    sleep-inactive-ac-timeout = 7200;
+  };
+
   dconf.settings."org/gnome/mutter".experimental-features = [
     # Needed for blur-free fractional scaling; inert at scale 1.
     "scale-monitor-framebuffer"

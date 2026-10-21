@@ -157,10 +157,9 @@
   #
   # System
   #
+  # The RTC is kept in UTC; Windows is set to match via the
+  # RealTimeIsUniversal=1 registry key.
   time.timeZone = "America/Los_Angeles";
-  # Windows keeps the RTC in local time; match it so the clock doesn't jump
-  # when switching OSes.
-  time.hardwareClockInLocalTime = true;
 
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -169,9 +168,28 @@
     powerOnBoot = true;
   };
 
+  # The onboard MediaTek MT7922 (Wi-Fi over PCIe, Bluetooth over USB) is the
+  # main suspect for the machine hanging in S3 and needing a hard power-off.
+  # Wi-Fi is unused (wired Ethernet), so its driver is kept out entirely.
+  boot.blacklistedKernelModules = [ "mt7921e" ];
+
+  # Bluetooth is needed, so unload its driver across sleep instead; the
+  # adapter re-probes on wake and paired devices reconnect. Unload failures
+  # must not block suspend.
+  powerManagement.powerDownCommands = ''
+    ${pkgs.kmod}/bin/modprobe -r btusb || true
+  '';
+  powerManagement.resumeCommands = ''
+    ${pkgs.kmod}/bin/modprobe btusb || true
+  '';
+
   virtualisation.docker.enable = true;
   virtualisation.docker.package = pkgs.docker_29;
   virtualisation.docker.autoPrune.enable = true;
+  # Docker writes its own iptables rules, so published ports bypass the NixOS
+  # firewall. Bind them to localhost unless a host IP is given explicitly
+  # (`-p 0.0.0.0:8080:80`).
+  virtualisation.docker.daemon.settings.ip = "127.0.0.1";
 
   # Exposes the GPU to containers via CDI: `docker run --device nvidia.com/gpu=all ...`
   hardware.nvidia-container-toolkit.enable = true;
@@ -182,6 +200,7 @@
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
   };
 
   # Run games with `gamemoderun %command%` (Steam launch options) for a
@@ -219,6 +238,8 @@
     enable = true;
     settings = {
       PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
     };
   };
 
@@ -237,7 +258,8 @@
 
     # Gaming: Lutris is the unified library (Steam/GOG/Battle.net/local
     # exes); Heroic covers Epic/GOG titles Lutris handles poorly; ProtonPlus
-    # installs GE-Proton and other compatibility tools.
+    # installs GE-Proton and other compatibility tools for Lutris and Heroic
+    # (Steam gets GE-Proton from programs.steam.extraCompatPackages).
     # Lutris is wrapped so Proton games use Wine's native Wayland driver
     # (XWayland can't carry HDR) and output HDR when the game enables it.
     # Override per game in Lutris' environment variables if one misbehaves.

@@ -12,6 +12,10 @@ in
     gcr-ssh-agent.enable = false;
   };
 
+  # Kill the heaviest cgroup in a user's session under sustained memory
+  # pressure, instead of letting the desktop thrash until it locks up.
+  systemd.oomd.enableUserSlices = true;
+
   services.desktopManager.gnome.enable = true;
   services.displayManager.gdm.enable = true;
 
