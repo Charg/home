@@ -4,8 +4,8 @@
 
 {
   # Mutter otherwise picks the EDID-preferred 3840x1080, which the panel
-  # upscales to its native 5120x1440 and blurs text. 1.25 keeps the UI
-  # roughly the size it was at 3840x1080 while rendering at native res.
+  # upscales to its native 5120x1440 and blurs text. At ~109 PPI (same as
+  # a 27" 1440p) the panel wants scale 1.0; 1.25 made the UI oversized.
   # 240 Hz is only offered as a VRR mode over HDMI; fixed 120 Hz avoids
   # OLED VRR flicker. bt2100 is GNOME's HDR mode. GNOME can't persist
   # display changes made in Settings while this file is managed here.
@@ -25,7 +25,7 @@
           <logicalmonitor>
             <x>0</x>
             <y>0</y>
-            <scale>1.25</scale>
+            <scale>1</scale>
             <primary>yes</primary>
             <monitor>
               <monitorspec>
@@ -51,7 +51,7 @@
     '';
 
   dconf.settings."org/gnome/mutter".experimental-features = [
-    # Required for fractional (1.25) scaling without blur.
+    # Needed for blur-free fractional scaling; inert at scale 1.
     "scale-monitor-framebuffer"
     # Lets X11 apps (Steam, some games) render at native res instead of
     # being upscaled by the compositor.
