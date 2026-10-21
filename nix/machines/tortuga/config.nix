@@ -44,10 +44,17 @@
   #
   # Partitioned by hand next to Windows, so referenced by GPT
   # partition label rather than managed by disko.
+  #
+  # Unlocked by the TPM when PCR 7 (Secure Boot state + approving cert) matches
+  # enrollment; falls back to the passphrase otherwise. Enroll with
+  # `systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 /dev/disk/by-partlabel/nixos-root`
+  # and re-enroll after BIOS updates, key changes or dbx updates.
+  boot.initrd.systemd.enable = true;
   boot.initrd.luks.devices.cryptroot = {
     device = "/dev/disk/by-partlabel/nixos-root";
     allowDiscards = true;
     bypassWorkqueues = true;
+    crypttabExtraOpts = [ "tpm2-device=auto" ];
   };
 
   fileSystems =
