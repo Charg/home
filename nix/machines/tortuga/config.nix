@@ -39,6 +39,17 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Ask systemd-boot (honoured by lanzaboote) for the highest mode the firmware offers instead.
+  # Fixes boot text being mangled
+  boot.loader.systemd-boot.consoleMode = "max";
+
+ # Improved console screen font
+  console = {
+    earlySetup = true;
+    packages = [ pkgs.terminus_font ];
+    font = "ter-v24n";
+  };
+
   #
   # Disks
   #
