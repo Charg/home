@@ -28,11 +28,16 @@ spec:
         # Managed config: wins over anything saved at runtime. The model goes
         # through LiteLLM (kube/nuc01/litellm) with its own virtual key, so the
         # OpenAI key stays in LiteLLM.
+        #
+        # model.default is deliberately NOT managed: when Hermes saves the user
+        # config it strips managed keys first, and a model section left with no
+        # keys at all is written as invalid YAML (a bare `{}`), which breaks every
+        # chat session. Leaving default to the user config keeps that section
+        # non-empty, and lets the model be switched at runtime (/model).
         config:
           model:
             provider: custom
             base_url: http://litellm.litellm.svc:4000/v1
-            default: gpt-4o
             api_key: ${LITELLM_API_KEY}
           dashboard:
             # Traefik reaches the dashboard from the pod network; trust its
