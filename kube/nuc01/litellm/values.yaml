@@ -25,9 +25,9 @@ environmentSecrets:
 # in the clear, the actual keys live in litellm-config/litellm-provider-keys.enc.yaml.
 proxy_config:
   model_list:
-    - model_name: gpt-4o
+    - model_name: gpt-6-luna
       litellm_params:
-        model: openai/gpt-4o
+        model: openai/gpt-6-luna
         api_key: os.environ/OPENAI_API_KEY
     # Local models via llama-swap (kube/nuc01/llama-swap) on tortuga's GPU.
     # Unavailable while the node is off; the first request after idle waits
