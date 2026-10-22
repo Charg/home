@@ -32,7 +32,6 @@ in
     ../../programs/neovim/hm.nix
     ../../programs/opencode/hm.nix
     ../../programs/orca/hm.nix
-    ../../programs/podman/hm.nix
     ../../programs/ripgrep/hm.nix
     ../../programs/ssh/hm.nix
     ../../programs/starship/hm.nix

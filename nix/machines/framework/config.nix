@@ -75,7 +75,7 @@ in
     51820 # WireGuard
   ];
 
-  # Docker, Virtualbox, Podman, etc creates a NetworkManager connection profile for every bridge/veth
+  # Docker, Virtualbox, etc creates a NetworkManager connection profile for every bridge/veth
   # they own. Let them manage their own interfaces instead.
   systemd.services.NetworkManager-wait-online.enable = false;
 
@@ -87,7 +87,7 @@ in
   ];
 
   # Desktop notification (and journal log) when joining a network whose uplink
-  # subnet overlaps a local Docker/Podman/VirtualBox network. See nix/packages/netcheck.
+  # subnet overlaps a local Docker/VirtualBox network. See nix/packages/netcheck.
   networking.networkmanager.dispatcherScripts = [
     {
       type = "basic";
@@ -474,37 +474,6 @@ in
   };
   # Weekly `docker system prune -f` which clears out networks, images, and stopped containers
   virtualisation.docker.autoPrune.enable = true;
-  virtualisation = {
-    podman = {
-      enable = true;
-
-      # Create a `docker` alias for podman, to use it as a drop-in replacement
-      # dockerCompat = true;
-
-      # Required for containers under podman-compose to be able to talk to each other.
-      defaultNetwork.settings = {
-        dns_enabled = true;
-        subnets = [
-          {
-            subnet = "198.19.0.0/24";
-            gateway = "198.19.0.1";
-          }
-        ];
-      };
-    };
-  };
-  virtualisation.containers.containersConf.settings.network = {
-    default_subnet = "198.19.0.0/24";
-    default_subnet_pools = [
-      {
-        base = "198.19.64.0/18";
-        size = 24;
-      }
-    ];
-  };
-  # The podman CLI doesn't need the API socket; start it by hand if a tool does.
-  systemd.sockets.podman.wantedBy = lib.mkForce [ ];
-  systemd.user.sockets.podman.wantedBy = lib.mkForce [ ];
 
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.host.enableExtensionPack = true;
@@ -514,7 +483,7 @@ in
 
   # VirtualBox's built-in host-only allowlist (192.168.56.0/21) collides with the
   # same private ranges hotel/office Wi-Fi hands out. Restrict it to the same
-  # IANA-reserved range used for the Docker/Podman pools above.
+  # IANA-reserved 198.18.0.0/15 range used for the Docker pools above.
   environment.etc."vbox/networks.conf".text = ''
     * 198.19.128.0/21
     * fe80::/64
