@@ -3,8 +3,9 @@ name: branch-and-pr
 description: >-
   Git branch-and-PR workflow. Use when starting new work ("let's start on X",
   "create a branch for this") or when work is ready for review ("this is
-  ready", "raise a PR"). Encodes this repo's conventions: branch naming,
-  semantic commits/PR titles, and draft-PR-by-default.
+  ready", "raise a PR", "raise a PR and auto-merge it"). Encodes this repo's
+  conventions: branch naming, semantic commits/PR titles, and opt-in
+  auto-merge.
 ---
 
 # Branch and PR workflow
@@ -35,6 +36,12 @@ naming. E.g. `fix: null-pointer on checkout`, not `Fix null pointer`.
    is a one-way door).
 4. Create a label if it does not exist:
    `gh label create "🤖 agent" --description "Agent Authored" --color #C4C4C4`
-4. `gh pr create --label "🤖 agent" --base main --title "..." --body-file <path> --draft` -
-   default to `--draft` unless the user wants it ready for review.
-5. Return the PR URL.
+5. `gh pr create --label "🤖 agent" --base main --title "..." --body-file <path>` -
+   add `--draft` if the user requests it should be a draft PR.
+6. Auto-merge: off by default. Only enable it when the user explicitly asks
+   for it for this PR (a request for an earlier PR does not carry over).
+   - It cannot be combined with `--draft`; if both are asked for, say so and
+     ask which they want.
+   - `gh pr merge --auto --squash <url>` (use `--rebase` or `--merge` if the
+     repo doesn't allow squash).
+7. Return the PR URL, and say whether auto-merge is enabled.
