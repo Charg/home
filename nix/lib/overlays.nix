@@ -67,13 +67,39 @@ in
         };
         # Anthropic now serves this release's binary uncompressed; nixpkgs'
         # installPhase still assumes the old .zst-compressed distribution.
-        installPhase =
-          builtins.replaceStrings
+        #
+        # nixpkgs also wraps the binary with `--prefix LD_LIBRARY_PATH` so voice
+        # mode can dlopen libasound. Every process Claude spawns (Bash tool, MCP
+        # servers) inherits that, and its alsa-lib can need a newer glibc than
+        # the rest of the system, breaking e.g. Playwright's Chromium. Drop the
+        # wrapper line and put alsa-lib on the binary's search path instead.
+        #
+        # It has to be DT_RPATH, not the DT_RUNPATH autoPatchelf writes: the
+        # libasound user is the embedded audio-capture.node addon, which links
+        # it directly, and glibc only consults the executable's DT_RPATH (never
+        # its DT_RUNPATH) when resolving a dlopened library's dependencies.
+        installPhase = final.lib.pipe old.installPhase [
+          (builtins.replaceStrings
             [ "unzstd -q $src -o $out/bin/claude" ]
             [
               "install -m755 $src $out/bin/claude"
             ]
-            old.installPhase;
+          )
+          (final.lib.splitString "\n")
+          (builtins.filter (line: !(final.lib.hasInfix "LD_LIBRARY_PATH" line)))
+          (final.lib.concatStringsSep "\n")
+        ];
+        runtimeDependencies = final.lib.optionals final.stdenv.hostPlatform.isLinux [ final.alsa-lib ];
+        nativeBuildInputs =
+          old.nativeBuildInputs ++ final.lib.optionals final.stdenv.hostPlatform.isLinux [ final.patchelf ];
+        # Appended from preFixup so it runs after autoPatchelf's postFixup hook.
+        preFixup = final.lib.optionalString final.stdenv.hostPlatform.isLinux ''
+          forceRpath() {
+            local bin=$out/bin/.claude-wrapped
+            patchelf --force-rpath --set-rpath "$(patchelf --print-rpath "$bin")" "$bin"
+          }
+          postFixupHooks+=(forceRpath)
+        '';
       }
     );
   })

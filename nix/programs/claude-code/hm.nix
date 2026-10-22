@@ -25,9 +25,6 @@
         "--headless"
         "--isolated"
       ];
-      # PipeWire's JACK support exports a system-wide LD_LIBRARY_PATH whose
-      # alsa-lib can need a newer glibc than the Playwright Chromium build.
-      env.LD_LIBRARY_PATH = "";
     };
 
     settings = {
