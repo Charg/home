@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published  as text in one file per ticket locally.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured issue tracker (GitHub issues or local files).
 disable-model-invocation: true
 ---
 
@@ -8,6 +8,7 @@ disable-model-invocation: true
 
 Break a plan, spec, or conversation into a set of **tickets** - tracer-bullet vertical slices, each declaring the tickets that **block** it.
 
+The issue tracker (`docs/agents/issue-tracker.md`) and triage label vocabulary (`docs/agents/triage-labels.md`) should have been provided to you - run `/setup-repo` if not.
 
 ## Process
 
@@ -56,13 +57,20 @@ Iterate until the user approves the breakdown.
 
 ### 5. Publish the tickets to the configured tracker
 
-Publish the approved tickets. The tickets are the same either way, only the shape of the blocking edges changes:
+Publish the approved tickets. The tickets are the same either way; only where they live and the shape of the blocking edges changes. Follow the branch matching the configured tracker:
+
+- **GitHub** → one issue per ticket, using the issue template below. Work through the tickets in dependency order (blockers first) so every blocker already has an issue number when the tickets it gates are created. For each ticket:
+  1. **Create**: `gh issue create --title "<title>" --label ready-for-agent --body-file -` with the body on a heredoc (use the `ready-for-agent` string from the triage label table; if the label doesn't exist yet, `gh label create ready-for-agent` first). The command prints the issue URL - its last path segment is the new issue number. The "Blocked by" section lists the blockers as `#<n>`, and the "Parent" section references the parent spec issue as `#<n>` if there is one.
+  2. **Blocking edges**: for each blocker, add a native dependency with `gh api --method POST repos/{owner}/{repo}/issues/<n>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/{owner}/{repo}/issues/<blocker> --jq .id`, _not_ the `#number` or `node_id`). If the dependencies API isn't available on the repo, the body's `Blocked by: #<n>` references are the fallback record - say so when you report back.
+  3. **Parent link**: if the source was a parent spec issue, attach the ticket as a sub-issue with `gh api --method POST repos/{owner}/{repo}/issues/<parent>/sub_issues -F sub_issue_id=<ticket-db-id>` (the ticket's database id, looked up the same way). If sub-issues aren't available, the "Parent" section's `#<parent>` reference stands alone.
+
+  `gh api` fills `{owner}/{repo}` from the current clone. Finish by listing the created issues (number, title, blockers) for the user.
 
 - **Local files** → first allocate a unique feature key: `ls -d .scratch/*-[0-9][0-9][0-9][0-9][0-9] 2>/dev/null | sed 's/.*-//' | sort -n | tail -1` gives the highest existing serial (directories with no numeric suffix are legacy and don't count); use one more than that, or `00001` if there is none. Then write one file per ticket under `.scratch/<feature-slug>-<NNNNN>/issues/<NN>-<slug>.md`, tickets numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on (bare ticket numbers refer within this feature). Use the per-ticket file template below - one ticket per file, never a single combined file.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
-Do NOT close or modify any parent issue.
+Do NOT close or modify any parent issue - attaching the tickets as sub-issues is the only change it gets.
 
 <local-ticket-template>
 
@@ -83,7 +91,7 @@ Do NOT close or modify any parent issue.
 
 ## Parent
 
-A reference to the parent issue on the tracker (if the source was an existing issue, otherwise omit this section).
+`#<parent>` - the parent spec issue (if the source was an existing issue, otherwise omit this section).
 
 ## What to build
 
@@ -96,7 +104,7 @@ The end-to-end behaviour this ticket makes work, from the user's perspective - n
 
 ## Blocked by
 
-- A reference to each blocking ticket, or "None - can start immediately".
+- `#<n>` for each blocking ticket, or "None - can start immediately".
 
 </issue-template>
 
