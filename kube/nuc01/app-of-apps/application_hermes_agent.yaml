@@ -1,0 +1,98 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hermes-agent
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/charg
+    chart: hermes-agent
+    targetRevision: 0.1.0
+    helm:
+      valuesObject:
+        # Credentials: hermes-agent-config/hermes-agent-credentials.enc.yaml
+        apiServer:
+          existingSecret:
+            name: hermes-agent-credentials
+        dashboard:
+          enabled: true
+          publicUrl: https://hermes.home.packet.fail
+          basicAuth:
+            username: chris
+            existingSecret:
+              name: hermes-agent-credentials
+              passwordKey: dashboard-password
+              secretKey: dashboard-secret
+        # Managed config: wins over anything saved at runtime. The model goes
+        # through LiteLLM (kube/nuc01/litellm) with its own virtual key, so the
+        # OpenAI key stays in LiteLLM.
+        config:
+          model:
+            provider: custom
+            base_url: http://litellm.litellm.svc:4000/v1
+            default: gpt-4o
+            api_key: ${LITELLM_API_KEY}
+          dashboard:
+            # Traefik reaches the dashboard from the pod network; trust its
+            # X-Forwarded-For so the login rate limit is per client.
+            trusted_proxies:
+              - 10.42.0.0/16
+        managedEnv:
+          - name: LITELLM_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: hermes-agent-credentials
+                key: litellm-api-key
+        # The image starts as root and drops to uid 10000; these are the only
+        # capabilities that start needs.
+        podSecurityContext:
+          seccompProfile:
+            type: RuntimeDefault
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - CHOWN
+              - DAC_OVERRIDE
+              - FOWNER
+              - SETUID
+              - SETGID
+              - KILL
+        persistence:
+          existingClaim: hermes-agent-data
+        # Dashboard only: the API stays cluster-internal (and is further
+        # limited by hermes-agent-config/networkpolicy.yaml).
+        ingress:
+          enabled: true
+          className: traefik-internal
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: hermes.home.packet.fail
+          hosts:
+            - host: hermes.home.packet.fail
+              paths:
+                - path: /
+                  pathType: Prefix
+                  port: dashboard
+          tls:
+            - hosts:
+                - hermes.home.packet.fail
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            memory: 4Gi
+  destination:
+    namespace: ai
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
