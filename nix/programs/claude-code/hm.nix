@@ -1,6 +1,8 @@
 {
   config,
+  lib,
   pkgs,
+  inputs,
   ...
 }:
 
@@ -9,6 +11,24 @@
     enable = true;
 
     skills = ../../common/skills;
+
+    plugins = [
+      "${inputs.claude-plugins-official}/plugins/frontend-design"
+    ];
+
+    # nixpkgs' build is pinned and points at Nix-patched browsers, unlike the
+    # marketplace plugin's `npx @playwright/mcp@latest`.
+    mcpServers.playwright = {
+      type = "stdio";
+      command = lib.getExe pkgs.playwright-mcp;
+      args = [
+        "--headless"
+        "--isolated"
+      ];
+      # PipeWire's JACK support exports a system-wide LD_LIBRARY_PATH whose
+      # alsa-lib can need a newer glibc than the Playwright Chromium build.
+      env.LD_LIBRARY_PATH = "";
+    };
 
     settings = {
       autoCompactEnabled = true;

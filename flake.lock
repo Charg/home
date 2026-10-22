@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "claude-plugins-official": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792627125,
+        "narHash": "sha256-I7Ko4Ssksx6mkhej73jihZ3cuHuS7qePfBwpUebwttI=",
+        "owner": "anthropics",
+        "repo": "claude-plugins-official",
+        "rev": "af59ee3a1051a29dda4a2e7a2af221aa457ae08b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anthropics",
+        "repo": "claude-plugins-official",
+        "type": "github"
+      }
+    },
     "colmena": {
       "inputs": {
         "nix-github-actions": "nix-github-actions",
@@ -340,6 +356,7 @@
     },
     "root": {
       "inputs": {
+        "claude-plugins-official": "claude-plugins-official",
         "colmena": "colmena",
         "darwin": "darwin",
         "disko": "disko",
