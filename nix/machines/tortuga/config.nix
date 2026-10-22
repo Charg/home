@@ -141,6 +141,11 @@
     "interface-name:veth*"
   ];
 
+  # Wake on magic packet, applied by udev via a systemd .link file so it holds
+  # under NetworkManager. Also needs Wake on LAN enabled (and ErP off) in the
+  # BIOS.
+  networking.interfaces.enp9s0.wakeOnLan.enable = true;
+
   #
   # Graphics
   #
