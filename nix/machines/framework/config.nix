@@ -75,6 +75,13 @@ in
     51820 # WireGuard
   ];
 
+  # kind pod traffic (10.244.0.0/16) reaches the host un-NATed over the Docker bridge, but
+  # the pod routes only exist inside the kind node container, so rpfilter drops it.
+  # Exempt that source range, scoped to Docker bridges so it can't be spoofed elsewhere.
+  networking.firewall.extraCommands = ''
+    iptables -t mangle -I nixos-fw-rpfilter -i br-+ -s 10.244.0.0/16 -j RETURN
+  '';
+
   # Docker, Virtualbox, etc creates a NetworkManager connection profile for every bridge/veth
   # they own. Let them manage their own interfaces instead.
   systemd.services.NetworkManager-wait-online.enable = false;
