@@ -228,9 +228,16 @@ alloy:
         }
       }
 
+      discovery.relabel "technitium_probe" {
+        targets = prometheus.exporter.blackbox.technitium.targets
+        rule {
+          target_label = "job"
+          replacement  = "technitium-dns-probe"
+        }
+      }
+
       prometheus.scrape "technitium_probe" {
-        targets         = prometheus.exporter.blackbox.technitium.targets
-        job_name        = "technitium-dns-probe"
+        targets         = discovery.relabel.technitium_probe.output
         scrape_interval = "60s"
         forward_to      = [prometheus.remote_write.default.receiver]
       }
