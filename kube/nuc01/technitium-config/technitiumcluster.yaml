@@ -6,7 +6,7 @@ metadata:
 spec:
   replicas: 3
   dnsServerDomain: dns.home.packet.fail
-  image: technitium/dns-server:15.6.1
+  image: technitium/dns-server:15.6.2
   adminSecretRef:
     name: technitium-admin
   priorityClassName: system-cluster-critical
