@@ -13,6 +13,11 @@ resources:
     memory: 256Mi
 
 alloy:
+  extraPorts:
+    - name: syslog
+      port: 1514
+      targetPort: 1514
+      protocol: TCP
   configMap:
     content: |-
       discovery.kubernetes "pods" {
@@ -59,5 +64,179 @@ alloy:
       loki.write "default" {
         endpoint {
           url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+        }
+      }
+
+      loki.source.syslog "technitium" {
+        listener {
+          address            = "0.0.0.0:1514"
+          protocol           = "tcp"
+          idle_timeout       = "10m"
+          max_message_length = 32768
+          labels             = { job = "technitium-query-log", namespace = "technitium", service_name = "technitium-query-log" }
+        }
+        relabel_rules = loki.relabel.technitium_syslog.rules
+        forward_to    = [loki.process.technitium.receiver]
+      }
+
+      loki.relabel "technitium_syslog" {
+        forward_to = []
+        rule {
+          source_labels = ["__syslog_message_hostname"]
+          target_label  = "pod"
+        }
+      }
+
+      loki.process "technitium" {
+        stage.regex {
+          expression = `^<\d+>1(?: \S+){5} \[meta timestamp="(?P<ts>[^"]*)" clientIp="(?P<client_ip>[^"]*)" protocol="[^"]*" responseType="(?P<response_type>[^"]*)" responseRtt="(?P<rtt_raw>[^"]*)" rCode="(?P<rcode>[^"]*)"(?: qName="(?P<qname>[^"]*)" qType="(?P<qtype>[^"]*)")?`
+        }
+        stage.regex {
+          source     = "rtt_raw"
+          expression = `^(?P<rtt>[0-9.]+)$`
+        }
+        stage.timestamp {
+          source = "ts"
+          format = "RFC3339"
+        }
+
+        stage.labels {
+          values = { rcode = "", response_type = "" }
+        }
+        stage.metrics {
+          metric.counter {
+            name        = "technitium_queries_total"
+            description = "Queries recorded in the Technitium query log."
+            match_all   = true
+            action      = "inc"
+          }
+          metric.histogram {
+            name        = "technitium_upstream_rtt_ms"
+            description = "Upstream round trip of recursively resolved queries, in milliseconds."
+            source      = "rtt"
+            buckets     = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]
+          }
+        }
+        stage.label_drop {
+          values = ["rcode", "response_type"]
+        }
+        stage.structured_metadata {
+          values = { rcode = "", response_type = "", qname = "", qtype = "", client_ip = "" }
+        }
+
+        stage.replace {
+          expression = `^(<\d+>1(?: \S+){5} \[meta )`
+          replace    = ""
+        }
+        stage.replace {
+          expression = `( questionsSummary="[^"]*"| a(?:Name|Type|Class|Ttl|RData|DnssecStatus)_\d+="(?:[^"\\]|\\.)*")`
+          replace    = ""
+        }
+        stage.replace {
+          expression = `(\] "QNAME: .*)$`
+          replace    = ""
+        }
+
+        forward_to = [loki.write.default.receiver]
+      }
+
+      prometheus.scrape "technitium_query_log" {
+        targets         = [{"__address__" = "127.0.0.1:12345"}]
+        job_name        = "technitium-query-log"
+        honor_labels    = true
+        scrape_interval = "60s"
+        forward_to      = [prometheus.relabel.technitium_query_log.receiver]
+      }
+
+      prometheus.relabel "technitium_query_log" {
+        forward_to = [prometheus.remote_write.default.receiver]
+        rule {
+          source_labels = ["__name__"]
+          regex         = "loki_process_custom_technitium_.+"
+          action        = "keep"
+        }
+        rule {
+          regex  = "component_id|component_path"
+          action = "labeldrop"
+        }
+      }
+
+      prometheus.exporter.blackbox "technitium" {
+        config = `
+      modules:
+        dns_local:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: grafana.home.packet.fail
+            query_type: A
+            transport_protocol: udp
+            preferred_ip_protocol: ip4
+            ip_protocol_fallback: false
+            valid_rcodes: [NOERROR]
+            validate_answer_rrs:
+              fail_if_none_matches_regexp: [".*"]
+        dns_recursive:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: example.com
+            query_type: A
+            transport_protocol: udp
+            preferred_ip_protocol: ip4
+            ip_protocol_fallback: false
+            valid_rcodes: [NOERROR]
+            validate_answer_rrs:
+              fail_if_none_matches_regexp: [".*"]
+      `
+
+        target {
+          name    = "dns-0-local"
+          address = "192.168.74.52:53"
+          module  = "dns_local"
+          labels  = { replica = "dns-0", check = "local" }
+        }
+        target {
+          name    = "dns-0-recursive"
+          address = "192.168.74.52:53"
+          module  = "dns_recursive"
+          labels  = { replica = "dns-0", check = "recursive" }
+        }
+        target {
+          name    = "dns-1-local"
+          address = "192.168.74.53:53"
+          module  = "dns_local"
+          labels  = { replica = "dns-1", check = "local" }
+        }
+        target {
+          name    = "dns-1-recursive"
+          address = "192.168.74.53:53"
+          module  = "dns_recursive"
+          labels  = { replica = "dns-1", check = "recursive" }
+        }
+        target {
+          name    = "dns-2-local"
+          address = "192.168.74.54:53"
+          module  = "dns_local"
+          labels  = { replica = "dns-2", check = "local" }
+        }
+        target {
+          name    = "dns-2-recursive"
+          address = "192.168.74.54:53"
+          module  = "dns_recursive"
+          labels  = { replica = "dns-2", check = "recursive" }
+        }
+      }
+
+      prometheus.scrape "technitium_probe" {
+        targets         = prometheus.exporter.blackbox.technitium.targets
+        job_name        = "technitium-dns-probe"
+        scrape_interval = "60s"
+        forward_to      = [prometheus.remote_write.default.receiver]
+      }
+
+      prometheus.remote_write "default" {
+        endpoint {
+          url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
         }
       }

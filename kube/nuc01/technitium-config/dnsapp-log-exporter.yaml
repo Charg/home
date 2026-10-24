@@ -1,0 +1,30 @@
+---
+apiVersion: dns.packet.fail/v1alpha1
+kind: DNSApp
+metadata:
+  name: log-exporter
+spec:
+  serverRef:
+    name: dns
+  appName: Log Exporter
+  url: https://download.technitium.com/dns/apps/LogExporterApp-v3.1.1.zip
+  version: "3.1.1"
+  config: |-
+    {
+      "maxQueueSize": 10000,
+      "enableEdnsLogging": false,
+      "file": {
+        "path": "./dns_logs.json",
+        "enabled": false
+      },
+      "http": {
+        "endpoint": "http://localhost:5000/logs",
+        "enabled": false
+      },
+      "syslog": {
+        "address": "alloy.monitoring.svc.cluster.local",
+        "port": 1514,
+        "protocol": "TCP",
+        "enabled": true
+      }
+    }

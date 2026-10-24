@@ -459,3 +459,94 @@ additionalPrometheusRulesMap:
             annotations:
               summary: "{{ $labels.instance }} {{ $labels.device }} logged new media errors"
               description: "Unrecovered data integrity errors increased in the last hour."
+  home-technitium:
+    groups:
+      - name: home-technitium
+        rules:
+          - alert: TechnitiumProbeFailing
+            expr: probe_success{job="technitium-dns-probe"} == 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.replica }} failing its {{ $labels.check }} DNS probe"
+              description: "The blackbox probe from Alloy has not had a valid answer for 5 minutes."
+          - alert: TechnitiumAllReplicasDown
+            expr: sum by (check) (probe_success{job="technitium-dns-probe"}) == 0
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "No Technitium replica answers {{ $labels.check }} DNS probes"
+              description: "All three replicas have failed the probe for 2 minutes; LAN name resolution is down."
+          - alert: TechnitiumProbeSlow
+            expr: probe_duration_seconds{job="technitium-dns-probe"} > 0.5
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.replica }} {{ $labels.check }} probe taking {{ $value | humanizeDuration }}"
+              description: "DNS probe round trip has been above 500ms for 15 minutes."
+          - alert: TechnitiumServfailRatioHigh
+            expr: |
+              (
+                sum by (node) (technitium_dns_queries_last_hour{result="server_failure"})
+                  / sum by (node) (technitium_dns_queries_last_hour)
+              ) > 0.05
+              and sum by (node) (technitium_dns_queries_last_hour) > 200
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.node }} answering {{ $value | humanizePercentage }} of queries with SERVFAIL"
+              description: "More than 5% SERVFAIL over the last hour. Failing names: {job=\"technitium-query-log\"} | rcode=\"ServerFailure\" in Loki."
+          - alert: TechnitiumStatsStale
+            expr: technitium_dns_stats_scrape_success == 0
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Operator cannot read stats from {{ $labels.node }}"
+              description: "technitium-operator has failed to collect dashboard stats for 15 minutes; the technitium_dns_* metrics are stale."
+          - alert: TechnitiumMemoryNearLimit
+            expr: |
+              max by (pod) (container_memory_working_set_bytes{namespace="technitium", container="dns-server"})
+                / max by (pod) (kube_pod_container_resource_limits{namespace="technitium", container="dns-server", resource="memory"})
+                > 0.85
+            for: 30m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.pod }} at {{ $value | humanizePercentage }} of its memory limit"
+              description: "Working set above 85% of the limit for 30 minutes; the replica will be OOM killed if it keeps growing."
+          - alert: TechnitiumContainerRestarted
+            expr: increase(kube_pod_container_status_restarts_total{namespace="technitium"}[1h]) > 0
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.pod }}/{{ $labels.container }} restarted"
+              description: "A container in the technitium namespace restarted in the last hour. Check its previous logs before they rotate."
+          - alert: TechnitiumQueryLogStalled
+            expr: |
+              sum by (node) (technitium_dns_queries_last_hour) > 100
+              unless on (node)
+              label_replace(
+                sum by (pod) (increase(loki_process_custom_technitium_queries_total[30m])) > 0,
+                "node", "$1", "pod", "(.+)"
+              )
+            for: 30m
+            labels:
+              severity: warning
+            annotations:
+              summary: "No query log records from {{ $labels.node }}"
+              description: "The replica is answering queries but Alloy has received no Log Exporter records for 30 minutes. Check the log-exporter DNSApp and Alloy's syslog listener."
+          - alert: TechnitiumUpstreamSlow
+            expr: |
+              histogram_quantile(0.95, sum by (pod, le) (rate(loki_process_custom_technitium_upstream_rtt_ms_bucket[15m]))) > 500
+              and sum by (pod) (rate(loki_process_custom_technitium_upstream_rtt_ms_count[15m])) > 0.05
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "{{ $labels.pod }} p95 upstream round trip at {{ $value | humanize }}ms"
+              description: "Recursive lookups from this replica have had a p95 upstream round trip above 500ms for 15 minutes."
