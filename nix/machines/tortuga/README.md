@@ -47,3 +47,30 @@ spec:
 ```
 
 `kubectl logs gpu-test` should print the 4080 SUPER.
+
+## Game streaming (Helios)
+
+`helios.nix` runs [Helios](https://github.com/moonlight-os/helios), a Sunshine
+fork, built with CUDA so it can encode on the 4080 with NVENC. The service runs
+Helios inside a headless Sway session rendered on the 4080, and each client
+gets its own display there; the GNOME session and the G9 are left untouched.
+(Helios can start a private Sway itself, but only after it has already picked
+a capture method, so launched from GNOME it finds nothing to capture.)
+
+```zsh
+systemctl --user start helios   # not started with the session
+```
+
+Then pair a client from the web UI at <https://localhost:47990>. The first
+paired client gets admin permissions.
+
+Caveats:
+- **Use a controller.** Keyboard and mouse input from a client goes to the
+  GNOME session (which isn't visible on the stream), not to the Sway session.
+  Controllers work, as games read them directly.
+- **Audio:** while streaming, Helios switches the default output to its own
+  virtual sink, so the speakers go quiet until the session ends.
+- **Steam is single-instance:** if Steam is already open on the GNOME desktop,
+  launching it from Helios opens games there instead. Quit it first.
+- **Login:** Helios is a user service, so after a Wake-on-LAN boot it isn't
+  running until someone logs in at GDM.

@@ -10,6 +10,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./helios.nix
     ./k3s.nix
     inputs.lanzaboote.nixosModules.lanzaboote
     ../../common/alloy.nix

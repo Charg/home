@@ -127,6 +127,23 @@
         "type": "github"
       }
     },
+    "helios": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792813960,
+        "narHash": "sha256-kL4q9BVeyTa2LwYTVAsdmnl4NtxAUp1pMQ+dYbXtXLI=",
+        "ref": "feat/sway-hdr",
+        "rev": "9d603bbedccb085fa0288798ab84f900f4db9520",
+        "revCount": 3415,
+        "type": "git",
+        "url": "file:///home/chris/code/helios"
+      },
+      "original": {
+        "ref": "feat/sway-hdr",
+        "type": "git",
+        "url": "file:///home/chris/code/helios"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -360,6 +377,7 @@
         "colmena": "colmena",
         "darwin": "darwin",
         "disko": "disko",
+        "helios": "helios",
         "home-manager": "home-manager",
         "lanzaboote": "lanzaboote",
         "nixos-hardware": "nixos-hardware",
