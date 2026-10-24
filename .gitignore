@@ -28,3 +28,4 @@ nixos-wsl.tar.gz
 .claude/plans/
 # Local, per-developer project instructions
 CLAUDE.local.md
+.playwright-mcp/
