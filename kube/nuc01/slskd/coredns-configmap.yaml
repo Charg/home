@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slskd-coredns
+  namespace: media
+data:
+  Corefile: |
+    # In-pod split-horizon resolver, same shape as lookie's qbit-neo. Cluster
+    # names -> kube-dns; everything else -> DoT inside the tunnel. Loopback
+    # only, so nothing outside the pod can query it.
+    #
+    # gluetun's own resolver must stay off (DNS_SERVER=off): it binds wildcard
+    # :53 and would collide with this one. DNS_KEEP_NAMESERVER=on stops it
+    # rewriting the pod-shared /etc/resolv.conf.
+    #
+    # No `health` plugin: it binds wildcard :8080. Probed with tcpSocket on 53.
+    (common) {
+        errors
+        cache 30
+        bind 127.0.0.1
+    }
+
+    cluster.local:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    # Private reverse zones only. Peer rDNS is public and must stay in-tunnel,
+    # so in-addr.arpa is not forwarded wholesale.
+    10.in-addr.arpa:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    168.192.in-addr.arpa:53 {
+        import common
+        forward . 10.43.0.10
+    }
+
+    .:53 {
+        import common
+        forward . tls://1.1.1.1 tls://1.0.0.1 {
+            tls_servername cloudflare-dns.com
+        }
+    }

@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: slskd-internal
+  namespace: media
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: slskd.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: slskd.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: slskd
+                port:
+                  number: 5030
+  tls:
+    - hosts:
+        - slskd.home.packet.fail

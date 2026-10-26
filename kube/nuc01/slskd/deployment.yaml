@@ -1,0 +1,183 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slskd
+  namespace: media
+  labels:
+    app.kubernetes.io/name: slskd
+spec:
+  replicas: 1
+  # /app holds slskd's SQLite state on a RWO iSCSI volume; never two writers.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slskd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slskd
+        # Deliberately NOT setGateway: this pod has its own tunnel so it can
+        # take a Proton forwarded port. See README.md.
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      dnsPolicy: None
+      dnsConfig:
+        nameservers: ["127.0.0.1"]
+        searches:
+          - media.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - { name: ndots, value: "5" }
+      terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: coredns
+          image: registry.k8s.io/coredns/coredns:v1.14.6@sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea
+          restartPolicy: Always
+          args: ["-conf", "/etc/coredns/Corefile"]
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [NET_BIND_SERVICE]
+          startupProbe:
+            tcpSocket: { port: 53 }
+            periodSeconds: 2
+            failureThreshold: 15
+          volumeMounts:
+            - { name: coredns-config, mountPath: /etc/coredns, readOnly: true }
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { memory: 128Mi }
+        - name: gluetun              # NATIVE SIDECAR - restartPolicy makes it one
+          image: ghcr.io/qdm12/gluetun:v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
+          restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [NET_ADMIN]
+          env:
+            # Root but unprivileged: gluetun chowns its files to PUID/PGID and,
+            # without CAP_CHOWN, deletes the port file when that fails. Same
+            # trap as lookie's qbit-neo.
+            - { name: PUID, value: "0" }
+            - { name: PGID, value: "0" }
+            - { name: VPN_SERVICE_PROVIDER, value: protonvpn }
+            - { name: VPN_TYPE, value: wireguard }
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef: { name: slskd-wireguard, key: privatekey }
+            - { name: SERVER_COUNTRIES, value: "Switzerland" }
+            - { name: FIREWALL_INPUT_PORTS, value: "5030" }
+            - { name: FIREWALL_OUTBOUND_SUBNETS, value: "10.42.0.0/16,10.43.0.0/16" }
+            # Loopback only: slskd polls it from inside the pod, nothing else
+            # should. The API key is a second lock, required by slskd anyway.
+            - { name: HTTP_CONTROL_SERVER_ADDRESS, value: "127.0.0.1:8000" }
+            - name: HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: gluetun-auth-role }
+            # An IP, not a hostname: DNS goes through the tunnel this checks.
+            - { name: HEALTH_TARGET_ADDRESSES, value: "1.1.1.1:443" }
+            - { name: DNS_SERVER, value: "off" }
+            - { name: DNS_KEEP_NAMESERVER, value: "on" }
+            - { name: VPN_PORT_FORWARDING, value: "on" }
+            - { name: VPN_PORT_FORWARDING_PROVIDER, value: protonvpn }
+            - { name: PORT_FORWARD_ONLY, value: "on" }
+            - { name: TZ, value: America/Los_Angeles }
+          startupProbe:
+            exec:
+              command: [/gluetun-entrypoint, healthcheck]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 36        # 3 minutes to first handshake
+          volumeMounts:
+            - { name: gluetun-tmp, mountPath: /tmp/gluetun }
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 192Mi }
+      containers:
+        - name: slskd
+          image: ghcr.io/slskd/slskd:0.26.2@sha256:d0963a3e5b16facd295bf4f2156dad0182f246b1b21a032cae12f5494c694843
+          securityContext:
+            # Non-root path through the image entrypoint: no usermod/chown, and
+            # PUID/PGID must stay unset or it refuses to start.
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - { name: TZ, value: America/Los_Angeles }
+            - { name: SLSKD_NO_HTTPS, value: "true" }
+            - { name: SLSKD_SHARED_DIR, value: /app/downloads }
+            # Built-in gluetun integration: polls the control server for the
+            # forwarded port and re-binds the listener live when Proton rotates
+            # it. Also holds Soulseek disconnected while the tunnel is down.
+            - { name: SLSKD_VPN, value: "true" }
+            - { name: SLSKD_VPN_PORT_FORWARDING, value: "true" }
+            - { name: SLSKD_VPN_GLUETUN_URL, value: "http://127.0.0.1:8000" }
+            - name: SLSKD_VPN_GLUETUN_API_KEY
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: gluetun-api-key }
+            - name: SLSKD_SLSK_USERNAME
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: soulseek-username }
+            - name: SLSKD_SLSK_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: soulseek-password }
+            - name: SLSKD_USERNAME
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: web-username }
+            - name: SLSKD_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: web-password }
+            # Fixed so WebUI sessions survive a pod restart; random otherwise.
+            - name: SLSKD_JWT_KEY
+              valueFrom:
+                secretKeyRef: { name: slskd-secrets, key: jwt-key }
+          ports:
+            - { name: http, containerPort: 5030, protocol: TCP }
+          volumeMounts:
+            - { name: data, mountPath: /app }
+            - { name: dotnet-extract, mountPath: /.net }
+            - { name: tmp, mountPath: /tmp }
+          # /health has no checks registered: it means "web server up", not
+          # "logged in to Soulseek". Fine for probes, not for alerting.
+          readinessProbe:
+            httpGet: { path: /health, port: 5030 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 5030 }
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { memory: 1Gi }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: slskd-data
+        - name: coredns-config
+          configMap:
+            name: slskd-coredns
+        - name: gluetun-tmp
+          emptyDir: {}
+        - name: dotnet-extract
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

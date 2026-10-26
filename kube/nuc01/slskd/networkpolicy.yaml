@@ -1,0 +1,50 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: slskd
+  namespace: media
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: slskd
+  policyTypes:
+    - Ingress
+    - Egress
+  # Only the WebUI is reachable in-cluster. Soulseek peers arrive through the
+  # tunnel on wg0, which the CNI never sees, so they need no rule here.
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-internal
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 5030
+  # kube-dns for cluster names (the in-pod CoreDNS forwards to it), plus
+  # everything outside the cluster: in practice that is only the WireGuard
+  # endpoint, since gluetun's firewall drops anything else that is not in the
+  # tunnel. No ipBlock on the endpoint, because gluetun picks the server.
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.42.0.0/16
+              - 10.43.0.0/16
+              - 192.168.0.0/16
