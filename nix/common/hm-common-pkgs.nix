@@ -25,6 +25,17 @@
   pkgs.lsof
   pkgs.mermaid-cli # Renders mermaid diagrams to PNG/SVG (mmdc)
   pkgs.minikube
+  # DJ software. Qt's GTK3 platform theme (picked under GNOME) aborts unless
+  # gtk3's GSettings schemas (org.gtk.Settings.FileChooser) are on XDG_DATA_DIRS.
+  (pkgs.symlinkJoin {
+    name = "mixxx-wrapped";
+    paths = [ pkgs.mixxx ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/mixxx \
+        --prefix XDG_DATA_DIRS : ${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}
+    '';
+  })
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
   pkgs.nixd # Nix LSP
   pkgs.nixfmt
