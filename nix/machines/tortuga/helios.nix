@@ -43,10 +43,12 @@ let
   # it uses that one instead, so run it as the only client of a headless Sway
   # and take the compositor down with it.
   #
-  # Client mouse input lands on GNOME, not this Sway, so its cursor never moves
-  # and would sit in the stream; hide it once idle.
+  # Sway's stock config makes the session usable as a streamed desktop
+  # ($mod+Return terminal, $mod+d launcher, bar). Exiting Sway would take
+  # Helios down mid-stream, so that binding is removed.
   swayConfig = pkgs.writeText "helios-sway.conf" ''
-    seat * hide_cursor 1000
+    include ${sway}/etc/sway/config
+    unbindsym $mod+Shift+e
     exec ${pkgs.runtimeShell} -c '${lib.getExe config.services.helios.package}; ${sway}/bin/swaymsg exit'
   '';
 
@@ -84,9 +86,9 @@ in
   # session rendered on the 4080, so the G9 and the GNOME session are left
   # alone. No KMS capture, so no CAP_SYS_ADMIN wrapper.
   #
-  # Keyboard and mouse input from a client lands on the GNOME session, not the
-  # Sway one: the virtual devices are system-wide and the headless Sway has no
-  # input backend. Controllers work, as games read them directly.
+  # Keyboard and mouse go to Sway as virtual devices of that compositor, so
+  # they never reach the GNOME session. Controllers are system-wide uinput
+  # devices, which games read directly.
   #
   # Started by hand: `systemctl --user start helios`, web UI on
   # https://localhost:47990.
@@ -102,6 +104,9 @@ in
     # Launches Proton games directly, e.g. with
     # PROTON_ENABLE_WAYLAND/PROTON_ENABLE_HDR for HDR streams.
     pkgs.umu-launcher
+    # Terminal and launcher that Sway's stock config binds.
+    pkgs.foot
+    pkgs.wmenu
   ];
 
   systemd.user.services.helios = {

@@ -130,11 +130,11 @@
     "helios": {
       "flake": false,
       "locked": {
-        "lastModified": 1792813960,
-        "narHash": "sha256-kL4q9BVeyTa2LwYTVAsdmnl4NtxAUp1pMQ+dYbXtXLI=",
+        "lastModified": 1792895658,
+        "narHash": "sha256-xtr+eouQ4+kx2vZ0HBSIM/L9vjLH5FmaUhPW5PifH70=",
         "ref": "feat/sway-hdr",
-        "rev": "9d603bbedccb085fa0288798ab84f900f4db9520",
-        "revCount": 3415,
+        "rev": "ecb165f23fff4f02d55d68ac96635c0f9d5fb916",
+        "revCount": 3417,
         "type": "git",
         "url": "file:///home/chris/code/helios"
       },
