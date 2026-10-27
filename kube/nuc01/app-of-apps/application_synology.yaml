@@ -12,7 +12,6 @@ spec:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/synology
     targetRevision: main
-    plugin: {}
   destination:
     namespace: synology
     server: https://kubernetes.default.svc
