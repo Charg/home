@@ -9,5 +9,8 @@
     "emSign ECC Root CA - G3"
     "emSign Root CA - C1"
     "emSign ECC Root CA - C3"
+    # Not compromised itself, but it cross-signs eMudhra certs, so it is
+    # an alternate trust path to them. Mozilla/Chrome/Ubuntu dropped it too.
+    "Comodo AAA Services root"
   ];
 }
