@@ -1,0 +1,14 @@
+---
+# DSM's customized domain. Points straight at the NAS rather than traefik so DSM web,
+# Drive sync and file protocols all share one name; the NAS holds its own cert (acme.sh).
+apiVersion: dns.packet.fail/v1alpha1
+kind: Record
+metadata:
+  name: bytes
+spec:
+  name: bytes.home.packet.fail
+  zone: home.packet.fail
+  type: CNAME
+  data: synology.home.packet.fail
+  serverRef:
+    name: dns

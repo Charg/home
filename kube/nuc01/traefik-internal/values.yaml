@@ -12,8 +12,6 @@ providers:
   kubernetesIngress:
     enabled: true
     ingressClass: traefik-internal
-    # For backends outside the cluster, e.g. kube/nuc01/synology.
-    allowExternalNameServices: true
 
 resources:
   requests:
