@@ -164,8 +164,15 @@
     open = true;
     # Saves VRAM across suspend; avoids corrupted desktop on resume.
     powerManagement.enable = true;
+    # nixpkgs defaults to the kernel suspend notifiers new in 595 with the open
+    # modules, and resume oopsed in nvKmsResume on that path (pstore,
+    # 2026-10-27). Use the systemd nvidia-suspend/resume services instead,
+    # which save VRAM to a file under TemporaryFilePath.
+    powerManagement.kernelSuspendNotifier = false;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # Disk-backed, so a VRAM dump doesn't sit in RAM while asleep.
+    moduleParams.nvidia.NVreg_TemporaryFilePath = "/var/tmp";
   };
 
   # Mutter reads monitors.xml from the system config dirs too, so the GDM
