@@ -14,5 +14,5 @@ spec:
   externalName: synology.home.packet.fail
   ports:
     - name: https
-      port: 5001
+      port: 443
       protocol: TCP
