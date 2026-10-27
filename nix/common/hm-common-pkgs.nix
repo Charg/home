@@ -37,6 +37,7 @@
     '';
   })
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
+  pkgs.nicotine-plus
   pkgs.nixd # Nix LSP
   pkgs.nixfmt
   pkgs.nnn
