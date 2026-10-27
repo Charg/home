@@ -45,10 +45,23 @@ let
   #
   # Sway's stock config makes the session usable as a streamed desktop
   # ($mod+Return terminal, $mod+d launcher, bar). Exiting Sway would take
-  # Helios down mid-stream, so that binding is removed.
+  # Helios down mid-stream, so that binding is removed. Android clients take the
+  # Super key for themselves, so the bindings use Alt instead.
+  #
+  # The service's PATH has no Sway binaries, so the bar and swaynag are named by
+  # store path; nixpkgs' stock config leaves the wallpaper commented out. Streams
+  # are often 4K at scale 1, where the default 24px cursor is hard to find.
+  swayStockConfig = pkgs.runCommand "sway-stock-alt.conf" { } ''
+    sed 's/^set \$mod Mod4$/set $mod Mod1/' ${sway}/etc/sway/config > $out
+    grep -q '^set \$mod Mod1$' $out
+  '';
   swayConfig = pkgs.writeText "helios-sway.conf" ''
-    include ${sway}/etc/sway/config
+    include ${swayStockConfig}
     unbindsym $mod+Shift+e
+    bar bar-0 swaybar_command ${sway}/bin/swaybar
+    swaynag_command ${sway}/bin/swaynag
+    output * bg ${sway}/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+    seat * xcursor_theme Adwaita 48
     exec ${pkgs.runtimeShell} -c '${lib.getExe config.services.helios.package}; ${sway}/bin/swaymsg exit'
   '';
 
@@ -127,6 +140,30 @@ in
       # would otherwise leak through.
       UnsetEnvironment = [ "DISPLAY" ];
     };
+  };
+
+  # Holds off GNOME's idle suspend while a client is streaming; GNOME's input
+  # idle timer never sees the streamed session. gsd-power suspends as this
+  # user, and logind lets a user override their own block inhibitors, so it
+  # has to be GNOME's inhibitor rather than systemd-inhibit. Started and
+  # stopped from Helios with global state commands (run on first client
+  # connect and last disconnect), set in the web UI:
+  #   global_state_cmd = [{"do":"systemctl --user start helios-sleep-inhibit","undo":"systemctl --user stop helios-sleep-inhibit"}]
+  # Quitting the app mid-stream skips the state undo, so the prep undo stops it
+  # too; PartOf covers Helios itself stopping.
+  systemd.user.services.helios-sleep-inhibit = {
+    description = "Inhibit suspend while a Helios client is connected";
+    partOf = [ "helios.service" ];
+    serviceConfig.ExecStart = lib.escapeShellArgs [
+      (lib.getExe' pkgs.gnome-session "gnome-session-inhibit")
+      "--inhibit-only"
+      "--inhibit"
+      "suspend"
+      "--app-id"
+      "helios"
+      "--reason"
+      "Helios client connected"
+    ];
   };
 
   # DS5 emulation needs /dev/uhid. Upstream loads the module via modules-load.d,
