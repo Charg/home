@@ -1,0 +1,13 @@
+---
+# The NAS lives outside the cluster, so nothing publishes it via external-dns.
+apiVersion: dns.packet.fail/v1alpha1
+kind: Record
+metadata:
+  name: synology
+spec:
+  name: synology.home.packet.fail
+  zone: home.packet.fail
+  type: A
+  data: 192.168.74.10
+  serverRef:
+    name: dns

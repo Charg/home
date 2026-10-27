@@ -1,0 +1,16 @@
+---
+# Cluster DNS forwards to the node resolver, which doesn't know about home.packet.fail.
+# k3s imports *.server keys from this ConfigMap as extra CoreDNS server blocks.
+# source: https://docs.k3s.io/advanced#coredns-custom-configuration-imports
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  home-packet-fail.server: |
+    home.packet.fail:53 {
+      errors
+      cache 30
+      forward . 192.168.74.52 192.168.74.53 192.168.74.54
+    }
