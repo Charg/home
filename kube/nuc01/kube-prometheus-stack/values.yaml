@@ -96,6 +96,14 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: prometheus
+      synology-nas:
+        gnetId: 14284
+        revision: 10
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
+          - name: VAR_NASDEVICES
+            value: "1"
       ac-postgres-slow-queries:
         json: |-
           {

@@ -36,10 +36,16 @@ serviceMonitor:
   # The Synology walk (disks, SMART, RAID, iSCSI LUNs) takes a few seconds.
   interval: 60s
   scrapeTimeout: 30s
+  # ucd_* and hrSystem feed the CPU, memory, load and device-picker panels of
+  # Grafana dashboard 14284.
   module:
     - synology
     - if_mib
     - system
+    - hrSystem
+    - ucd_system_stats
+    - ucd_memory
+    - ucd_la_table
   auth:
     - synology_v3
   params:
