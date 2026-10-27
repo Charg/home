@@ -19,6 +19,7 @@
     ../../common/gnome.nix
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
+    ../../common/ca-blacklist.nix
   ];
 
   home-manager.users.${currentSystemUser}.imports = [ ./hm.nix ];

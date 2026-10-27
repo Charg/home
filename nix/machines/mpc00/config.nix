@@ -7,6 +7,7 @@
     ./firewall.nix
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
+    ../../common/ca-blacklist.nix
     ../../common/synology-iscsi.nix
     ../../common/initrd-ssh-unlock.nix
   ];

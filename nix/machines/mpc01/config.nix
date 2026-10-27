@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../common/system-packages.nix
+    ../../common/ca-blacklist.nix
     ./firewall.nix
     ../../common/synology-iscsi.nix
     ../../common/initrd-ssh-unlock.nix
