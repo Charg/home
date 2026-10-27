@@ -1,0 +1,27 @@
+---
+# DSM runs on the NAS itself, outside the cluster; the Service has no selector and is
+# backed by the static EndpointSlice below.
+apiVersion: v1
+kind: Service
+metadata:
+  name: dsm
+spec:
+  ports:
+    - name: http
+      port: 5000
+      protocol: TCP
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: dsm
+  labels:
+    kubernetes.io/service-name: dsm
+addressType: IPv4
+ports:
+  - name: http
+    port: 5000
+    protocol: TCP
+endpoints:
+  - addresses:
+      - 192.168.74.10

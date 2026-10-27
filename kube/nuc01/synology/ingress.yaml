@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dsm
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: bytes.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: bytes.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dsm
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - bytes.home.packet.fail
