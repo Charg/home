@@ -52,12 +52,14 @@ spec:
             capabilities:
               drop: [ALL]
               add: [NET_BIND_SERVICE]
-          startupProbe:
-            tcpSocket: { port: 53 }
-            periodSeconds: 2
-            failureThreshold: 15
           volumeMounts:
             - { name: coredns-config, mountPath: /etc/coredns, readOnly: true }
+          # NO PROBE ON PURPOSE. kubelet dials tcpSocket/httpGet probes at the
+          # pod IP, and this resolver binds 127.0.0.1 only, so they can never
+          # pass; the image has no shell for an exec probe. On a native sidecar
+          # a startupProbe that never passes wedges the pod in Init forever.
+          # Nothing races on it: gluetun connects and health-checks by IP, and
+          # slskd starts only after gluetun's probe passes. Same as qbit-neo.
           resources:
             requests: { cpu: 25m, memory: 32Mi }
             limits: { memory: 128Mi }

@@ -1,0 +1,47 @@
+# source: https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-snmp-exporter
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+# Only the auths live here; modules (synology, if_mib, system) come from the
+# image's bundled snmp.yml, loaded alongside via the extra --config.file below.
+# Credentials are expanded from env, sourced from the sops secret in
+# monitoring-config.
+config: |
+  auths:
+    synology_v3:
+      version: 3
+      security_level: authPriv
+      username: ${SNMP_SYNOLOGY_USERNAME}
+      password: ${SNMP_SYNOLOGY_AUTH_PASSWORD}
+      auth_protocol: SHA
+      priv_protocol: AES
+      priv_password: ${SNMP_SYNOLOGY_PRIV_PASSWORD}
+
+extraArgs:
+  - --config.file=/etc/snmp_exporter/snmp.yml
+  - --config.expand-environment-variables
+
+envFrom:
+  - secretRef:
+      name: snmp-exporter-credentials
+
+serviceMonitor:
+  enabled: true
+  # The Synology walk (disks, SMART, RAID, iSCSI LUNs) takes a few seconds.
+  interval: 60s
+  scrapeTimeout: 30s
+  module:
+    - synology
+    - if_mib
+    - system
+  auth:
+    - synology_v3
+  params:
+    - name: synology
+      target: synology.home.packet.fail

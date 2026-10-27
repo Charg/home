@@ -14,7 +14,7 @@ data:
     # :53 and would collide with this one. DNS_KEEP_NAMESERVER=on stops it
     # rewriting the pod-shared /etc/resolv.conf.
     #
-    # No `health` plugin: it binds wildcard :8080. Probed with tcpSocket on 53.
+    # No `health` plugin: it binds wildcard :8080. No probe at all; see deployment.yaml.
     (common) {
         errors
         cache 30

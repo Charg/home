@@ -112,6 +112,11 @@ spec:
             chart: loki
             targetRevision: 7.3.0
             namespace: monitoring
+          - name: snmp-exporter
+            repoURL: https://prometheus-community.github.io/helm-charts
+            chart: prometheus-snmp-exporter
+            targetRevision: 9.19.0
+            namespace: monitoring
           - name: alloy
             repoURL: https://grafana.github.io/helm-charts
             chart: alloy
