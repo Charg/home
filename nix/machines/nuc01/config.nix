@@ -3,6 +3,7 @@
   imports = [
     ./hardware-configuration.nix
     ./firewall.nix
+    ./netconsole.nix
     ../../common/system-packages.nix
     ../../common/ca-blacklist.nix
     ../../common/synology-iscsi.nix

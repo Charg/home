@@ -12,6 +12,7 @@
     ./hardware-configuration.nix
     ./helios.nix
     ./k3s.nix
+    ./netconsole.nix
     inputs.lanzaboote.nixosModules.lanzaboote
     ../../common/alloy.nix
     ../../common/bluetooth.nix
