@@ -126,6 +126,13 @@ spec:
             - { name: TZ, value: America/Los_Angeles }
             - { name: SLSKD_NO_HTTPS, value: "true" }
             - { name: SLSKD_SHARED_DIR, value: /app/downloads }
+            # Re-scan shares every 12h (minutes, min 60) so new downloads get
+            # shared; unset, slskd only scans at startup.
+            - { name: SLSKD_SHARE_CACHE_RETENTION, value: "720" }
+            # Bandwidth caps, speed in KiB/s;
+            - { name: SLSKD_UPLOAD_SPEED_LIMIT, value: "2048" }     # ~16 Mbit/s
+            - { name: SLSKD_UPLOAD_SLOTS, value: "5" }
+            - { name: SLSKD_DOWNLOAD_SLOTS, value: "10" }
             # Built-in gluetun integration: polls the control server for the
             # forwarded port and re-binds the listener live when Proton rotates
             # it. Also holds Soulseek disconnected while the tunnel is down.

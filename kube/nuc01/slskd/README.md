@@ -53,6 +53,17 @@ Unlike qbit-neo there is **no interface binding**: slskd's
 reconnect, so it stays `0.0.0.0`. Peer transfers already in flight when the
 tunnel drops are covered only by gluetun's firewall.
 
+## Settings
+
+Every slskd setting is managed as an `SLSKD_*` env var in `deployment.yaml`,
+so it lives in git and changes roll out through Argo CD.
+
+Do not set anything in `/app/slskd.yml` on the volume, or through the WebUI's
+options editor. YAML **overrides** env in slskd, so a value set there silently
+wins over `deployment.yaml` and drifts from git. Leave the file as generated
+(all commented out). Options that only exist in YAML, such as per-peer daily
+and weekly upload limits, are not in use.
+
 ## Storage
 
 `slskd-data` is a 100Gi `synology-iscsi-storage` volume (RWO, `Retain`,
@@ -62,9 +73,9 @@ Deployment is `replicas: 1` with `strategy: Recreate`.
 
 `/app/downloads` is also the share. Many Soulseek users refuse uploads to
 peers that share nothing; change `SLSKD_SHARED_DIR` to share something else.
-
-`slskd.yml` on the volume **overrides** the env vars here (YAML beats env in
-slskd). Leave it as generated, or expect it to win.
+Shares are re-scanned every 12h (`SLSKD_SHARE_CACHE_RETENTION`, in minutes),
+so a finished download can take up to that long to appear; rescan from the
+WebUI to share it sooner.
 
 slskd runs as uid 1000 through the image's non-root path. `/.net` (the
 single-file bundle extracts its native libraries there) and `/tmp` are
