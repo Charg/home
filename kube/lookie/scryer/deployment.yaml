@@ -38,7 +38,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: scryer
-          image: ghcr.io/scryer-media/scryer:0.19.4@sha256:e16af536abd122acdd172213b4ab8ff3bf873aac923f44cf8d6ffd54d8f5ab8e
+          image: ghcr.io/scryer-media/scryer:0.21.21@sha256:13df0028f3d42c5241013c473115aae0dbe06458d5a567f188cb707b458a4d1e
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -86,6 +86,16 @@ spec:
             limits:
               cpu: 3000m
               memory: 2Gi
+          # Scryer applies schema migrations on startup, and a multi-release
+          # jump can take minutes. Without this, the liveness probe could
+          # restart the pod mid-migration after ~75s. Allows up to 10
+          # minutes; liveness/readiness only start once this passes.
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 60
           readinessProbe:
             httpGet:
               path: /
