@@ -7,7 +7,10 @@ pattern as `kube/lookie/qbit-neo/` and `kube/nuc01/cloudflared/`).
 Pre-1.0, roughly weekly releases. Image tag is pinned and digest-locked; bump
 deliberately, and back up `/config/scryer.db` **and** the encryption key secret before
 upgrading — the DB is unusable without the key that encrypts the credentials stored in
-it.
+it. Migrations are one-way and a Scryer backup only restores on the version that made
+it, so rolling back means the old image *plus* a backup taken on that old version —
+trigger one manually (System → Backup) right before bumping. The `startupProbe` gives
+startup migrations up to 10 minutes before liveness can restart the pod mid-migration.
 
 ## Storage
 
@@ -20,7 +23,7 @@ and `vaultwarden` store their state on this cluster.
 
 This trades away durability the iSCSI volume gave for free: `local-path`'s reclaim
 policy is `Delete`, and the volume can't be expanded. Scryer's own scheduled-backup
-feature (Settings → Backup) is pointed at `/data/backups/scryer` — the `plex-media`
+feature (System → Backup) is pointed at `/data/backups/scryer` — the `plex-media`
 PVC, already mounted at `/data` — so backups land on durable, expandable, Synology-backed
 storage independent of `/config`'s lifecycle, without a dedicated backup PVC. Keep the
 backup path outside `/data/Movies` and `/data/TV` so Plex never scans it.
@@ -46,9 +49,9 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
 
 1. **Set an admin password.** A fresh install creates an `admin` account with no
    password and form login disabled — nothing prompts for sign-in until this is done.
-   Settings → Users → set a password (the literal value `admin` is rejected). Then add
+   System → Users → set a password (the literal value `admin` is rejected). Then add
    `SCRYER_AUTH_ENABLED=true` to `deployment.yaml` and commit.
-2. **Download client** — install the `qbittorrent` plugin.
+2. **Download client** — **Integrations → Download clients**, install the `qbittorrent` plugin.
    `base_url: http://qbit-neo.default.svc.cluster.local:8080`, credentials from the
    qBittorrent WebUI (only in Scryer's encrypted database, not in git — read them from
    the UI). `routing_mode: category` (default), `post_import_action:
@@ -59,8 +62,7 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
    torrent resume data.
 3. **Media server** — **Integrations → Media Servers**
    (`/integrations/media-servers`), install the `plex` plugin. Note this is not under
-   Settings and not under Notifications; the `/settings/*` routes are `profile`,
-   `security`, `library`, `subtitles` and `download-clients` only.
+   Notifications.
    `base_url: http://plex-plex-media-server.default.svc.cluster.local:32400`, a Plex
    token as `auth_token`, `update_library: true`, and critically:
    ```
@@ -81,23 +83,32 @@ DB (`/config/scryer.db`), not in this repo. These steps are done once, in the UI
 4. **Libraries** — Movies root `/data/Movies`, Series root `/data/TV`. By design, Scryer
    only manages new acquisitions here — pre-existing titles keep their release names and
    are not bulk-imported or renamed.
-5. **Indexers** — install the `torznab` plugin (and `nyaa` for anime — Prowlarr doesn't
+5. **Indexers** — **Integrations → Indexers**, install the `torznab` plugin (and `nyaa` for anime — Prowlarr doesn't
    cover that as cleanly) from the plugin catalog. Add trackers here as Prowlarr-backed
    Torznab feeds: for each indexer configured in Prowlarr, add a Scryer `torznab` entry
    pointing at `http://prowlarr.default.svc.cluster.local:9696/<indexerid>/api`, API key
    from the `prowlarr-api-key` secret (`<indexerid>` is Prowlarr's numeric ID for that
    indexer, visible in its Torznab feed URL). Prowlarr owns the tracker definitions and
    login flows — see `kube/lookie/prowlarr/README.md`.
-6. **Proxy** — Settings → Indexers → **Indexer proxies** (Beta) → **Connect indexer
-   proxy**:
+6. **Proxy** — **Integrations → Proxies** (`/integrations/proxies`; moved out of the
+   Indexers page in 0.20.0, and the old `/integrations/indexers/proxies` URL redirects
+   there). Add a proxy, then assign it to the indexers that should use it:
    - **Provider**: `Trawl`.
    - **Base URL**: `http://trawl.default.svc.cluster.local:8191` (base URL only —
      Scryer appends `/v1` itself).
    - **Timeout**: `60` seconds (valid range 1–180).
    - **Enabled**: checked, then **Test**.
-7. **Backups** — Settings → Backup: set the folder to `/data/backups/scryer` (not the
+7. **Backups** — System → Backup: set the folder to `/data/backups/scryer` (not the
    `/config` default — see Storage above), and a schedule/retention. Trigger a manual
    backup afterward and confirm the file appears there.
+
+## Finding a title from a log line
+
+Logs identify titles only by UUID (`title_id`). The quickest lookup is the API explorer
+(System navigation) — query the title by ID. There is no `sqlite3` in the image; as a
+last resort, `grep -a` the UUID in `/config/scryer.db-wal` (small, recent writes —
+rows carry the `tvdb:series:<id>` external ID) rather than the multi-GB `scryer.db`,
+which takes minutes to scan and competes with Scryer for I/O.
 
 ## Routed through the WireGuard gateway
 
