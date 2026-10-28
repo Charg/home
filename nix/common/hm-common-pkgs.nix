@@ -25,19 +25,7 @@
   pkgs.lsof
   pkgs.mermaid-cli # Renders mermaid diagrams to PNG/SVG (mmdc)
   pkgs.minikube
-  # DJ software. Qt's GTK3 platform theme (picked under GNOME) aborts unless
-  # gtk3's GSettings schemas (org.gtk.Settings.FileChooser) are on XDG_DATA_DIRS.
-  (pkgs.symlinkJoin {
-    name = "mixxx-wrapped";
-    paths = [ pkgs.mixxx ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/mixxx \
-        --prefix XDG_DATA_DIRS : ${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}
-    '';
-  })
   pkgs.nh # Yet another Nix CLI helper - https://github.com/nix-community/nh
-  pkgs.nicotine-plus
   pkgs.nixd # Nix LSP
   pkgs.nixfmt
   pkgs.nnn
@@ -69,4 +57,30 @@
   unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
   unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
   unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
+]
+# GNU userland on macOS (shadows BSD defaults)
+++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+  pkgs.coreutils
+  pkgs.diffutils
+  pkgs.findutils
+  pkgs.gawk
+  pkgs.gnugrep
+  pkgs.gnumake
+  pkgs.gnused
+  pkgs.gnutar
+]
+# Linux-only personal apps
+++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+  # DJ software. Qt's GTK3 platform theme (picked under GNOME) aborts unless
+  # gtk3's GSettings schemas (org.gtk.Settings.FileChooser) are on XDG_DATA_DIRS.
+  (pkgs.symlinkJoin {
+    name = "mixxx-wrapped";
+    paths = [ pkgs.mixxx ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/mixxx \
+        --prefix XDG_DATA_DIRS : ${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}
+    '';
+  })
+  pkgs.nicotine-plus
 ]
