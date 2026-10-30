@@ -5,7 +5,7 @@ metadata:
   name: vaultwarden
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: ghcr.io/charg
     chart: vaultwarden

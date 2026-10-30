@@ -22,6 +22,7 @@ spec:
             chart: home-assistant
             targetRevision: 0.3.78
             namespace: default
+            project: apps
             serverSideDiff: true
           - name: akri
             repoURL: https://project-akri.github.io/akri/
@@ -34,6 +35,7 @@ spec:
             chart: plex-media-server
             targetRevision: 1.7.1
             namespace: default
+            project: apps
             serverSideDiff: true
           - name: metallb
             repoURL: https://metallb.github.io/metallb
@@ -97,7 +99,8 @@ spec:
     metadata:
       name: "{{ .name }}"
     spec:
-      project: default
+      # Elements default to infra; workloads set project: apps.
+      project: '{{ dig "project" "infra" . }}'
       destination:
         namespace: "{{ .namespace }}"
         server: https://kubernetes.default.svc

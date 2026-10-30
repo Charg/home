@@ -15,6 +15,7 @@ and renders one `Application` per PR:
 | | |
 |---|---|
 | Application | `accord-pr-<n>` |
+| Project | `previews` |
 | Namespace | `accord-pr-<n>` (created on sync, deleted on prune) |
 | Chart | `helm/accord` from the accord repo at the PR's **head commit** |
 | Values | the chart's `values-preview.yaml`, plus `image.tag` and `preview.host` |
@@ -31,6 +32,9 @@ Teardown is generator-driven. When the PR stops matching (label removed, PR
 closed or merged) it leaves the generator output, the `Application` is deleted,
 and because `preserveResourcesOnDeletion: false` the deletion cascades through
 the namespace. Nothing to clean up by hand.
+
+Generated Applications use the `previews` AppProject. A PR that adds a new
+kind to `helm/accord` needs a matching entry there before it will sync.
 
 Preview environments are self-contained: the chart's preview mode runs its own
 throwaway pgvector Postgres on `emptyDir` and seeds it, so they need none of

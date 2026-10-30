@@ -1,0 +1,36 @@
+---
+# Cluster plumbing and app-of-apps parents. New chart registries are added here.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra
+  namespace: argocd
+  annotations:
+    # Projects must exist before the Applications that reference them.
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Cluster infrastructure and app-of-apps parents
+  sourceRepos:
+    - https://github.com/Charg/home.git
+    - https://github.com/SynologyOpenSource/synology-csi.git
+    - ghcr.io/charg/charts
+    - registry.k8s.io/nfd/charts
+    - https://angelnu.github.io/helm-charts/
+    - https://argoproj.github.io/argo-helm
+    - https://charts.jetstack.io
+    - https://cloudnative-pg.github.io/charts
+    - https://grafana.github.io/helm-charts
+    - https://intel.github.io/helm-charts
+    - https://kubernetes-sigs.github.io/external-dns/
+    - https://metallb.github.io/metallb
+    - https://nvidia.github.io/k8s-device-plugin
+    - https://open-telemetry.github.io/opentelemetry-helm-charts
+    - https://ot-container-kit.github.io/helm-charts/
+    - https://prometheus-community.github.io/helm-charts
+    - https://traefik.github.io/charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

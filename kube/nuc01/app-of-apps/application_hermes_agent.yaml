@@ -5,7 +5,7 @@ metadata:
   name: hermes-agent
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: ghcr.io/charg
     chart: hermes-agent

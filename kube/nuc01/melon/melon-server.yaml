@@ -5,7 +5,7 @@ metadata:
   name: melon-server
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: ghcr.io/charg/charts
     chart: melon-server

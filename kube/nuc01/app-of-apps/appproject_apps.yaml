@@ -1,0 +1,44 @@
+---
+# Workloads. New namespaces and chart registries are added here.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Application workloads
+  sourceRepos:
+    - https://github.com/Charg/home.git
+    - ghcr.io/charg
+    - ghcr.io/charg/charts
+    - ghcr.io/berriai
+    - https://go.temporal.io/helm-charts
+    - https://pajikos.github.io/home-assistant-helm-chart/
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: ac
+    - server: https://kubernetes.default.svc
+      namespace: ai
+    - server: https://kubernetes.default.svc
+      namespace: backup
+    - server: https://kubernetes.default.svc
+      namespace: cloudflared
+    - server: https://kubernetes.default.svc
+      namespace: home-assistant
+    - server: https://kubernetes.default.svc
+      namespace: litellm
+    - server: https://kubernetes.default.svc
+      namespace: media
+    - server: https://kubernetes.default.svc
+      namespace: melon
+    - server: https://kubernetes.default.svc
+      namespace: ov
+    - server: https://kubernetes.default.svc
+      namespace: temporal
+    - server: https://kubernetes.default.svc
+      namespace: vaultwarden
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace

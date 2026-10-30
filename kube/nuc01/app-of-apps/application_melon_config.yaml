@@ -5,7 +5,7 @@ metadata:
   name: melon-config
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/melon-config

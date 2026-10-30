@@ -92,6 +92,7 @@ spec:
             chart: temporal
             targetRevision: 1.6.0
             namespace: temporal
+            project: apps
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
@@ -127,6 +128,7 @@ spec:
             chart: litellm-helm
             targetRevision: 1.100.0
             namespace: litellm
+            project: apps
           - name: technitium-operator
             repoURL: ghcr.io/charg/charts
             chart: technitium-operator
@@ -137,6 +139,7 @@ spec:
             chart: home-assistant
             targetRevision: 0.3.78
             namespace: home-assistant
+            project: apps
           - name: pod-gateway
             repoURL: https://angelnu.github.io/helm-charts/
             chart: pod-gateway
@@ -152,7 +155,8 @@ spec:
     metadata:
       name: "{{ .name }}"
     spec:
-      project: default
+      # Elements default to infra; workloads set project: apps.
+      project: '{{ dig "project" "infra" . }}'
       destination:
         namespace: "{{ .namespace }}"
         server: https://kubernetes.default.svc

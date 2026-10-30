@@ -5,7 +5,7 @@ metadata:
   name: anythingllm
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: ghcr.io/charg
     chart: anythingllm

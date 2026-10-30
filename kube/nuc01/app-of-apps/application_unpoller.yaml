@@ -5,7 +5,7 @@ metadata:
   name: unpoller
   namespace: argocd
 spec:
-  project: default
+  project: infra
   source:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/unpoller

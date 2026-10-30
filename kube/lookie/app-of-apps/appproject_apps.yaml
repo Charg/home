@@ -1,0 +1,21 @@
+---
+# Workloads. New namespaces and chart registries are added here.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: Application workloads
+  sourceRepos:
+    - https://github.com/Charg/home.git
+    - http://pajikos.github.io/home-assistant-helm-chart/
+    - https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: default
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace

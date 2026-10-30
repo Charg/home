@@ -5,7 +5,7 @@ metadata:
   name: bitmagnet-postgres
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/bitmagnet-postgres
