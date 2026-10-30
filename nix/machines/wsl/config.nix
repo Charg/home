@@ -27,6 +27,14 @@
 
   users.extraGroups.docker.members = [ currentSystemUser ];
 
+  # No sshd here, so sops-nix cannot derive an age identity from a host key.
+  # Bootstrap once with `sudo age-keygen -o /var/lib/sops-nix/key.txt`, add the
+  # printed public key as a recipient in .sops.yaml, create
+  # nix/machines/wsl/secrets/users.enc.yaml, then import
+  # ../../common/sops-user-password.nix. Until then the existing shadow entry
+  # is kept (users.mutableUsers defaults to true).
+  sops.age.keyFile = "/var/lib/sops-nix/key.txt";
+
   nix = {
     package = pkgs.nixVersions.latest;
     extraOptions = ''

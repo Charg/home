@@ -91,6 +91,11 @@ let
   ]
   ++ lib.optionals (!isDarwin) [
     inputs.disko.nixosModules.disko
+    inputs.sops-nix.nixosModules.sops
+    {
+      # Same toolchain workaround as the home-manager module above.
+      sops.package = (import inputs.sops-nix { pkgs = unstable-pkgs; }).sops-install-secrets;
+    }
   ]
   ++ lib.optionals isWSL [
     inputs.nixos-wsl.nixosModules.wsl

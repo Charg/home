@@ -11,6 +11,7 @@
     ../../common/synology-iscsi.nix
     ../../common/initrd-ssh-unlock.nix
     ../../common/openssh-hardening.nix
+    ../../common/sops-user-password.nix
   ];
 
   home-manager.users.dev = ../../users/dev/home-manager.nix;

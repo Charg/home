@@ -22,6 +22,7 @@
     ../../common/system-packages.nix
     ../../common/ca-blacklist.nix
     ../../common/openssh-hardening.nix
+    ../../common/sops-user-password.nix
   ];
 
   home-manager.users.${currentSystemUser}.imports = [ ./hm.nix ];
