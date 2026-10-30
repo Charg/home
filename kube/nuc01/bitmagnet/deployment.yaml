@@ -71,6 +71,11 @@ spec:
             # it while watching conntrack; see README.md.
             - name: DHT_CRAWLER_SCALING_FACTOR
               value: "2"
+            # classifier.yml is read from $XDG_CONFIG_HOME/bitmagnet.
+            - name: XDG_CONFIG_HOME
+              value: /etc/xdg
+            - name: CLASSIFIER_WORKFLOW
+              value: filtered
           ports:
             - name: http
               containerPort: 3333
@@ -78,6 +83,10 @@ spec:
             - name: dht
               containerPort: 3334
               protocol: UDP
+          volumeMounts:
+            - name: classifier
+              mountPath: /etc/xdg/bitmagnet
+              readOnly: true
           resources:
             requests:
               cpu: 100m
@@ -101,3 +110,7 @@ spec:
             tcpSocket:
               port: 3333
             periodSeconds: 20
+      volumes:
+        - name: classifier
+          secret:
+            secretName: bitmagnet-classifier
