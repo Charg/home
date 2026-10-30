@@ -67,10 +67,9 @@ spec:
                   name: bitmagnet-secrets
                   key: tmdb-api-key
                   optional: true
-            # Upstream default is 10. Start low on the shared gateway and raise
-            # it while watching conntrack; see README.md.
+            # Upstream default is 10. Start low on the shared gateway
             - name: DHT_CRAWLER_SCALING_FACTOR
-              value: "2"
+              value: "7"
             # classifier.yml is read from $XDG_CONFIG_HOME/bitmagnet.
             - name: XDG_CONFIG_HOME
               value: /etc/xdg
