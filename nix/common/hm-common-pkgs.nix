@@ -46,6 +46,7 @@
   pkgs.python313
   pkgs.sops
   pkgs.sqlite-interactive # compiled with quality of additions like readline support
+  pkgs.ssh-to-age
   pkgs.trivy # Simple and comprehensive vulnerability scanner for containers, suitable for CI
   pkgs.unzip
   pkgs.uv
