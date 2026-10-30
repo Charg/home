@@ -142,6 +142,7 @@
     "interface-name:docker*"
     "interface-name:br-*"
     "interface-name:veth*"
+    "interface-name:vboxnet*"
   ];
 
   # Wake on magic packet, applied by udev via a systemd .link file so it holds
@@ -238,6 +239,15 @@
 
   # Exposes the GPU to containers via CDI: `docker run --device nvidia.com/gpu=all ...`
   hardware.nvidia-container-toolkit.enable = true;
+
+  # No extension pack: it's unfree, so enabling it changes the virtualbox and
+  # kernel module derivations to ones Hydra doesn't build, and every kernel or
+  # VirtualBox bump becomes a long local compile. Without it both come from
+  # cache.nixos.org as long as the kernel stays on the default kernelPackages.
+  virtualisation.virtualbox.host.enable = true;
+  # Don't bring up vboxnet0 at boot; VirtualBox creates host-only interfaces
+  # itself when a VM that uses one starts.
+  virtualisation.virtualbox.host.addNetworkInterface = false;
 
   #
   # Gaming
