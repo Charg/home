@@ -54,6 +54,7 @@ in
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
     ../../common/ca-blacklist.nix
+    ../../common/openssh-hardening.nix
   ];
 
   #
@@ -574,12 +575,7 @@ in
   # Enable the OpenSSH daemon.
   # Installed but not started at boot: `sudo systemctl start sshd` when needed.
   systemd.services.sshd.wantedBy = lib.mkForce [ ];
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-    };
-  };
+  services.openssh.enable = true;
 
   # A simple daemon allowing you to update some devices' firmware
   # https://github.com/fwup-home/fwup

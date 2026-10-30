@@ -8,6 +8,7 @@
     ./firewall.nix
     ../../common/synology-iscsi.nix
     ../../common/initrd-ssh-unlock.nix
+    ../../common/openssh-hardening.nix
   ];
 
   users.users.nixos = {

@@ -21,6 +21,7 @@
     ../../common/nix-ld.nix
     ../../common/system-packages.nix
     ../../common/ca-blacklist.nix
+    ../../common/openssh-hardening.nix
   ];
 
   home-manager.users.${currentSystemUser}.imports = [ ./hm.nix ];
@@ -47,7 +48,7 @@
   # Fixes boot text being mangled
   boot.loader.systemd-boot.consoleMode = "max";
 
- # Improved console screen font
+  # Improved console screen font
   console = {
     earlySetup = true;
     packages = [ pkgs.terminus_font ];
@@ -289,14 +290,7 @@
 
   services.printing.enable = false;
 
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
+  services.openssh.enable = true;
 
   services.fwupd.enable = true;
 

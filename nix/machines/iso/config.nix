@@ -4,6 +4,8 @@
   ...
 }:
 {
+  imports = [ ../../common/openssh-hardening.nix ];
+
   environment.systemPackages = with pkgs; [
     efibootmgr
     git
