@@ -17,6 +17,7 @@ server:
           regex: (service_latency|persistence_latency|client_latency|memory_gc_pause_ms)_bucket
           targetLabel: __tmp_keep
           replacement: "true"
+          action: replace
         - sourceLabels: [__name__, __tmp_keep]
           regex: .+_bucket;
           action: drop
