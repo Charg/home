@@ -369,6 +369,32 @@ alertmanager:
         cpu: 100m
         memory: 128Mi
 
+kubelet:
+  serviceMonitor:
+    # k3s serves every embedded component's metrics on the kubelet's /metrics,
+    # duplicating the apiserver job. Keep only what the kubelet rules/dashboards
+    # use (plus k3s_* for the agent's server load balancer).
+    metricRelabelings:
+      - sourceLabels: [__name__]
+        regex: (kubelet|volume_manager|storage_operation|csi|rest_client|process|go|k3s)_.+
+        action: keep
+      # Chart default, re-stated since this list replaces it.
+      - sourceLabels: [__name__, le]
+        regex: (csi_operations|storage_operation_duration)_seconds_bucket;(0.25|2.5|15|25|120|600)(\.0)?
+        action: drop
+
+kubeApiServer:
+  serviceMonitor:
+    metricRelabelings:
+      # Histograms not used by any rule or dashboard; _sum/_count are kept.
+      - sourceLabels: [__name__]
+        regex: (apiserver_request_duration_seconds|etcd_request_duration_seconds|apiserver_request_body_size_bytes|apiserver_watch_list_duration_seconds|apiserver_watch_cache_read_wait_seconds|apiserver_response_sizes|apiserver_watch_events_sizes|scheduler_plugin_execution_duration_seconds)_bucket
+        action: drop
+      # Chart default, re-stated since this list replaces it.
+      - sourceLabels: [__name__, le]
+        regex: (etcd_request|apiserver_request_slo|apiserver_request_sli|apiserver_request)_duration_seconds_bucket;(0\.15|0\.2|0\.3|0\.35|0\.4|0\.45|0\.6|0\.7|0\.8|0\.9|1\.25|1\.5|1\.75|2|3|3\.5|4|4\.5|6|7|8|9|15|20|40|45|50)(\.0)?
+        action: drop
+
 kubeEtcd:
   service:
     enabled: false
