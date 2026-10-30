@@ -12,6 +12,11 @@ grafana:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
     passwordKey: admin-password
+  grafana.ini:
+    analytics:
+      reporting_enabled: false
+      check_for_updates: false
+      check_for_plugin_updates: false
   persistence:
     enabled: true
     storageClassName: local-path
@@ -62,7 +67,7 @@ grafana:
         cpu: 25m
         memory: 64Mi
       limits:
-        cpu: 100m
+        cpu: 250m
         memory: 128Mi
   dashboardProviders:
     dashboardproviders.yaml:
@@ -317,13 +322,15 @@ prometheus:
             requests:
               storage: 10Gi
     retention: 15d
+    # local-path doesn't enforce the PVC size, so cap the TSDB explicitly.
+    retentionSize: 18GB
     resources:
       requests:
         cpu: 100m
-        memory: 1536Mi
+        memory: 2560Mi
       limits:
         cpu: 500m
-        memory: 1536Mi
+        memory: 3Gi
     enableRemoteWriteReceiver: true
     enableOTLPReceiver: true
     otlp:
@@ -368,6 +375,15 @@ kubeEtcd:
   serviceMonitor:
     enabled: false
 
+# k3s embeds these in the k3s binary with no scrapeable endpoints, so the
+# default scrapes (and their *Down alerts) only ever fire as false positives.
+kubeProxy:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+
 nodeExporter:
   enabled: true
 
@@ -386,7 +402,7 @@ prometheus-node-exporter:
       cpu: 10m
       memory: 32Mi
     limits:
-      cpu: 50m
+      cpu: 250m
       memory: 64Mi
 
 kubeStateMetrics:
