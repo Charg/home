@@ -23,4 +23,11 @@
   };
 
   users.users.${currentSystemUser}.hashedPasswordFile = config.sops.secrets.user-password.path;
+
+  # NixOS only writes a declared password into an existing /etc/shadow entry
+  # when users are immutable (update-users-groups.pl keeps existing entries
+  # untouched under mutableUsers, FIXME and all). Without this the file above
+  # would only ever apply on first account creation, and `passwd` changes
+  # would silently diverge from the repo.
+  users.mutableUsers = false;
 }
