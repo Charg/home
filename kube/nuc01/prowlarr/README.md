@@ -45,8 +45,8 @@ logins leave through the tunnel. The mechanism and its traps are in
 - Some private trackers refuse logins from VPN exits. Record any here by name.
 
 `networkpolicy.yaml` allows ingress from `traefik-internal`, Scryer and the
-gateway pod (required for VXLAN return traffic), and egress to kube-dns, Trawl
-and the gateway. No internet rules: that traffic is inside the tunnel, where
+gateway pod (required for VXLAN return traffic), and egress to kube-dns, Trawl,
+bitmagnet's Torznab feed and the gateway. No internet rules: that traffic is inside the tunnel, where
 an `ipBlock` rule can't see it.
 
 ## Configuration (manual)

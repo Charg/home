@@ -1,0 +1,36 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: bitmagnet-postgres
+  namespace: media
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
+  instances: 1
+
+  bootstrap:
+    initdb:
+      database: bitmagnet
+      owner: bitmagnet
+      secret:
+        name: bitmagnet-postgres-credentials
+
+  # Grows without bound; needs an expandable class, not local-path.
+  storage:
+    size: 50Gi
+    storageClass: synology-iscsi-storage
+
+  postgresql:
+    parameters:
+      shared_buffers: 512MB
+
+  monitoring:
+    enablePodMonitor: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi

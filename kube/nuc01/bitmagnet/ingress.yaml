@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bitmagnet-internal
+  namespace: media
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: bitmagnet.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: bitmagnet.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bitmagnet
+                port:
+                  number: 3333
+  tls:
+    - hosts:
+        - bitmagnet.home.packet.fail

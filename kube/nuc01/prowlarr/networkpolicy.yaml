@@ -56,6 +56,14 @@ spec:
       ports:
         - protocol: TCP
           port: 8191
+    # bitmagnet's Torznab feed.
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bitmagnet
+      ports:
+        - protocol: TCP
+          port: 3333
     - to:
         - podSelector:
             matchLabels:
