@@ -31,6 +31,12 @@ jobs:
             echo "client_payload.version is required" >&2
             exit 1
           fi
+          # The value is spliced into sed, a branch name and a commit message,
+          # so accept nothing but a plain semver string.
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "client_payload.version is not a semver string: ${VERSION}" >&2
+            exit 1
+          fi
 
           # The chart's appVersion sets the image tag, so the chart version is the only string.
           sed -i -E "s/^(\s*targetRevision:\s*).*/\1${VERSION}/" kube/nuc01/melon/melon-server.yaml
