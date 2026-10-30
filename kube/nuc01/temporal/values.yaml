@@ -10,6 +10,18 @@ server:
     serviceMonitor:
       enabled: true
       interval: 30s
+      # Histogram buckets are ~80% of Temporal's series. Keep only those used by
+      # the temporal-server Grafana dashboard; _sum/_count are kept for the rest.
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: (service_latency|persistence_latency|client_latency|memory_gc_pause_ms)_bucket
+          targetLabel: __tmp_keep
+          replacement: "true"
+        - sourceLabels: [__name__, __tmp_keep]
+          regex: .+_bucket;
+          action: drop
+        - regex: __tmp_keep
+          action: labeldrop
 
   config:
     persistence:
