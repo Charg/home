@@ -10,7 +10,6 @@ spec:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/unpoller
     targetRevision: main
-    plugin: {}
   destination:
     namespace: monitoring
     server: https://kubernetes.default.svc
