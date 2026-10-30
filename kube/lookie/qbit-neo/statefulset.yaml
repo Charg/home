@@ -215,6 +215,22 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 36        # 3 minutes to first handshake
+          # Port-forward watchdog. If NAT-PMP is refused when the tunnel comes
+          # up, gluetun logs one ERROR and never retries - the tunnel stays
+          # healthy, the port file stays empty, and inbound is silently dead
+          # until someone notices (9 days, the first time). Restarting the
+          # sidecar in place re-runs server selection and port forwarding;
+          # see the README for why that restart is safe on this version.
+          #
+          # 5 x 60s is wide enough to ignore a rotation, which clears the file
+          # and rewrites it about a second later. Only gates after the
+          # startupProbe passes, by which point forwarding has had its go.
+          livenessProbe:
+            exec:
+              command: [/bin/sh, -c, "test -s /gluetun/forwarded_port"]
+            periodSeconds: 60
+            failureThreshold: 5
+            timeoutSeconds: 5
           volumeMounts:
             - { name: gluetun-run, mountPath: /gluetun }
             # gluetun creates this directory itself, without an owner-execute

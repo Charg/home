@@ -142,6 +142,15 @@ since a pod can seed more than one torrent) right after a successful port push. 
 best-effort and does not affect the exit code — a failed reannounce just means the tracker
 catches up on its normal interval instead of immediately.
 
+**A refused first request is not retried.** If NAT-PMP fails when the tunnel comes up,
+gluetun logs a single `ERROR [vpn] starting port forwarding service` and gives up for the
+life of the container, while the tunnel itself stays healthy. That happened on 2026-10-20
+and went unnoticed for nine days, with incoming connections dead and torrents stalled.
+gluetun therefore has a `livenessProbe` that fails when `/gluetun/forwarded_port` is empty
+for 5 × 60s. That restarts the sidecar in place (safe — see above), which picks a server
+and requests a port again. The window is wide enough that the ~1s gap during a rotation
+never trips it.
+
 Details worth keeping in mind before editing them:
 
 - `port-seed.sh` **`exec`s `/usr/bin/catatonit -- /entrypoint.sh`**, reproducing the image's
