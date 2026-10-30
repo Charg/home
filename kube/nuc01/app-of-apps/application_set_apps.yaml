@@ -15,7 +15,7 @@ spec:
           - name: argocd
             repoURL: https://argoproj.github.io/argo-helm
             chart: argo-cd
-            targetRevision: 10.4.0
+            targetRevision: 10.11.6
             namespace: argocd
           - name: metallb
             repoURL: https://metallb.github.io/metallb
@@ -25,28 +25,28 @@ spec:
           - name: traefik-internal
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.3.0
+            targetRevision: 41.7.1
             namespace: traefik-internal
           - name: traefik-public
             repoURL: https://traefik.github.io/charts
             chart: traefik
-            targetRevision: 41.3.0
+            targetRevision: 41.7.1
             namespace: traefik-public
             helm_skip_crds: true
           - name: external-dns
             repoURL: https://kubernetes-sigs.github.io/external-dns/
             chart: external-dns
-            targetRevision: 1.21.1
+            targetRevision: 1.23.0
             namespace: external-dns
           - name: external-dns-technitium
             repoURL: https://kubernetes-sigs.github.io/external-dns/
             chart: external-dns
-            targetRevision: 1.21.1
+            targetRevision: 1.23.0
             namespace: external-dns
           - name: cert-manager
             repoURL: https://charts.jetstack.io
             chart: cert-manager
-            targetRevision: v1.21.1
+            targetRevision: v1.21.3
             namespace: cert-manager
           - name: node-feature-discovery
             repoURL: registry.k8s.io/nfd/charts
@@ -56,12 +56,12 @@ spec:
           - name: intel-operator
             repoURL: https://intel.github.io/helm-charts
             chart: intel-device-plugins-operator
-            targetRevision: 0.36.0
+            targetRevision: 0.37.1
             namespace: intel-operator
           - name: intel-operator-gpu
             repoURL: https://intel.github.io/helm-charts
             chart: intel-device-plugins-gpu
-            targetRevision: 0.36.0
+            targetRevision: 0.37.1
             namespace: intel-operator
           - name: nvidia-device-plugin
             repoURL: https://nvidia.github.io/k8s-device-plugin
@@ -75,32 +75,32 @@ spec:
           - name: cloudnativepg
             repoURL: https://cloudnative-pg.github.io/charts
             chart: cloudnative-pg
-            targetRevision: 0.29.0
+            targetRevision: 0.29.1
             namespace: cnpg-system
           - name: plugin-barman-cloud
             repoURL: https://cloudnative-pg.github.io/charts
             chart: plugin-barman-cloud
-            targetRevision: 0.8.0
+            targetRevision: 0.8.1
             namespace: cnpg-system
           - name: redis-operator
             repoURL: https://ot-container-kit.github.io/helm-charts/
             chart: redis-operator
-            targetRevision: 0.26.1
+            targetRevision: 0.27.0
             namespace: ov
           - name: temporal
             repoURL: https://go.temporal.io/helm-charts
             chart: temporal
-            targetRevision: 1.6.0
+            targetRevision: 1.7.0
             namespace: temporal
           - name: kube-prometheus-stack
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: kube-prometheus-stack
-            targetRevision: 88.5.3
+            targetRevision: 88.6.5
             namespace: monitoring
           - name: opentelemetry-collector
             repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
             chart: opentelemetry-collector
-            targetRevision: 0.170.0
+            targetRevision: 0.178.1
             namespace: monitoring
           - name: tempo
             repoURL: https://grafana.github.io/helm-charts
@@ -110,7 +110,7 @@ spec:
           - name: loki
             repoURL: https://grafana.github.io/helm-charts
             chart: loki
-            targetRevision: 7.3.0
+            targetRevision: 7.5.0
             namespace: monitoring
           - name: snmp-exporter
             repoURL: https://prometheus-community.github.io/helm-charts
@@ -120,7 +120,7 @@ spec:
           - name: alloy
             repoURL: https://grafana.github.io/helm-charts
             chart: alloy
-            targetRevision: 1.11.1
+            targetRevision: 1.15.0
             namespace: monitoring
           - name: litellm
             repoURL: ghcr.io/berriai
@@ -135,7 +135,7 @@ spec:
           - name: home-assistant
             repoURL: https://pajikos.github.io/home-assistant-helm-chart/
             chart: home-assistant
-            targetRevision: 0.3.78
+            targetRevision: 0.3.89
             namespace: home-assistant
           - name: pod-gateway
             repoURL: https://angelnu.github.io/helm-charts/
