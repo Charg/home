@@ -104,6 +104,43 @@ grafana:
             value: prometheus
           - name: VAR_NASDEVICES
             value: "1"
+      # UniFi dashboards, fed by unpoller.
+      unifi-client-dpi:
+        gnetId: 11310
+        revision: 5
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
+      unifi-sites:
+        gnetId: 11311
+        revision: 5
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
+      unifi-usw:
+        gnetId: 11312
+        revision: 9
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
+      unifi-usg:
+        gnetId: 11313
+        revision: 9
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
+      unifi-uap:
+        gnetId: 11314
+        revision: 10
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
+      unifi-clients:
+        gnetId: 11315
+        revision: 9
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
       ac-postgres-slow-queries:
         json: |-
           {
