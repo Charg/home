@@ -1,6 +1,6 @@
 # https://github.com/pajikos/home-assistant-helm-chart/tree/main/charts/home-assistant
 
-replicaCount: 0
+replicaCount: 1
 ingress:
   enabled: true
   className: traefik-internal
