@@ -60,6 +60,15 @@ spec:
             - "128mb"
             - "--maxmemory-policy"
             - "allkeys-lru"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - name: redis-data
               mountPath: /data
@@ -100,6 +109,19 @@ spec:
             - name: http
               containerPort: 8191
               protocol: TCP
+          # Container-level on purpose: the gateway webhook injects containers
+          # that set their own context, and a pod-level one would apply to
+          # them too. Verified against this image: it comes up healthy as an
+          # arbitrary uid with every capability dropped.
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - name: dshm
               mountPath: /dev/shm
