@@ -58,6 +58,7 @@ ingress:
   ingressClassName: traefik-internal
   annotations:
     external-dns.alpha.kubernetes.io/hostname: loki.home.packet.fail
+    traefik.ingress.kubernetes.io/router.middlewares: monitoring-telemetry-ingest-auth@kubernetescrd
   hosts:
     - loki.home.packet.fail
   paths:

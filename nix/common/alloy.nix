@@ -1,9 +1,21 @@
-{ config, ... }:
+{ config, currentSystemName, ... }:
 
 let
   hostName = config.networking.hostName;
+  # Per-host credential for the nuc01 ingest endpoints. systemd hands the
+  # decrypted file to the (DynamicUser) service under this fixed path.
+  credentialPath = "/run/credentials/alloy.service/telemetry-password";
 in
 {
+  sops.secrets.telemetry-password = {
+    sopsFile = ../machines/${currentSystemName}/secrets/telemetry.enc.yaml;
+    restartUnits = [ "alloy.service" ];
+  };
+
+  systemd.services.alloy.serviceConfig.LoadCredential = [
+    "telemetry-password:${config.sops.secrets.telemetry-password.path}"
+  ];
+
   services.alloy = {
     enable = true;
     extraFlags = [ "--disable-reporting" ];
@@ -55,6 +67,10 @@ in
     prometheus.remote_write "nuc01" {
       endpoint {
         url = "https://prometheus.home.packet.fail/api/v1/write"
+        basic_auth {
+          username      = "${hostName}"
+          password_file = "${credentialPath}"
+        }
       }
     }
 
@@ -92,6 +108,10 @@ in
     loki.write "nuc01" {
       endpoint {
         url = "https://loki.home.packet.fail/loki/api/v1/push"
+        basic_auth {
+          username      = "${hostName}"
+          password_file = "${credentialPath}"
+        }
       }
     }
   '';

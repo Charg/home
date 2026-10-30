@@ -1,0 +1,12 @@
+---
+# Applied to the remote-write and log-push ingresses; one htpasswd line per
+# sending host in telemetry-ingest-auth.enc.yaml.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: telemetry-ingest-auth
+  namespace: monitoring
+spec:
+  basicAuth:
+    secret: telemetry-ingest-auth
+    removeHeader: true

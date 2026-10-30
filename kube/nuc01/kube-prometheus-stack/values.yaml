@@ -303,6 +303,7 @@ prometheus:
     ingressClassName: traefik-internal
     annotations:
       external-dns.alpha.kubernetes.io/hostname: prometheus.home.packet.fail
+      traefik.ingress.kubernetes.io/router.middlewares: monitoring-telemetry-ingest-auth@kubernetescrd
     hosts:
       - prometheus.home.packet.fail
     paths:
