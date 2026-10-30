@@ -58,10 +58,18 @@ repoServer:
       args:
         - |
           set -e
+          # Hashes come from sops-${SOPS_VERSION}.checksums.txt
+          # on the GitHub release; bump the version and both hashes together.
           SOPS_VERSION=v3.12.2
-          ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
-          wget -qO /custom-tools/sops "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}"
-          chmod +x /custom-tools/sops
+          case "$(uname -m)" in
+            x86_64)  ARCH=amd64; SHA256=14e2e1ba3bef31e74b70cf0b674f6443c80f6c5f3df15d05ffc57c34851b4998 ;;
+            aarch64) ARCH=arm64; SHA256=f66de6f528dca946e910d74fa36a62a7714c11d0db16bd3c9bd8acf73b66704b ;;
+            *) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;;
+          esac
+          wget -qO /custom-tools/sops.tmp "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}"
+          echo "${SHA256}  /custom-tools/sops.tmp" | sha256sum -c -
+          chmod +x /custom-tools/sops.tmp
+          mv /custom-tools/sops.tmp /custom-tools/sops
       resources:
         requests:
           cpu: 10m
