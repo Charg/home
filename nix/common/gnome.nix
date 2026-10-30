@@ -17,6 +17,9 @@ in
   systemd.oomd.enableUserSlices = true;
 
   services.desktopManager.gnome.enable = true;
+  # Unwrapped GTK3/Qt apps (e.g. VirtualBox) abort when opening a file dialog
+  # because the session only ships GTK4's schemas, not org.gtk.Settings.FileChooser.
+  services.desktopManager.gnome.extraGSettingsOverridePackages = [ pkgs.gtk3 ];
   services.displayManager.gdm.enable = true;
 
   # pop-shell's floating_exceptions/main.js is a standalone GTK3 GJS app,
