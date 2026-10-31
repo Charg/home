@@ -271,6 +271,37 @@
   # Used for YubiKey related operations.
   services.pcscd.enable = true;
 
+  security.pam.services.login = {
+    # Replaced by the two rules below; the disabled rule still anchors their order.
+    u2f.enable = false;
+    rules.auth =
+      let
+        pam_u2f = "${pkgs.pam_u2f}/lib/security/pam_u2f.so";
+        base = config.security.pam.services.login.rules.auth.u2f.order;
+      in
+      {
+        u2f-login = {
+          control = "sufficient";
+          modulePath = pam_u2f;
+          order = base + 1;
+          settings = {
+            userpresence = 1;
+            authfile = ".config/Yubico/u2f_keys_login";
+            cue = true;
+          };
+        };
+        u2f-present = {
+          control = "required";
+          modulePath = pam_u2f;
+          order = base + 2;
+          settings = {
+            userpresence = 0;
+            authfile = ".config/Yubico/u2f_keys";
+          };
+        };
+      };
+  };
+
   services.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
@@ -303,6 +334,7 @@
     notifications.wall.enable = true;
   };
   environment.systemPackages = with pkgs; [
+    pam_u2f # pamu2fcfg, for registering FIDO2 keys (see security.pam below)
     smartmontools
     sbctl # Secure Boot key management for lanzaboote
 

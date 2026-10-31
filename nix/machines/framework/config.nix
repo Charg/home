@@ -105,7 +105,10 @@ in
     }
   ];
 
-  environment.systemPackages = [ netcheck ];
+  environment.systemPackages = [
+    netcheck
+    pkgs.pam_u2f # pamu2fcfg, for registering FIDO2 keys (see security.pam below)
+  ];
 
   # Name my AV Access ethernet adapter
   systemd.network.links."10-av-eth" = {
@@ -517,6 +520,23 @@ in
   # Smart Card Reader Service
   # Used for YubiKey related operations.
   services.pcscd.enable = true;
+
+  security.pam.u2f.settings.userpresence = 0;
+  # gdm-password and the lock screen substack `login`; pam_u2f sits before
+  # pam_unix, so a missing key fails the login even with the right password.
+  security.pam.services.login.u2f = {
+    enable = true;
+    control = "required";
+  };
+  # gdm-fingerprint carries its own rule list and ignores the option above.
+  # Run pam_u2f after pam_fprintd so the key is only checked once a finger
+  # has matched.
+  security.pam.services.gdm-fingerprint.rules.auth.u2f = {
+    control = "required";
+    modulePath = "${pkgs.pam_u2f}/lib/security/pam_u2f.so";
+    order = config.security.pam.services.gdm-fingerprint.rules.auth.fprintd.order + 10;
+    settings = config.security.pam.u2f.settings;
+  };
 
   # Enable thunderbold
   services.hardware.bolt.enable = true;
