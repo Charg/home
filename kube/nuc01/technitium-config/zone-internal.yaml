@@ -1,0 +1,22 @@
+---
+apiVersion: dns.packet.fail/v1alpha1
+kind: Zone
+metadata:
+  name: internal
+spec:
+  zoneName: internal
+  serverRef:
+    name: dns
+  type: Forwarder
+  forwarder: 192.168.74.1
+---
+apiVersion: dns.packet.fail/v1alpha1
+kind: Zone
+metadata:
+  name: reverse-192-168-73
+spec:
+  zoneName: 73.168.192.in-addr.arpa
+  serverRef:
+    name: dns
+  type: Forwarder
+  forwarder: 192.168.74.1
