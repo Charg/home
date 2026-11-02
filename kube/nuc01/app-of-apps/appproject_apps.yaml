@@ -16,6 +16,7 @@ spec:
     - ghcr.io/berriai
     - https://go.temporal.io/helm-charts
     - https://pajikos.github.io/home-assistant-helm-chart/
+    - https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
   destinations:
     - server: https://kubernetes.default.svc
       namespace: ac

@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qbit-neo-internal
+  namespace: media
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: qbit.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: qbit.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbit-neo
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - qbit.home.packet.fail

@@ -1,0 +1,246 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qbit-neo-scripts
+  namespace: media
+data:
+  # Cold-start path. gluetun fires its port-changed hook ONCE, inline, when the
+  # mapping is first obtained - and with sidecar ordering that happens before
+  # this container exists, so the cold-start port cannot come from the hook.
+  # Read it from gluetun's status file instead and patch the git-seeded config
+  # before qBittorrent launches. port-up.sh below owns rotation only.
+  port-seed.sh: |
+    #!/bin/sh
+    set -u
+    PORT_FILE=/gluetun/forwarded_port
+    CONF=/config/qBittorrent/qBittorrent.conf
+
+    i=0
+    while [ ! -s "$PORT_FILE" ] && [ "$i" -lt 60 ]; do
+      sleep 1
+      i=$((i + 1))
+    done
+
+    if [ -s "$PORT_FILE" ]; then
+      # First line only, and it has to be a bare port number. Stripping every
+      # non-digit instead would concatenate a multi-line file into one huge
+      # integer - qBittorrent accepts that, wraps it to 32 bits, and then fails
+      # to open any listener at all while the WebUI comes up looking healthy.
+      PORT=$(head -n 1 "$PORT_FILE" | tr -d ' \t\r')
+      case "$PORT" in
+        ''|*[!0-9]*) PORT= ;;
+      esac
+      if [ -n "$PORT" ] && { [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; }; then
+        PORT=
+      fi
+      if [ -n "$PORT" ]; then
+        # ^-anchored so this cannot also rewrite Session\SSL\Port.
+        if sed -i "s/^Session\\\\Port=.*/Session\\\\Port=${PORT}/" "$CONF"; then
+          echo "[port-seed] Session\\Port=${PORT}"
+        else
+          # sed -i writes a temp file alongside the target, so this is what a
+          # permissions or read-only-mount problem looks like. Worth saying out
+          # loud - the symptom otherwise is just an instance nobody can reach.
+          echo "[port-seed] FAILED to write ${CONF} - starting on the seeded placeholder" >&2
+        fi
+      else
+        echo "[port-seed] unusable port in ${PORT_FILE} - starting on the seeded placeholder" >&2
+      fi
+    else
+      echo "[port-seed] no forwarded port after ${i}s - starting with the seeded placeholder" >&2
+    fi
+
+    # Not finding a port is deliberately NOT fatal: qBittorrent still starts,
+    # outbound-only. A hard failure here would turn a degraded instance into a
+    # down one.
+    #
+    # Reproduces the image's own entrypoint verbatim. catatonit is what reaps
+    # zombies as PID 1, and /entrypoint.sh handles the log symlink and stale
+    # lockfile - bypassing straight to qbittorrent-nox would lose both.
+    exec /usr/bin/catatonit -- /entrypoint.sh "$@"
+
+  # Share-limit reaper. The split this implements - private seeds to a ratio,
+  # public goes away once it has been imported - cannot be expressed in
+  # qBittorrent's own settings at all: share limits are global or per-torrent,
+  # and the private/public distinction lives in the torrent's `private` flag,
+  # which is only visible through the API. So a loop sets per-torrent limits on
+  # the private ones and deletes the public ones.
+  #
+  # Runs on the same image as qBittorrent, which already carries jq, curl, find
+  # and stat - no fifth image to track, and nothing can be installed at runtime
+  # anyway because gluetun DROPs outbound.
+  share-limits.sh: |
+    #!/bin/sh
+    set -u
+
+    API=http://127.0.0.1:8080/api/v2
+    INTERVAL=${INTERVAL:-60}
+    PRIVATE_RATIO=${PRIVATE_RATIO:-2.0}
+    PRIVATE_SEED_MINUTES=${PRIVATE_SEED_MINUTES:-20160}  # 14d of ACTIVE seeding
+    ORPHAN_GRACE_HOURS=${ORPHAN_GRACE_HOURS:-168}        # 7d
+    DRY_RUN=${DRY_RUN:-true}
+
+    log() { echo "[reaper] $*"; }
+
+    # Unauthenticated on purpose, exactly as port-up.sh is:
+    # WebUI\LocalHostAuth=false admits a loopback caller with no session, and
+    # every container in this pod shares one network namespace.
+    post() { curl -sf --max-time 15 -X POST "$@"; }
+
+    # Scryer hardlinks into /data/TV on import, so a second link means the
+    # import happened. This is deliberately a ONE-WAY test: a link proves
+    # imported, but the absence of one does NOT prove otherwise - Scryer falls
+    # back to a copy when the destination already exists. That is why the
+    # no-link path waits out ORPHAN_GRACE_HOURS rather than deleting.
+    imported() {
+      [ -n "$(find "$1" -type f -links +1 2>/dev/null | head -n 1)" ]
+    }
+
+    # imported() cannot tell "no link here" from "cannot see this path" - both
+    # produce empty output. That distinction matters because BOTH branches of
+    # the caller end in a deletion: false does not mean "leave it alone", it
+    # means "delete once the grace period is up". So an unreadable or missing
+    # path has to be a third outcome, and the caller skips it.
+    readable() {
+      [ -e "$1" ] || return 1
+      [ -d "$1" ] || { [ -r "$1" ]; return; }
+      # On a directory, -r alone is not enough: find descends, so traversal
+      # needs +x too, and one unreadable subdirectory several levels down is
+      # enough to make the link test lie. Checking find's own stderr is what
+      # actually covers the whole walk.
+      [ -r "$1" ] && [ -x "$1" ] || return 1
+      ! find "$1" 2>&1 >/dev/null | grep -q .
+    }
+
+    delete_with_content() {
+      if [ "$DRY_RUN" = "true" ]; then
+        log "DRY_RUN would delete + content: $2"
+        return
+      fi
+      if post "$API/torrents/delete" -d "hashes=$1" -d "deleteFiles=true" >/dev/null; then
+        log "deleted + content: $2"
+      else
+        log "FAILED to delete: $2" >&2
+      fi
+    }
+
+    while :; do
+      if ! INFO=$(curl -sf --max-time 15 "$API/torrents/info"); then
+        log "WebUI unreachable, retrying in ${INTERVAL}s" >&2
+        sleep "$INTERVAL"
+        continue
+      fi
+      NOW=$(date +%s)
+
+      # --- private: give them limits of their own ---------------------------
+      # ratio_limit -2 is "inherit the global limit", so this fires once per
+      # torrent and never overrides a limit that was set by hand. It runs while
+      # the torrent is still downloading, long before any limit could bite.
+      echo "$INFO" |
+        jq -r '.[] | select(.private == true and .ratio_limit == -2) | [.hash, .name] | @tsv' |
+        while IFS="$(printf '\t')" read -r HASH NAME; do
+          [ -n "$HASH" ] || continue
+          if [ "$DRY_RUN" = "true" ]; then
+            log "DRY_RUN would set private limits (ratio ${PRIVATE_RATIO}): ${NAME}"
+            continue
+          fi
+          # inactiveSeedingTimeLimit=-1 (unlimited) is load-bearing: an idle
+          # private torrent is the normal case and must not be stopped for it,
+          # but the global inactive limit would do exactly that.
+          if post "$API/torrents/setShareLimits" \
+              -d "hashes=${HASH}" \
+              -d "ratioLimit=${PRIVATE_RATIO}" \
+              -d "seedingTimeLimit=${PRIVATE_SEED_MINUTES}" \
+              -d "inactiveSeedingTimeLimit=-1" >/dev/null; then
+            log "private limits set (ratio ${PRIVATE_RATIO}, ${PRIVATE_SEED_MINUTES}m): ${NAME}"
+          else
+            log "FAILED to set limits: ${NAME}" >&2
+          fi
+        done
+
+      # --- public: remove once imported -------------------------------------
+      # `private` is null until metadata arrives, so match == false rather than
+      # != true - nothing gets reaped on unknown provenance. Both loops skip
+      # nulls for the same reason, and pick the torrent up on a later pass.
+      #
+      # Name is read last so that spaces in it cannot shift the earlier fields;
+      # @tsv escapes tabs and newlines, so nothing else can either.
+      echo "$INFO" |
+        jq -r '.[] | select(.private == false and .progress == 1)
+                   | [.hash, .completion_on, .content_path, .name] | @tsv' |
+        while IFS="$(printf '\t')" read -r HASH DONE_AT CONTENT NAME; do
+          [ -n "$HASH" ] && [ -n "$CONTENT" ] || continue
+          if ! readable "$CONTENT"; then
+            log "unreadable or missing, skipping (NOT reaping): ${CONTENT}"
+            continue
+          fi
+          if imported "$CONTENT"; then
+            delete_with_content "$HASH" "$NAME"
+            continue
+          fi
+          # Never imported. Deleting the torrent's content here does not touch
+          # the library: the library copy is a separate link (or, in the
+          # fallback case, a separate file) and survives either way.
+          [ "$DONE_AT" -gt 0 ] 2>/dev/null || continue
+          AGE_H=$(( (NOW - DONE_AT) / 3600 ))
+          if [ "$AGE_H" -ge "$ORPHAN_GRACE_HOURS" ]; then
+            log "never imported after ${AGE_H}h, reaping: ${NAME}"
+            delete_with_content "$HASH" "$NAME"
+          fi
+        done
+
+      sleep "$INTERVAL"
+    done
+
+  # Rotation path. gluetun calls this inline on every port change and only logs
+  # failures - and it BLOCKS its own renewal loop while this runs. Proton's
+  # mapping expires in under a minute, so the total retry budget here has to
+  # stay well clear of that: 8 tries x (2s timeout + 3s sleep) = 40s worst case.
+  # Do not raise the attempt count without cutting the sleep or the timeout.
+  port-up.sh: |
+    #!/bin/sh
+    # {{PORTS}} is a comma-separated LIST - Proton hands out one port today, but
+    # the substitution is plural and nothing here would notice if that changed.
+    # Sending the raw list produces json={"listen_port":1,2}, which qBittorrent
+    # answers 200 OK to while silently discarding the field, so the failure
+    # would look exactly like success.
+    PORT=${1%%,*}
+    case "$PORT" in
+      ''|*[!0-9]*)
+        echo "[port-up] refusing non-numeric port '${1}'" >&2
+        exit 1
+        ;;
+    esac
+    if [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+      echo "[port-up] refusing out-of-range port '${PORT}'" >&2
+      exit 1
+    fi
+    i=0
+    while [ "$i" -lt 8 ]; do
+      # Unauthenticated on purpose: WebUI\LocalHostAuth=false lets a loopback
+      # caller in without a session, and this is loopback within the pod's own
+      # network namespace.
+      if wget -q -O- --timeout=2 \
+          --post-data="json={\"listen_port\":${PORT}}" \
+          http://127.0.0.1:8080/api/v2/app/setPreferences >/dev/null 2>&1; then
+        echo "[port-up] listen_port=${PORT}"
+        # Force an immediate reannounce so the tracker learns the new port
+        # right away. Without this, qBittorrent waits out its own reannounce
+        # interval (tens of minutes) before telling the tracker - and every
+        # peer that asks the tracker in the meantime is handed a port we've
+        # already stopped listening on. Best-effort: a failure here just
+        # means the tracker catches up on its normal schedule instead.
+        if wget -q -O- --timeout=2 --post-data="hashes=all" \
+            http://127.0.0.1:8080/api/v2/torrents/reannounce >/dev/null 2>&1; then
+          echo "[port-up] reannounced"
+        else
+          echo "[port-up] reannounce failed, tracker will pick up the new port on its own schedule" >&2
+        fi
+        exit 0
+      fi
+      i=$((i + 1))
+      sleep 3
+    done
+    echo "[port-up] FAILED to set listen_port=${PORT} after ${i} attempts" >&2
+    exit 1

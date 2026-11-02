@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: scryer-config
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # Node-local, because SQLite fsyncs every write. local-path can't be
+  # expanded, hence the headroom.
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 30Gi

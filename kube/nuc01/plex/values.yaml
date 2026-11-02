@@ -1,0 +1,47 @@
+image:
+  # renovate: datasource=docker depName=plexinc/pms-docker
+  tag: 1.43.3.10896-cb3ebc72d
+  sha: sha256:83a425ae9e133b1cb2cc3b809556e01c61cd8ff65c582e41b4374bc2210bac9e
+  pullPolicy: IfNotPresent
+serviceAccount:
+  automountServiceAccountToken: false
+ingress:
+  enabled: true
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: plex.home.packet.fail
+  ingressClassName: traefik-internal
+  url: https://plex.home.packet.fail
+  tls:
+  - hosts:
+    - plex.home.packet.fail
+pms:
+  storageClassName: synology-iscsi-storage
+  # Binds the static volume in kube/nuc01/media-storage/.
+  configStorage: 10Gi
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+      gpu.intel.com/i915: '1'
+    limits:
+      gpu.intel.com/i915: '1'
+      cpu: 4000m
+      memory: 22Gi
+# Shares a node with the other plex-media consumers.
+nodeSelector:
+  kubernetes.io/hostname: nuc01
+extraEnv:
+  HOSTNAME: plex.packet.fail
+extraVolumeMounts:
+- name: plex-media
+  mountPath: /media
+- name: plex-transcode
+  mountPath: /transcode_custom
+extraVolumes:
+- name: plex-media
+  persistentVolumeClaim:
+    claimName: plex-media
+- name: plex-transcode
+  emptyDir:
+    medium: Memory
+    sizeLimit: 20Gi

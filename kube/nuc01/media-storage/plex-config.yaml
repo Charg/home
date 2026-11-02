@@ -1,0 +1,28 @@
+---
+# Existing volume, bound statically. The chart's volumeClaimTemplate creates
+# the claim; claimRef reserves this volume for it.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: plex-config
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 20Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: pms-config-plex-plex-media-server-0
+    namespace: media
+  csi:
+    driver: csi.san.synology.com
+    fsType: ext4
+    volumeAttributes:
+      dsm: 192.168.74.10
+      formatOptions: -E nodiscard
+      protocol: iscsi
+    volumeHandle: 5a4ed878-3b35-40df-b680-88b6bb0b9dca
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: synology-iscsi-storage
+  volumeMode: Filesystem

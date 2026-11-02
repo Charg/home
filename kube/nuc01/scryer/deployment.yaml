@@ -1,0 +1,124 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scryer
+  namespace: media
+  labels:
+    app.kubernetes.io/name: scryer
+spec:
+  replicas: 1
+  # SQLite on a RWO volume must never have two writers at once.
+  strategy:
+    type: Recreate
+  # NOT the place for setGateway - a Deployment's selector is immutable, and a
+  # routing flag has no business being part of this workload's identity.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scryer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: scryer
+        # Routes all non-cluster egress through the WireGuard gateway. The
+        # admission webhook appends two injected containers on the strength of
+        # this label, and networkpolicy-routed.yaml in kube/nuc01/media-config
+        # fences the pod on the strength of the same one. Only "true"/"false"
+        # are safe values - see that directory's README.
+        setGateway: "true"
+    spec:
+      automountServiceAccountToken: false
+      # Shares a node with the other plex-media consumers; see
+      # kube/nuc01/media-storage/README.md.
+      nodeSelector:
+        kubernetes.io/hostname: nuc01
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: scryer
+          image: ghcr.io/scryer-media/scryer:0.21.21@sha256:13df0028f3d42c5241013c473115aae0dbe06458d5a567f188cb707b458a4d1e
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: SCRYER_BIND
+              value: 0.0.0.0:8080
+            - name: UMASK
+              value: "002"
+            - name: TZ
+              value: America/Los_Angeles
+            - name: SCRYER_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: scryer-encryption-key
+                  key: encryption-key
+            # Seed settings only; inert once changed in the UI.
+            - name: SCRYER_MOVIES_PATH
+              value: /data/Movies
+            - name: SCRYER_SERIES_PATH
+              value: /data/TV
+            - name: SCRYER_AUTH_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: scryer-config
+              mountPath: /config
+            # Same mount path qBittorrent uses for /data - this is what
+            # lets Scryer do atomic-move/hardlink imports with zero remote
+            # path mapping between the download client and the library.
+            - name: plex-media
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 500m
+              memory: 768Mi
+            # CPU limit was 1000m; container_cpu_usage_seconds_total peaked at
+            # 0.99 cores with the throttle ratio hitting 97% during a scan/import
+            # burst - genuinely CPU-bound, not just blocked on the old iSCSI
+            # storage. Memory limit is untouched: peak usage was 541Mi against
+            # 2Gi, zero OOM events in 30d.
+            limits:
+              cpu: 3000m
+              memory: 2Gi
+          # Scryer applies schema migrations on startup, and a multi-release
+          # jump can take minutes. Without this, the liveness probe could
+          # restart the pod mid-migration after ~75s. Allows up to 10
+          # minutes; liveness/readiness only start once this passes.
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: scryer-config
+          persistentVolumeClaim:
+            # Node-local (see pvc.yaml): SQLite fsyncs every write transaction,
+            # and synology-iscsi-storage puts a network round-trip behind each
+            # one.
+            claimName: scryer-config
+        - name: plex-media
+          persistentVolumeClaim:
+            claimName: plex-media

@@ -1,0 +1,343 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qbit-neo
+  namespace: media
+  labels:
+    app.kubernetes.io/name: qbit-neo
+    app.kubernetes.io/instance: qbit-neo
+    app.kubernetes.io/version: 5.2.3
+spec:
+  replicas: 1
+  serviceName: qbit-neo
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbit-neo
+      app.kubernetes.io/instance: qbit-neo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbit-neo
+        app.kubernetes.io/instance: qbit-neo
+    spec:
+      automountServiceAccountToken: false
+      # Shares a node with the other plex-media consumers; see
+      # kube/nuc01/media-storage/README.md.
+      nodeSelector:
+        kubernetes.io/hostname: nuc01
+      # gluetun's wireguard needs the sysctl, which the kubelet must allow.
+      # The pod is unschedulable without it.
+      #
+      # Deliberately NO pod-level runAsUser/runAsNonRoot: either would capture
+      # gluetun, which has to stay root - see its PUID/PGID comment below. The
+      # two containers that drop to 1000 declare it themselves.
+      #
+      # fsGroup reaches the gluetun emptyDirs as well as the PVC, giving them
+      # gid 1000 and g+rwxs. gluetun still writes them fine as root.
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+        fsGroup: 1000
+        # The kubelet skips its recursive walk only when the volume root's gid
+        # already matches fsGroup AND its mode already carries the bits it
+        # would otherwise apply. plex-media's root is 2775 1000:1000, which
+        # passes both. Tidying that root back to 0755 would quietly reintroduce
+        # the walk on every mount.
+        fsGroupChangePolicy: OnRootMismatch
+      # Points at the in-pod CoreDNS sidecar, which splits cluster names to
+      # kube-dns and everything else to DoT over the tunnel. gluetun is
+      # configured (DNS_KEEP_NAMESERVER=on) to leave this alone rather than
+      # rewriting the pod-shared /etc/resolv.conf out from under it.
+      dnsPolicy: None
+      dnsConfig:
+        nameservers: ["127.0.0.1"]
+        searches:
+          - media.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - { name: ndots, value: "5" }
+      terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: config-seed          # ordinary init container: runs to completion
+          image: docker.io/library/busybox:1.38@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
+          # Must match the uid qBittorrent runs as. This rewrites the config
+          # file on EVERY pod start, so left at root it would hand qBittorrent
+          # a root-owned file it can no longer write - re-breaking the volume's
+          # ownership on each restart, with no error at seed time.
+          #
+          # Note the kubelet creates a *missing* subPath directory as root:root
+          # 0755. If qbit-neo-config ever disappears from the volume, this
+          # container fails its mkdir/cp as uid 1000 and the pod wedges in
+          # Init: loud and data-safe, but a full outage whose cause is not
+          # obvious from the symptom.
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          command: [sh, -c]
+          args:
+            - |
+              set -eu
+              mkdir -p /config/qBittorrent
+              cp -f /seed/qBittorrent.conf /config/qBittorrent/qBittorrent.conf
+          volumeMounts:
+            - { name: media, mountPath: /config, subPath: qbit-neo-config }
+            - { name: config-seed, mountPath: /seed, readOnly: true }
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { memory: 32Mi }
+        # NATIVE SIDECAR, listed before gluetun on purpose: sidecars start in
+        # list order, so the resolver is up before gluetun makes its first
+        # lookup. gluetun's own health check targets an IP, not a name, so it
+        # never waits on this - there is no circular wait.
+        - name: coredns
+          image: registry.k8s.io/coredns/coredns:v1.14.6@sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea
+          restartPolicy: Always
+          args: ["-conf", "/etc/coredns/Corefile"]
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              # 53 is a privileged port and this image's binary carries no file
+              # capabilities, so dropping ALL without re-adding this makes the
+              # container fail at exec time ("operation not permitted") rather
+              # than log a warning.
+              add: [NET_BIND_SERVICE]
+          volumeMounts:
+            - { name: coredns-config, mountPath: /etc/coredns, readOnly: true }
+          # NO PROBE ON PURPOSE, and it must stay that way unless something
+          # changes below. Every probe kind is unusable here:
+          #   - tcpSocket/httpGet are dialled by kubelet from the NODE, at the
+          #     pod IP. This resolver binds 127.0.0.1 only, so they can never
+          #     connect - the same reason gluetun's probe is an exec, one
+          #     container down.
+          #   - exec has nothing to run: the image ships only the /coredns
+          #     binary, no shell, no dig, no nslookup.
+          # A startupProbe that can never pass is worse than none at all: on a
+          # native sidecar it does not degrade the pod, it wedges it in Init
+          # forever, because the containers after it never start.
+          #
+          # Nothing actually races on this. gluetun reaches its servers by IP
+          # and health-checks an IP, so it needs no resolver; qBittorrent, which
+          # does, only starts once gluetun's own probe has passed - by which
+          # point CoreDNS has been listening for minutes.
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { memory: 128Mi }
+        - name: gluetun              # NATIVE SIDECAR - restartPolicy makes it one
+          image: ghcr.io/qdm12/gluetun:v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
+          restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [NET_ADMIN]
+          env:
+            # The image defaults these to 1000, and gluetun chowns every file it
+            # writes to them. This container runs as root with all capabilities
+            # dropped, so it has no CAP_CHOWN and the chown fails - which is
+            # fatal to the port forwarding service, not cosmetic: it writes the
+            # port file, fails to chown it, and then deletes it again. Setting
+            # them to the uid this container already runs as makes the chown a
+            # no-op, which the kernel allows an owner to perform unprivileged.
+            #
+            # So this container stays root while the other two dropped to 1000,
+            # and that is not an oversight: it holds NET_ADMIN to bring up
+            # WireGuard, and these two must keep naming the uid it already is.
+            # Point them at 1000 and the chown stops being a no-op, fails for
+            # want of CAP_CHOWN, and gluetun deletes the port file - breaking
+            # port forwarding silently. qBittorrent reads that file as uid 1000
+            # now, which works because it is world-readable.
+            - { name: PUID, value: "0" }
+            - { name: PGID, value: "0" }
+            - { name: VPN_SERVICE_PROVIDER, value: protonvpn }
+            - { name: VPN_TYPE, value: wireguard }
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef: { name: qbit-neo-wireguard, key: privatekey }
+            - { name: SERVER_COUNTRIES, value: "Switzerland" }
+            # gluetun names the tunnel tun0 by default. The seeded qBittorrent
+            # config binds its sockets to wg0, and qBittorrent treats a missing
+            # interface as "no binding" rather than an error - it logs "The
+            # configured network interface is invalid" and carries on listening
+            # anyway, which silently removes the leak containment. Renaming the
+            # interface here keeps the two in agreement.
+            - { name: VPN_INTERFACE, value: wg0 }
+            # WebUI must be reachable from Traefik and other pods; gluetun's
+            # firewall DROPs inbound otherwise.
+            - { name: FIREWALL_INPUT_PORTS, value: "8080" }
+            # Cluster only; see networkpolicy.yaml.
+            - { name: FIREWALL_OUTBOUND_SUBNETS, value: "10.42.0.0/16,10.43.0.0/16" }
+            # Loopback-only: the control server exposes tunnel control with no
+            # auth, and it binds wildcard by default.
+            - { name: HTTP_CONTROL_SERVER_ADDRESS, value: "127.0.0.1:8000" }
+            # An IP, not a hostname. A name here would make the tunnel's health
+            # check wait on a resolver that is itself waiting on the tunnel.
+            - { name: HEALTH_TARGET_ADDRESSES, value: "1.1.1.1:443" }
+            # Built-in resolver off: it binds wildcard :53 regardless of
+            # DNS_ADDRESS and would collide with the CoreDNS sidecar.
+            - { name: DNS_SERVER, value: "off" }
+            # DNS_KEEP_NAMESERVER, not DNS_ADDRESS. gluetun refuses to point
+            # /etc/resolv.conf at a loopback address when its own forwarder is
+            # off - it treats that as a black hole and silently substitutes its
+            # bootstrap upstream (verified: DNS_ADDRESS=127.0.0.1 produced
+            # "nameserver 1.1.1.1"). Since /etc/resolv.conf is shared by every
+            # container in the pod, that would drag qBittorrent off the
+            # split-horizon resolver too. Keeping the nameserver instead leaves
+            # dnsConfig's 127.0.0.1 in place.
+            #
+            # gluetun logs a scary warning here about keeping container
+            # nameservers leaking DNS outside the VPN. It does not apply: the
+            # nameserver being kept is 127.0.0.1, the in-pod CoreDNS sidecar,
+            # whose public upstream is DoT over this tunnel. Do not "fix" it.
+            - { name: DNS_KEEP_NAMESERVER, value: "on" }
+            - { name: VPN_PORT_FORWARDING, value: "on" }
+            - { name: VPN_PORT_FORWARDING_PROVIDER, value: protonvpn }
+            # Only pick servers that actually support forwarding, otherwise
+            # server selection can land somewhere NAT-PMP is refused.
+            - { name: PORT_FORWARD_ONLY, value: "on" }
+            - { name: VPN_PORT_FORWARDING_STATUS_FILE, value: /gluetun/forwarded_port }
+            # gluetun splits this shell-style and then exec's it directly -
+            # there is no shell in between, so the interpreter has to be named
+            # explicitly rather than relying on the script's shebang.
+            - name: VPN_PORT_FORWARDING_UP_COMMAND
+              value: "/bin/sh /wrapper/port-up.sh {{PORTS}}"
+            - { name: TZ, value: America/Los_Angeles }
+          # startupProbe, NOT readinessProbe: Kubernetes gates the next
+          # container on a sidecar having *started*, so a readinessProbe here
+          # would hold nothing back - and it would also feed pod readiness, so
+          # a tunnel blip would pull the Service endpoint out from under
+          # Traefik. exec, not httpGet: gluetun's health server binds
+          # 127.0.0.1:9999 and kubelet sends httpGet probes to the pod IP,
+          # which would never reach it.
+          startupProbe:
+            exec:
+              command: [/gluetun-entrypoint, healthcheck]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 36        # 3 minutes to first handshake
+          volumeMounts:
+            - { name: gluetun-run, mountPath: /gluetun }
+            # gluetun creates this directory itself, without an owner-execute
+            # bit, and then cannot open the files it puts inside. Root would
+            # normally ignore that, but only via CAP_DAC_OVERRIDE, which is
+            # dropped here. Letting kubelet create the directory instead sizes
+            # the fix to the problem - no extra capability.
+            - { name: gluetun-tmp, mountPath: /tmp/gluetun }
+            - { name: scripts, mountPath: /wrapper, readOnly: true }
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 192Mi }
+      containers:
+        - name: qbittorrent
+          image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+          securityContext:
+            # The image defaults to uid 65534. Pinned to 1000 to match the
+            # shared plex-media tree, which is owned 1000:1000 with directories
+            # 2775 - the same uid prowlarr, plex and scryer use.
+            #
+            # The uid has to match the tree's owner, not merely be able to
+            # write it: fs.protected_hardlinks is 1 on this node, so a non-root
+            # process may only link() a file it owns. A mismatch would not fail
+            # loudly - imports would be refused the hardlink and fall back to
+            # copying, silently consuming a volume sized on the assumption that
+            # a library file and its download share one inode.
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          # Wraps the image's own entrypoint to resolve the forwarded port
+          # before qBittorrent launches - the hook cannot do it on a cold start,
+          # because it fires before this container exists.
+          command: [/bin/sh, /wrapper/port-seed.sh]
+          env:
+            - { name: TZ, value: America/Los_Angeles }
+          ports:
+            - { name: http, containerPort: 8080, protocol: TCP }
+          volumeMounts:
+            - { name: media, mountPath: /config, subPath: qbit-neo-config }
+            - { name: media, mountPath: /data }
+            - { name: gluetun-run, mountPath: /gluetun, readOnly: true }
+            - { name: scripts, mountPath: /wrapper, readOnly: true }
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            # port-seed.sh waits up to 60s for the forwarded port before
+            # launching qBittorrent, so allow for that rather than flapping.
+            failureThreshold: 12
+          resources:
+            requests: { cpu: 200m, memory: 1Gi }
+            # No CPU limit on purpose: throttling this container wrecks throughput.
+            limits: { memory: 4Gi }
+        # Enforces the two share-limit policies qBittorrent cannot express
+        # itself - see share-limits.sh. An ordinary container, not a native
+        # sidecar: nothing starts after it, and it should not gate anything.
+        #
+        # Reuses the qBittorrent image rather than adding a fifth one to track.
+        # It already carries curl, jq and find, and gluetun DROPs outbound to
+        # everything but the LAN, so a slimmer base could not install them at
+        # runtime anyway. It talks to the WebUI over loopback in this pod's own
+        # network namespace, so it needs no credentials and no port.
+        - name: share-limits
+          image: ghcr.io/home-operations/qbittorrent:5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+          securityContext:
+            # Same uid as qBittorrent, and specifically so the hardlink test can
+            # traverse the whole tree. A directory this container cannot read
+            # looks identical to "never imported", which after the grace period
+            # means deleting content - so a permissions gap here fails toward
+            # data loss, not toward safety. uid 1000 covers it: the tree is
+            # owned 1000:1000 with every directory 2775. The residual risk is
+            # handled in share-limits.sh, whose readable() guard turns an
+            # unreadable path into a skip rather than a delete.
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          command: [/bin/sh, /wrapper/share-limits.sh]
+          env:
+            - { name: TZ, value: America/Los_Angeles }
+            # Logs what it would do and changes nothing. Watch a full cycle of
+            # real downloads in the log before turning this off - the import
+            # test is inferred from hardlink counts, not read out of Scryer.
+            - { name: DRY_RUN, value: "true" }
+          volumeMounts:
+            # No subPath: the hardlink test has to see both /data/downloads and
+            # the library trees it links into, and a link count is only
+            # meaningful across the whole filesystem.
+            - { name: media, mountPath: /data }
+            - { name: scripts, mountPath: /wrapper, readOnly: true }
+          # No probe: this is a loop with nothing listening, and its being down
+          # must not affect pod readiness or pull the WebUI out of the Service.
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 128Mi }
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: plex-media
+        - name: config-seed
+          secret:
+            secretName: qbit-neo-config-file
+        - name: coredns-config
+          configMap:
+            name: qbit-neo-coredns
+        # Carries gluetun's forwarded_port status file to qBittorrent. emptyDir,
+        # not the PVC: the mapping is valid only for the life of this tunnel, so
+        # persisting it across restarts would seed a stale port.
+        - name: gluetun-run
+          emptyDir: {}
+        - name: gluetun-tmp
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: qbit-neo-scripts
+            defaultMode: 0755

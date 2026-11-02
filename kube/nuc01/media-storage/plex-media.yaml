@@ -1,0 +1,41 @@
+---
+# Existing volume, bound statically. Single-writer; see README.md.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: plex-media
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 18Ti
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: plex-media
+    namespace: media
+  csi:
+    driver: csi.san.synology.com
+    fsType: ext4
+    volumeAttributes:
+      dsm: 192.168.74.10
+      formatOptions: -E nodiscard
+      protocol: iscsi
+    volumeHandle: 492ac9da-d4e9-4f31-b04e-319b6d49f3d3
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: synology-iscsi-storage
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-media
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: synology-iscsi-storage
+  volumeName: plex-media
+  resources:
+    requests:
+      storage: 18Ti
