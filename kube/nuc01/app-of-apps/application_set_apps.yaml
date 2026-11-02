@@ -140,6 +140,12 @@ spec:
             targetRevision: 0.3.78
             namespace: home-assistant
             project: apps
+          - name: plex
+            repoURL: https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
+            chart: plex-media-server
+            targetRevision: 1.7.1
+            namespace: media
+            project: apps
           - name: pod-gateway
             repoURL: https://angelnu.github.io/helm-charts/
             chart: pod-gateway

@@ -1,0 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: media-storage
+  namespace: argocd
+spec:
+  # infra, not apps: PersistentVolumes are cluster-scoped.
+  project: infra
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/nuc01/media-storage
+    targetRevision: main
+  destination:
+    namespace: media
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
