@@ -4,6 +4,10 @@ kind: Application
 metadata:
   name: media-storage
   namespace: argocd
+  annotations:
+    # Before the apps that claim these volumes, so a claim never gets
+    # dynamically provisioned ahead of its static volume.
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   # infra, not apps: PersistentVolumes are cluster-scoped.
   project: infra
