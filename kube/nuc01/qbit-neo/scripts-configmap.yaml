@@ -93,8 +93,22 @@ data:
     # imported, but the absence of one does NOT prove otherwise - Scryer falls
     # back to a copy when the destination already exists. That is why the
     # no-link path waits out ORPHAN_GRACE_HOURS rather than deleting.
+    #
+    # EVERY video file has to be linked, not just one: a season pack is
+    # imported episode by episode, and an "any link" test would delete the
+    # episodes still waiting. Files under MIN_VIDEO_KB are ignored so samples
+    # don't hold a pack back; extras over it do, and fall to the grace path.
+    # No qualifying video at all is "not imported", never vacuously true.
+    MIN_VIDEO_KB=${MIN_VIDEO_KB:-102400}  # 100MiB
+    videos() {
+      DIR=$1; shift
+      find "$DIR" -type f \( -iname '*.mkv' -o -iname '*.mp4' -o -iname '*.m4v' \
+        -o -iname '*.avi' -o -iname '*.ts' -o -iname '*.mov' -o -iname '*.wmv' \) \
+        -size +"${MIN_VIDEO_KB}k" "$@" 2>/dev/null
+    }
     imported() {
-      [ -n "$(find "$1" -type f -links +1 2>/dev/null | head -n 1)" ]
+      [ -n "$(videos "$1" | head -n 1)" ] &&
+        [ -z "$(videos "$1" -links 1 | head -n 1)" ]
     }
 
     # imported() cannot tell "no link here" from "cannot see this path" - both
