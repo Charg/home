@@ -38,7 +38,7 @@ tempo:
 
 persistence:
   enabled: true
-  storageClassName: local-path
+  storageClassName: longhorn
   size: 5Gi
 
 tempoQuery:
