@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: qbit-neo
     app.kubernetes.io/version: 5.2.3
 spec:
-  replicas: 1
+  replicas: 0
   serviceName: qbit-neo
   selector:
     matchLabels:

@@ -37,6 +37,7 @@ spec:
             namespace: default
             project: apps
             serverSideDiff: true
+            auto_sync: "false"
           - name: metallb
             repoURL: https://metallb.github.io/metallb
             chart: metallb
