@@ -18,6 +18,7 @@ spec:
     - https://angelnu.github.io/helm-charts/
     - https://argoproj.github.io/argo-helm
     - https://charts.jetstack.io
+    - https://charts.longhorn.io
     - https://cloudnative-pg.github.io/charts
     - https://grafana.github.io/helm-charts
     - https://intel.github.io/helm-charts

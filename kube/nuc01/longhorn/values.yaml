@@ -1,0 +1,39 @@
+# source: https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
+
+# The pre-upgrade hook job conflicts with Argo CD syncs.
+preUpgradeChecker:
+  jobEnabled: false
+
+persistence:
+  # local-path stays the cluster default; workloads opt in to longhorn.
+  defaultClass: false
+  defaultClassReplicaCount: 2
+  defaultDataLocality: best-effort
+
+defaultSettings:
+  defaultReplicaCount: '{"v1":"2","v2":"2"}'
+  defaultDataLocality: best-effort
+  replicaAutoBalance: best-effort
+  # Release volumes held by pods on a dead node so they reschedule elsewhere
+  # instead of waiting for the node to come back.
+  nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+  # Chart default reserves 12% of each node's CPU per instance manager.
+  guaranteedInstanceManagerCPU: '{"v1":"5","v2":"5"}'
+  upgradeChecker: false
+  allowCollectingLonghornUsageMetrics: false
+
+metrics:
+  serviceMonitor:
+    enabled: true
+
+ingress:
+  enabled: true
+  ingressClassName: traefik-internal
+  host: longhorn.home.packet.fail
+  pathType: Prefix
+  # The chart's tls option requires a named secret; the router annotation
+  # uses Traefik's default certificate like the other internal ingresses.
+  tls: false
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: longhorn.home.packet.fail
+    traefik.ingress.kubernetes.io/router.tls: "true"
