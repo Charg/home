@@ -19,8 +19,11 @@ grafana:
       check_for_plugin_updates: false
   persistence:
     enabled: true
-    storageClassName: local-path
-    size: 2Gi
+    # Longhorn PVC from monitoring-config.
+    existingClaim: grafana-data
+  # RWO volume: a surge pod on another node can't attach until the old one exits.
+  deploymentStrategy:
+    type: Recreate
   resources:
     requests:
       cpu: 50m
