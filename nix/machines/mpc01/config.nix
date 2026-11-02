@@ -7,6 +7,7 @@
     ../../common/ca-blacklist.nix
     ./firewall.nix
     ../../common/synology-iscsi.nix
+    ../../common/longhorn.nix
     ../../common/initrd-ssh-unlock.nix
     ../../common/openssh-hardening.nix
     ../../common/sops-user-password.nix
