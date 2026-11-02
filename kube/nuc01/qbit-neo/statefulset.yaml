@@ -305,10 +305,10 @@ spec:
           command: [/bin/sh, /wrapper/share-limits.sh]
           env:
             - { name: TZ, value: America/Los_Angeles }
-            # Logs what it would do and changes nothing. Watch a full cycle of
-            # real downloads in the log before turning this off - the import
-            # test is inferred from hardlink counts, not read out of Scryer.
-            - { name: DRY_RUN, value: "true" }
+            # "true" logs what it would do and changes nothing. Go back to it
+            # before changing the reaper - the import test is inferred from
+            # hardlink counts, not read out of Scryer.
+            - { name: DRY_RUN, value: "false" }
           volumeMounts:
             # No subPath: the hardlink test has to see both /data/downloads and
             # the library trees it links into, and a link count is only
