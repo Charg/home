@@ -281,6 +281,9 @@ ships `10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16` whitelisted **and enabled**. L
 every request arriving through Traefik comes from a cluster address and would therefore
 skip authentication entirely.
 
+`Session\AddTrackersFromURLEnabled` is on: new torrents get trackers appended from a
+URL-hosted list.
+
 ## Secrets
 
 - `qbit-neo-wireguard` — the WireGuard **private key only**, as key `privatekey`.
