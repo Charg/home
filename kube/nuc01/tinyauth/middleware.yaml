@@ -10,6 +10,11 @@ metadata:
 spec:
   forwardAuth:
     address: http://tinyauth.auth.svc.cluster.local:3000/api/auth/traefik
+    # Traefik sets the X-Forwarded-* headers for the auth call itself; never
+    # pass through whatever the client sent.
+    trustForwardHeader: false
+    # Replies are a small JSON body or a redirect.
+    maxResponseBodySize: 65536
     authResponseHeaders:
       - remote-user
       - remote-name
