@@ -30,6 +30,17 @@ spec:
       ports:
         - protocol: TCP
           port: 3333
+    # Metrics.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 3333
     # VXLAN return traffic from the gateway is a separate conntrack flow, not a
     # reply. Required; see kube/nuc01/media-config/README.md.
     - from:

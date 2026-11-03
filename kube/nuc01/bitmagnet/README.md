@@ -23,9 +23,15 @@ change it.
 ## Networking
 
 Routed through the shared gateway (`setGateway: "true"`); see
-`kube/nuc01/media-config/README.md`. `DHT_CRAWLER_SCALING_FACTOR` is kept low
-to limit load on the gateway. Before raising it, check conntrack on the
-gateway's node and this pod's node.
+`kube/nuc01/media-config/README.md`. `DHT_CRAWLER_SCALING_FACTOR` sets crawl
+concurrency and so load on the gateway. Before raising it, check conntrack
+inside the gateway pod (its own netns, not visible in node metrics) and this
+pod's CPU throttling.
+
+## Metrics
+
+`/metrics` on the HTTP port, scraped by `podmonitor.yaml`. Crawl rate:
+`rate(bitmagnet_dht_crawler_persisted_total{entity="Torrent"}[1h])`.
 
 ## Classifier
 

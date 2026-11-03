@@ -67,9 +67,13 @@ spec:
                   name: bitmagnet-secrets
                   key: tmdb-api-key
                   optional: true
-            # Upstream default is 10. Start low on the shared gateway
+            # Upstream default is 10. Shares the gateway; see README.md.
             - name: DHT_CRAWLER_SCALING_FACTOR
-              value: "7"
+              value: "15"
+            # Upstream default is 6s. Most fetches fail, and a failure usually
+            # holds its slot for the full timeout.
+            - name: METAINFO_REQUESTER_REQUEST_TIMEOUT
+              value: 4s
             # classifier.yml is read from $XDG_CONFIG_HOME/bitmagnet.
             - name: XDG_CONFIG_HOME
               value: /etc/xdg
