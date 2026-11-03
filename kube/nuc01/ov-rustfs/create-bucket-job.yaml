@@ -20,7 +20,7 @@ spec:
         - name: create-buckets
           # Pinned for the same reason as the store image: a floating tag
           # changes what runs with no diff to review.
-          image: cgr.dev/chainguard/minio-client:latest-dev@sha256:4ded9b0773ebf1afded36c4e91efad0d4e7dee91c6b3d5d29455732095afb2d0
+          image: cgr.dev/chainguard/minio-client:latest-dev@sha256:45f533aca9c8526c8fd88d43289d775074b76f6d749e0aee16f1bf97d8924bc5
           env:
             - name: RUSTFS_ACCESS_KEY
               valueFrom:
