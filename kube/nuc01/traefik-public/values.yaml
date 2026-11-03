@@ -35,9 +35,7 @@ ingressRoute:
     middlewares:
       - name: tinyauth
         namespace: auth
-    tls: {}
-
-tlsStore:
-  default:
-    defaultCertificate:
+    # Per-router certificate rather than a TLSStore: Traefik allows one
+    # "default" store cluster-wide, and traefik-internal owns it.
+    tls:
       secretName: home-packet-fail-wildcard-tls
