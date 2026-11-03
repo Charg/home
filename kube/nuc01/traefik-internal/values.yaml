@@ -9,6 +9,9 @@ providers:
   kubernetesCRD:
     enabled: true
     ingressClass: traefik-internal
+    # Ingresses in any namespace may reference the forward-auth middleware
+    # in auth (kube/nuc01/tinyauth) without a copy per namespace.
+    allowCrossNamespace: true
   kubernetesIngress:
     enabled: true
     ingressClass: traefik-internal

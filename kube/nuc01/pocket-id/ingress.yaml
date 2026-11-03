@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pocket-id-internal
+  namespace: auth
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: id.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: id.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pocket-id
+                port:
+                  number: 1411
+  tls:
+    - hosts:
+        - id.home.packet.fail
