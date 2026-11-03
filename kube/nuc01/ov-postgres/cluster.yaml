@@ -5,7 +5,9 @@ metadata:
   name: ov-postgres
 spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:18-standard-trixie
-  instances: 1
+  instances: 2
+  affinity:
+    podAntiAffinityType: required
 
   bootstrap:
     initdb:

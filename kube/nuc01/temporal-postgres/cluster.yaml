@@ -5,7 +5,9 @@ metadata:
   name: temporal-postgres
 spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
-  instances: 1
+  instances: 2
+  affinity:
+    podAntiAffinityType: required
 
   bootstrap:
     initdb:
