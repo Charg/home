@@ -27,6 +27,10 @@ in
     ];
     serviceConfig = {
       Type = "oneshot";
+      # Owns everything it reads; the setgid output dir hands the snapshot to
+      # the puller's group without needing to be a member of it
+      User = "headscale";
+      Group = "headscale";
       UMask = "0077";
       PrivateTmp = true;
     };
@@ -39,7 +43,6 @@ in
       cp ${hs.noise.private_key_path} ${hs.derp.server.private_key_path} "$tmp/"
 
       tar -C "$tmp" -c . | age -R ${../../common/keys/age-personal.pub} > ${dir}/latest.tar.age.new
-      chgrp headscale-backup ${dir}/latest.tar.age.new
       chmod 640 ${dir}/latest.tar.age.new
       mv ${dir}/latest.tar.age.new ${dir}/latest.tar.age
     '';
@@ -54,7 +57,7 @@ in
     };
   };
 
-  systemd.tmpfiles.rules = [ "d ${dir} 0750 root headscale-backup -" ];
+  systemd.tmpfiles.rules = [ "d ${dir} 2750 headscale headscale-backup -" ];
 
   # Pull-only account: its one key can read the latest snapshot and nothing else
   users.groups.headscale-backup = { };

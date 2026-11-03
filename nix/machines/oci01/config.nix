@@ -24,6 +24,12 @@
   # Same DHCP client as the nixos-anywhere installer
   networking.useNetworkd = true;
 
+  # Nothing on this network to discover; the firewall drops these anyway
+  services.resolved.settings.Resolve = {
+    LLMNR = false;
+    MulticastDNS = false;
+  };
+
   services.openssh.enable = true;
   networking.firewall.allowedTCPPorts = [ 22 ];
 
