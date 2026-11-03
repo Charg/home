@@ -16,6 +16,15 @@ providers:
     enabled: true
     ingressClass: traefik-internal
 
+ports:
+  web:
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
 resources:
   requests:
     cpu: 50m
