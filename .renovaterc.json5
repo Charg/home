@@ -35,6 +35,8 @@
       '/^kube/nuc01/ov-rustfs/proxy-deployment\\.yaml$/',
       '/^kube/nuc01/ov-rustfs/create-bucket-job\\.yaml$/',
       '/^kube/nuc01/cloudflared/deployment\\.yaml$/',
+      '/^kube/nuc01/pocket-id/deployment\\.yaml$/',
+      '/^kube/nuc01/tinyauth/deployment\\.yaml$/',
     ],
   },
   packageRules: [

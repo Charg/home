@@ -1,0 +1,18 @@
+---
+# Forward-auth for apps without their own login. Reference from any
+# namespace (traefik-internal has allowCrossNamespace on) with
+#   traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: tinyauth
+  namespace: auth
+spec:
+  forwardAuth:
+    address: http://tinyauth.auth.svc.cluster.local:3000/api/auth/traefik
+    authResponseHeaders:
+      - remote-user
+      - remote-name
+      - remote-email
+      - remote-groups
+      - remote-sub
