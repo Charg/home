@@ -7,7 +7,12 @@
 {
   programs.opencode = {
     enable = true;
-    package = unstable-pkgs.opencode;
+    # TODO: drop override once nixpkgs fixes the stale node_modules hash
+    package = unstable-pkgs.opencode.overrideAttrs (old: {
+      node_modules = old.node_modules.overrideAttrs {
+        outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
+      };
+    });
     settings = {
       autoupdate = false;
       share = "disabled";
