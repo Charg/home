@@ -6,6 +6,7 @@ metadata:
   namespace: ov
   annotations:
     external-dns.alpha.kubernetes.io/hostname: ov-media.home.packet.fail
+    traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
 spec:
   ingressClassName: traefik-internal
   rules:
