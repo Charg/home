@@ -24,7 +24,27 @@ resources:
     cpu: 300m
     memory: 256Mi
 
+# Two pods on separate nodes; the LB address only routes to the node that
+# holds a ready pod, so no SNAT and apps see the real client address.
+deployment:
+  replicas: 2
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: traefik
+            app.kubernetes.io/instance: traefik-internal-traefik-internal
+        topologyKey: kubernetes.io/hostname
+
 service:
+  spec:
+    externalTrafficPolicy: Local
   annotations:
     external-dns.alpha.kubernetes.io/hostname: traefik.home.packet.fail
 
