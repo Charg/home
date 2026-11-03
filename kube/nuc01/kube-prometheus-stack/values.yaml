@@ -316,8 +316,6 @@ prometheus:
       - hosts:
           - prometheus.home.packet.fail
   prometheusSpec:
-    # Temporary: holds the operator off the StatefulSet during the longhorn move.
-    paused: true
     storageSpec:
       volumeClaimTemplate:
         spec:
