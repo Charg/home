@@ -30,15 +30,15 @@ config:
       send_batch_size: 1024
 
   exporters:
-    otlphttp/tempo:
+    otlp_http/tempo:
       endpoint: http://tempo.monitoring.svc.cluster.local:4318
       tls:
         insecure: true
-    otlphttp/prometheus:
+    otlp_http/prometheus:
       endpoint: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp
       tls:
         insecure: true
-    otlphttp/loki:
+    otlp_http/loki:
       endpoint: http://loki.monitoring.svc.cluster.local:3100/otlp
       tls:
         insecure: true
@@ -51,21 +51,21 @@ config:
         processors:
           - batch
         exporters:
-          - otlphttp/tempo
+          - otlp_http/tempo
       metrics:
         receivers:
           - otlp
         processors:
           - batch
         exporters:
-          - otlphttp/prometheus
+          - otlp_http/prometheus
       logs:
         receivers:
           - otlp
         processors:
           - batch
         exporters:
-          - otlphttp/loki
+          - otlp_http/loki
 
 ports:
   otlp:
