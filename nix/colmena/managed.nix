@@ -14,6 +14,13 @@ in
       config.allowUnfree = true;
       overlays = overlays;
     };
+
+    # oci01 is aarch64; everything else uses meta.nixpkgs
+    nodeNixpkgs.oci01 = import nixpkgs {
+      system = "aarch64-linux";
+      config.allowUnfree = true;
+      overlays = overlays;
+    };
   };
 
   nuc01 = {
@@ -68,6 +75,27 @@ in
     imports = mkSystem "mpc01" {
       system = "x86_64-linux";
       user = "nixos";
+      wsl = false;
+      onlyModules = true;
+    };
+  };
+
+  oci01 = {
+    deployment = {
+      targetHost = "oci01";
+      targetUser = "nixos";
+      # aarch64; the control machines are x86_64
+      buildOnTarget = true;
+      tags = [
+        "server"
+        "oci01"
+      ];
+    };
+
+    imports = mkSystem "oci01" {
+      system = "aarch64-linux";
+      user = "nixos";
+      profile = "server";
       wsl = false;
       onlyModules = true;
     };

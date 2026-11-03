@@ -137,6 +137,12 @@
           user = "nixos";
         };
 
+        oci01 = {
+          system = "aarch64-linux";
+          user = "nixos";
+          profile = "server";
+        };
+
         mbp-work-1 = {
           system = "aarch64-darwin";
           user = "cargeros";

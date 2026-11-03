@@ -1,0 +1,34 @@
+// Tailnet policy. Default deny: only what a grant allows is reachable.
+//
+// Personal devices log in as a user. Everything headless is a tagged node,
+// owned by its tag rather than a person; register those from the start with
+//   headscale preauthkeys create --tags tag:server
+{
+  "groups": {
+    "group:admin": ["chris@"],
+  },
+
+  "tagOwners": {
+    "tag:server": ["group:admin"],
+  },
+
+  "grants": [
+    // A user's own devices reach each other
+    {
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "ip": ["*"],
+    },
+
+    // Admins manage servers
+    {
+      "src": ["group:admin"],
+      "dst": ["tag:server"],
+      "ip": ["*"],
+    },
+
+    // Servers get no access to personal devices or to each other. Add narrow
+    // tag-to-tag grants as services need them, e.g.
+    //   {"src": ["tag:server"], "dst": ["tag:monitoring"], "ip": ["tcp:443"]}
+  ],
+}
