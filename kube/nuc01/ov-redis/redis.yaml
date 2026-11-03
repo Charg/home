@@ -27,4 +27,4 @@ spec:
             storage: 1Gi
   redisExporter:
     enabled: false
-    image: quay.io/opstree/redis-exporter:v1.82.0@sha256:bce422b4bba8721bef04d5ca491eeec2b53278698b4bd9790f81fbb287cdfe88
+    image: quay.io/opstree/redis-exporter:v1.89.0@sha256:00a3628bdd3bb3423a15c5daefa328c471ee609798eed1744fe578c906d20cab
