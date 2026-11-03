@@ -29,6 +29,10 @@ in
       dns = {
         magic_dns = true;
         base_domain = "ts.packet.fail";
+        # Clients keep their network's resolver (Technitium at home) and only
+        # send the MagicDNS suffix through tailscale. The global nameservers
+        # become fallbacks
+        override_local_dns = false;
         nameservers.global = [
           "1.1.1.1"
           "1.0.0.1"
