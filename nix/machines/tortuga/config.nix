@@ -24,6 +24,7 @@
     ../../common/openssh-hardening.nix
     ../../common/sops-user-password.nix
     ../../common/tailscale.nix
+    ../../common/docker-local-ports.nix
   ];
 
   home-manager.users.${currentSystemUser}.imports = [ ./hm.nix ];
@@ -231,10 +232,6 @@
   virtualisation.docker.enable = true;
   virtualisation.docker.package = pkgs.docker_29;
   virtualisation.docker.autoPrune.enable = true;
-  # Docker writes its own iptables rules, so published ports bypass the NixOS
-  # firewall. Bind them to localhost unless a host IP is given explicitly
-  # (`-p 0.0.0.0:8080:80`).
-  virtualisation.docker.daemon.settings.ip = "127.0.0.1";
 
   # Soulseek (Nicotine+) listening port. The UDM forwards it here
   # (clouds/home/terraform/ubiquiti/port_forwards.tf); there is no UPnP.

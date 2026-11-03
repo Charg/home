@@ -57,6 +57,7 @@ in
     ../../common/openssh-hardening.nix
     ../../common/sops-user-password.nix
     ../../common/tailscale.nix
+    ../../common/docker-local-ports.nix
   ];
 
   #
