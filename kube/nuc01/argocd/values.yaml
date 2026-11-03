@@ -36,6 +36,19 @@ configs:
         hs.message = obj.status.health.message or ""
       end
       return hs
+    # OIDC login against kube/nuc01/pocket-id. Client id/secret come from the
+    # argocd-oidc secret in kube/nuc01/argocd-config. The built-in admin
+    # account stays enabled as a fallback.
+    oidc.config: |
+      name: Pocket ID
+      issuer: https://id.home.packet.fail
+      clientID: $argocd-oidc:clientID
+      clientSecret: $argocd-oidc:clientSecret
+      requestedScopes: [openid, profile, email, groups]
+  rbac:
+    scopes: "[groups, email]"
+    policy.csv: |
+      g, admins, role:admin
   params:
     server.insecure: true
   repositories:
@@ -168,6 +181,9 @@ applicationSet:
     limits:
       cpu: 100m
       memory: 128Mi
+# Not needed with oidc.config set.
+dex:
+  enabled: false
 redis:
   resources:
     requests:

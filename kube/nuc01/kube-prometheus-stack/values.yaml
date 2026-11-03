@@ -12,11 +12,33 @@ grafana:
     existingSecret: grafana-admin-credentials
     userKey: admin-user
     passwordKey: admin-password
+  # Client id/secret for the OIDC login below (GF_AUTH_GENERIC_OAUTH_* keys).
+  envFromSecret: grafana-oidc-credentials
   grafana.ini:
     analytics:
       reporting_enabled: false
       check_for_updates: false
       check_for_plugin_updates: false
+    server:
+      root_url: https://grafana.home.packet.fail
+    # OIDC login against kube/nuc01/pocket-id. The local admin login form stays
+    # enabled as a fallback.
+    auth.generic_oauth:
+      enabled: true
+      name: Pocket ID
+      auth_url: https://id.home.packet.fail/authorize
+      token_url: https://id.home.packet.fail/api/oidc/token
+      api_url: https://id.home.packet.fail/api/oidc/userinfo
+      scopes: openid email profile groups
+      use_pkce: true
+      allow_sign_up: true
+      auto_login: false
+      login_attribute_path: preferred_username
+      name_attribute_path: name
+      email_attribute_path: email
+      groups_attribute_path: groups
+      role_attribute_path: contains(groups[*], 'admins') && 'GrafanaAdmin' || 'Viewer'
+      allow_assign_grafana_admin: true
   persistence:
     enabled: true
     # Longhorn PVC from monitoring-config.
