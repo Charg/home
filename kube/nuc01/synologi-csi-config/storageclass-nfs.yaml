@@ -1,0 +1,20 @@
+---
+# Not in the chart's storageClasses: its template can't set mountOptions.
+# Each PVC becomes its own shared folder on the NAS (Btrfs volumes only), and
+# the driver adds the node's IP to that folder's NFS rules. The NFS service
+# has to be enabled in DSM. Parameters are immutable once created.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: synology-nfs-storage
+provisioner: csi.san.synology.com
+parameters:
+  protocol: nfs
+  dsm: "192.168.74.10"
+  location: /volume1
+  mountPermissions: "0700"
+mountOptions:
+  - nfsvers=4.1
+# Upstream's example uses Delete; backups outlive their PVC
+reclaimPolicy: Retain
+allowVolumeExpansion: true

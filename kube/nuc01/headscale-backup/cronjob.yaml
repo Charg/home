@@ -1,0 +1,92 @@
+---
+# Pulls oci01's daily encrypted headscale snapshot (nix/machines/oci01/backup.nix)
+# onto the NAS. Pull rather than push, so the internet-facing host has no way
+# in here. Public SSH, not the tailnet: the copy is needed when headscale is
+# down. Files stay encrypted to the personal age key; nothing here can read
+# them.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: headscale-backup
+  namespace: backup
+spec:
+  # oci01 snapshots at 03:00 and may reboot 04:00-06:00
+  schedule: "0 7 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: headscale-backup
+        spec:
+          restartPolicy: Never
+          # The share is root-owned and exported without root squash
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: pull
+              image: alpine/git:v2.54.0@sha256:ac6c828f15d82775d204d3d75112e1d34af8945da80ccf922713c9891ba68e7a
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: KEEP
+                  value: "30"
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  umask 077
+                  out=/backup/headscale-$(date -u +%F).tar.age
+
+                  ssh -i /ssh/id_ed25519 \
+                    -o BatchMode=yes -o ConnectTimeout=30 \
+                    -o UserKnownHostsFile=/known-hosts/known_hosts -o StrictHostKeyChecking=yes \
+                    headscale-backup@headscale.packet.fail > "$out.part"
+
+                  # Reject anything that isn't an age file rather than keep a bad copy
+                  if [ "$(head -c 21 "$out.part")" != "age-encryption.org/v1" ]; then
+                    echo "not an age file" >&2
+                    rm -f "$out.part"
+                    exit 1
+                  fi
+                  mv "$out.part" "$out"
+                  echo "saved $out ($(wc -c < "$out") bytes)"
+
+                  ls -1t /backup/headscale-*.tar.age | tail -n +$((KEEP + 1)) | xargs -r rm -f
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+                - name: ssh-key
+                  mountPath: /ssh
+                  readOnly: true
+                - name: known-hosts
+                  mountPath: /known-hosts
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: headscale-backup
+            - name: ssh-key
+              secret:
+                secretName: headscale-backup-ssh-key
+                defaultMode: 0400
+            - name: known-hosts
+              configMap:
+                name: headscale-backup-known-hosts
+            - name: tmp
+              emptyDir: {}

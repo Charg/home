@@ -1,0 +1,18 @@
+---
+# A shared folder on the NAS, created by synology-csi. Retain (set on the
+# storage class) plus Prune=false keeps the backups if this is ever deleted
+# from git.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: headscale-backup
+  namespace: backup
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: synology-nfs-storage
+  resources:
+    requests:
+      storage: 1Gi
