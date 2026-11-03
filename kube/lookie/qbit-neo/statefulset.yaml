@@ -58,7 +58,7 @@ spec:
       terminationGracePeriodSeconds: 60
       initContainers:
         - name: config-seed          # ordinary init container: runs to completion
-          image: docker.io/library/busybox:1.38@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
+          image: docker.io/library/busybox:1.38@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
           # Must match the uid qBittorrent runs as. This rewrites the config
           # file on EVERY pod start, so left at root it would hand qBittorrent
           # a root-owned file it can no longer write - re-breaking the volume's
