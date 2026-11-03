@@ -146,7 +146,12 @@ networkpolicies:
 DNS: 172.16.0.1
 DNSPolicy: None
 clusterName: cluster.local
-publicPorts: []
+# Static client addresses (no ports exposed). See media-config/README.md.
+publicPorts:
+  - { hostname: bitmagnet, IP: 10 }
+  - { hostname: prowlarr, IP: 11 }
+  - { hostname: scryer, IP: 12 }
+  - { hostname: trawl, IP: 13 }
 
 # Empty: the chart always adds the release namespace, and the clients live in it.
 routed_namespaces: []

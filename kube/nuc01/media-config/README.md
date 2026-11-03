@@ -23,6 +23,14 @@ admission webhook.
 Add `setGateway: "true"` to `spec.template.metadata.labels`. Never to
 `spec.selector`, which is immutable.
 
+- **Give it a static address** under `publicPorts` in
+  `kube/nuc01/pod-gateway/values.yaml`, below `VXLAN_GATEWAY_FIRST_DYNAMIC_IP`.
+  A gateway restart otherwise re-leases every client a new address, and
+  long-lived connections from the old one hang until TCP gives up (~15 min)
+  instead of resetting. The key is the pod name up to its first `-`, so it
+  must be unique, and the workload must use `Recreate` with one replica: two
+  pods with one address break both.
+
 - The value goes through `strconv.ParseBool`. A typo such as `"yes"` is
   rejected at admission, loudly, rather than starting unrouted.
 - An annotation of the same name overrides the label. Do not use both.
