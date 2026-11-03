@@ -5,7 +5,7 @@ metadata:
   name: ov-redis
 spec:
   kubernetesConfig:
-    image: quay.io/opstree/redis:v8.6.2@sha256:5f79911253cb74636e8e97555b08095902d46a835c6423adb123295b00ba70d7
+    image: quay.io/opstree/redis:v8.10.1@sha256:d3ef5a7f11eb501034b6612b842c864e1946088c52c04b29a22f38b1fe37c99b
     imagePullPolicy: IfNotPresent
     redisSecret:
       name: redis-credentials
