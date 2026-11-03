@@ -45,6 +45,7 @@ configs:
       clientID: $argocd-oidc:clientID
       clientSecret: $argocd-oidc:clientSecret
       requestedScopes: [openid, profile, email, groups]
+      enablePKCEAuthentication: true
   rbac:
     scopes: "[groups, email]"
     policy.csv: |
