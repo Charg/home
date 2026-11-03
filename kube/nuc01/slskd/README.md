@@ -4,7 +4,8 @@
 WebUI. All Soulseek traffic leaves through a ProtonVPN WireGuard tunnel in a
 gluetun sidecar, with a Proton forwarded port so peers can connect in.
 
-Served at `https://slskd.home.packet.fail` on `traefik-internal`.
+Served at `https://slskd.home.packet.fail` on `traefik-internal`, behind
+`kube/nuc01/tinyauth`.
 
 ## Images
 
