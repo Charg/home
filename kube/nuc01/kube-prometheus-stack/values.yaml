@@ -316,17 +316,19 @@ prometheus:
       - hosts:
           - prometheus.home.packet.fail
   prometheusSpec:
+    # Temporary: holds the operator off the StatefulSet during the longhorn move.
+    paused: true
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: local-path
+          storageClassName: longhorn
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 10Gi
+              storage: 30Gi
     retention: 15d
-    # local-path doesn't enforce the PVC size, so cap the TSDB explicitly.
+    # Keep the TSDB under the volume size, leaving room for compaction.
     retentionSize: 18GB
     resources:
       requests:
