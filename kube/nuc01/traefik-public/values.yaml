@@ -17,6 +17,27 @@ providers:
   kubernetesCRD:
     enabled: true
     ingressClass: traefik-public
+    # For the forward-auth middleware in auth (kube/nuc01/tinyauth).
+    allowCrossNamespace: true
   kubernetesIngress:
     enabled: true
     ingressClass: traefik-public
+
+service:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: traefik-public.home.packet.fail
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints: ["websecure"]
+    matchRule: Host(`traefik-public.home.packet.fail`)
+    middlewares:
+      - name: tinyauth
+        namespace: auth
+    tls: {}
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: home-packet-fail-wildcard-tls

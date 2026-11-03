@@ -1,0 +1,15 @@
+---
+# Same wildcard as traefik-internal's, in traefik-public's namespace for its
+# default certificate.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: home-packet-fail-wildcard
+  namespace: traefik-public
+spec:
+  secretName: home-packet-fail-wildcard-tls
+  dnsNames:
+    - "*.home.packet.fail"
+  issuerRef:
+    kind: ClusterIssuer
+    name: lets-encrypt-packet-fail

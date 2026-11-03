@@ -24,9 +24,19 @@ resources:
     cpu: 300m
     memory: 256Mi
 
+service:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: traefik.home.packet.fail
+
 ingressRoute:
   dashboard:
     enabled: true
+    entryPoints: ["websecure"]
+    matchRule: Host(`traefik.home.packet.fail`)
+    middlewares:
+      - name: tinyauth
+        namespace: auth
+    tls: {}
 
 tlsStore:
   default:
