@@ -1,6 +1,5 @@
 {
-  # Joined to the headscale tailnet (see nix/machines/oci01/README.md):
-  #   sudo tailscale up --login-server https://headscale.packet.fail --operator=$USER
+  # Joined to the tailnet once by hand; see nix/machines/oci01/README.md
   services.tailscale = {
     enable = true;
     openFirewall = true;
