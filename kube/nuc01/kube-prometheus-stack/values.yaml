@@ -126,6 +126,12 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: prometheus
+      traefik:
+        gnetId: 17347
+        revision: 9
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
       synology-nas:
         gnetId: 14284
         revision: 10

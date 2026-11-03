@@ -5,6 +5,14 @@ ingressClass:
   isDefaultClass: false
   name: traefik-public
 
+metrics:
+  prometheus:
+    addRoutersLabels: true
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+
 resources:
   requests:
     cpu: 50m
