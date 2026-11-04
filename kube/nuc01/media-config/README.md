@@ -111,6 +111,11 @@ never changes a routed app's ingress.
 - **`VXLAN_PORT`** must be set. The image default is the string `"0"`, which
   produces a firewall rule for port 0 and a tunnel that dies when gluetun's
   firewall comes up.
+- **`PORT_FORWARD_ONLY: "on"`** limits gluetun to ProtonVPN's P2P servers.
+  gluetun picks the server itself from `SERVER_COUNTRIES` and moves to another
+  whenever its health check fails; the endpoint in the Proton-generated config
+  is never used. Without the filter it can land on a server that blocks P2P,
+  which silently stalls bitmagnet's DHT crawl while HTTP traffic still works.
 - **`VPN_BLOCK_OTHER_TRAFFIC: true`** adds the only `FORWARD` accept matching
   gluetun's `FORWARD DROP`. Without it nothing is forwarded.
 - **`DNS_LOCAL_SERVER`** is set explicitly because the gateway pod's own
@@ -189,4 +194,4 @@ rides inside flannel's, which the host firewall already allows between peers.
 
 ## The WireGuard key
 
-The key permits NAT-PMP but gluetun runs with `VPN_PORT_FORWARDING=off`, so no port is ever requested.
+The key permits NAT-PMP but gluetun runs with `VPN_PORT_FORWARDING=off`, so no port is ever requested. It is not tied to one server: gluetun uses only the private key, so any server in `SERVER_COUNTRIES` accepts it.
