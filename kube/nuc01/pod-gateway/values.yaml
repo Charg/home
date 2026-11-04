@@ -166,7 +166,7 @@ settings:
   VPN_BLOCK_OTHER_TRAFFIC: true
   VPN_TRAFFIC_PORT: 51820
   VPN_LOCAL_CIDRS: "10.42.0.0/16 10.43.0.0/16 192.168.74.0/24"
-  DNS_LOCAL_CIDRS: "local 10.in-addr.arpa 168.192.in-addr.arpa"
+  DNS_LOCAL_CIDRS: "local home.packet.fail 10.in-addr.arpa 168.192.in-addr.arpa"
   DNS_LOCAL_SERVER: "10.43.0.10"
   GATEWAY_ENABLE_DNSSEC: false
   CONNECTION_RETRY_COUNT: 10

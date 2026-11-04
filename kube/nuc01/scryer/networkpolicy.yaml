@@ -78,6 +78,16 @@ spec:
       ports:
         - protocol: TCP
           port: 32400
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-internal
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8443
     # Egress to the gateway itself. Duplicated from
     # kube/nuc01/media-config/networkpolicy-routed.yaml on purpose:
     # NetworkPolicies are additive, and once this pod has an Egress policy of its

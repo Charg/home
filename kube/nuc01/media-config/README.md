@@ -132,6 +132,11 @@ inside the tunnel. Not `127.0.0.1`: dnsmasq always claims loopback too. gluetun'
 own resolver is off (`DNS_SERVER=off`, `DNS_KEEP_NAMESERVER=on`) because it binds
 wildcard `:53`.
 
+`DNS_LOCAL_CIDRS` (in `pod-gateway/values.yaml`) has dnsmasq send `local`,
+`home.packet.fail` and private reverse zones straight to kube-dns, so routed
+pods resolve internal ingress hostnames. Resolving one doesn't grant access: the
+client's own NetworkPolicy still has to allow `traefik-internal`.
+
 ### The post-rules ConfigMap
 
 The chart's `gateway_init.sh` runs once as an init container. If only the
