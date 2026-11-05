@@ -61,6 +61,12 @@ spec:
               value: "3600"
             - name: RUSTFS_SCANNER_BITROT_CYCLE_SECS
               value: "off"
+            # Separate from the scanner above: the capacity refresh walks the
+            # whole data dir every 120s by default, and on this many objects it
+            # never finishes before timing out, so it re-reads constantly for
+            # an estimate. Hourly is plenty for usage reporting.
+            - name: RUSTFS_CAPACITY_SCHEDULED_INTERVAL
+              value: "3600"
           # The image already runs as its own user; make that explicit and
           # take away everything else.
           securityContext:
