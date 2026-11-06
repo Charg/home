@@ -8,6 +8,9 @@ metadata:
     # Wave 1: datastores and Secrets before the chart (wave 2), whose PreSync
     # migration Job needs a running database.
     argocd.argoproj.io/sync-wave: "1"
+    # The client-side diff flags the API server's defaults in
+    # volumeClaimTemplates and never settles to Synced, which holds wave 2.
+    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   project: apps
   source:
