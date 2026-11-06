@@ -36,6 +36,13 @@ in
           "1.1.1.1"
           "1.0.0.1"
         ];
+        # Home names resolve via the LAN DNS servers, reached through the
+        # subnet routers
+        nameservers.split."home.packet.fail" = [
+          "192.168.74.52"
+          "192.168.74.53"
+          "192.168.74.54"
+        ];
       };
 
       # Embedded DERP relay only; no Tailscale-hosted regions

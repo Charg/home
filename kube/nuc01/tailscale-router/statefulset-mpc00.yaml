@@ -1,0 +1,80 @@
+---
+# One router per node, pinned, so each has a fixed UDP port the edge router
+# can forward to. The other router in this directory advertises the same
+# routes and takes over if this one drops.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tailscale-router-mpc00
+  namespace: tailscale
+  labels:
+    app.kubernetes.io/name: tailscale-router
+    app.kubernetes.io/instance: tailscale-router-mpc00
+spec:
+  replicas: 1
+  serviceName: ""
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: tailscale-router-mpc00
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tailscale-router
+        app.kubernetes.io/instance: tailscale-router-mpc00
+    spec:
+      serviceAccountName: tailscale-router
+      # Host network so WireGuard UDP leaves from the node's own address and
+      # port; pod traffic is masqueraded onto random source ports, which
+      # defeats the port forward. NetworkPolicy does not apply to these pods.
+      hostNetwork: true
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: mpc00
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef: { fieldPath: status.podIP }
+            - { name: TS_KUBE_SECRET, value: "tailscale-router-mpc00-state" }
+            - { name: TS_HOSTNAME, value: "nuc-router-mpc00" }
+            # Netstack; no tun device or NET_ADMIN needed.
+            - { name: TS_USERSPACE, value: "true" }
+            - { name: TS_AUTH_ONCE, value: "true" }
+            - { name: TS_ROUTES, value: "192.168.74.0/24" }
+            - { name: TS_EXTRA_ARGS, value: "--login-server=https://headscale.packet.fail --advertise-tags=tag:router" }
+            # Must match the edge router forward and the node firewall.
+            - { name: TS_TAILSCALED_EXTRA_ARGS, value: "--port=41641" }
+            - { name: TS_ENABLE_HEALTH_CHECK, value: "true" }
+            - { name: TS_LOCAL_ADDR_PORT, value: "$(POD_IP):9802" }
+            - { name: TS_SOCKET, value: "/tmp/tailscaled.sock" }
+            - { name: HOME, value: "/tmp" }
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef: { name: tailscale-router-authkey, key: authkey }
+          ports:
+            - { name: wireguard, containerPort: 41641, protocol: UDP }
+            - { name: health, containerPort: 9802, protocol: TCP }
+          readinessProbe:
+            httpGet: { path: /healthz, port: health }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits: { memory: 256Mi }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: {}

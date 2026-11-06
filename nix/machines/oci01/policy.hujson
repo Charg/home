@@ -10,6 +10,14 @@
 
   "tagOwners": {
     "tag:server": ["group:admin"],
+    "tag:router": ["group:admin"],
+  },
+
+  // Routes advertised by these tags are enabled without manual approval
+  "autoApprovers": {
+    "routes": {
+      "192.168.74.0/24": ["tag:router"],
+    },
   },
 
   "grants": [
@@ -24,6 +32,13 @@
     {
       "src": ["group:admin"],
       "dst": ["tag:server"],
+      "ip": ["*"],
+    },
+
+    // Admins reach the home LAN through the subnet routers
+    {
+      "src": ["group:admin"],
+      "dst": ["192.168.74.0/24"],
       "ip": ["*"],
     },
 

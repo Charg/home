@@ -37,6 +37,7 @@
       '/^kube/nuc01/cloudflared/deployment\\.yaml$/',
       '/^kube/nuc01/pocket-id/deployment\\.yaml$/',
       '/^kube/nuc01/tinyauth/deployment\\.yaml$/',
+      '/^kube/nuc01/tailscale-router/statefulset-[^/]+\\.yaml$/',
     ],
   },
   packageRules: [

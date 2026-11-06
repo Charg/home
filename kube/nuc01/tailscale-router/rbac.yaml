@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tailscale-router
+  namespace: tailscale
+---
+# Node state (keys, identity) lives in one Secret per router, created by the
+# container on first start.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tailscale-router
+  namespace: tailscale
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [create]
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames:
+      - tailscale-router-mpc00-state
+      - tailscale-router-mpc01-state
+    verbs: [get, update, patch]
+  - apiGroups: [""]
+    resources: [events]
+    verbs: [create, patch, get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tailscale-router
+  namespace: tailscale
+subjects:
+  - kind: ServiceAccount
+    name: tailscale-router
+    namespace: tailscale
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tailscale-router
