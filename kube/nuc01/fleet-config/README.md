@@ -25,7 +25,8 @@ database is not ready yet.
 ## Image and chart
 
 Bump the chart version (`fleet-apps/fleet.yaml`) and the
-digest-pinned `imageTag` (`kube/nuc01/fleet/values.yaml`) together.
+digest-pinned `imageTag` (`kube/nuc01/fleet/values.yaml`) together, along
+with the `fleetctl` pin in `nix/common/fleetctl.nix`.
 
 ## First run
 
@@ -44,8 +45,10 @@ every host) and has to be one of Fleet's global enroll secrets. After
 
 ```sh
 secret=$(sops decrypt --extract '["fleet-enroll-secret"]' nix/machines/nuc01/secrets/fleet.enc.yaml)
-printf 'apiVersion: v1\nkind: enroll_secret\nspec:\n  secrets:\n    - secret: %s\n' "$secret" \
-  | fleetctl apply -f /dev/stdin
+f=$(mktemp --suffix=.yaml)  # fleetctl apply wants a .yaml/.yml name
+printf 'apiVersion: v1\nkind: enroll_secret\nspec:\n  secrets:\n    - secret: %s\n' "$secret" > "$f"
+fleetctl apply -f "$f"
+rm -f "$f"; unset secret
 ```
 
 This replaces the global secret list, so rotating it means updating every

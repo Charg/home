@@ -81,6 +81,7 @@ in
       pkgs.kubectl
       pkgs.kubernetes-helm
       pkgs.argocd
+      (import ../../common/fleetctl.nix { inherit unstable-pkgs; })
 
       # Network Tools
       # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
