@@ -38,14 +38,18 @@ in
         ];
       };
 
-      # Embedded DERP relay alongside Tailscale's public ones
-      derp.server = {
-        enabled = true;
-        region_id = 999;
-        region_code = "oci";
-        region_name = "Oracle Cloud";
-        stun_listen_addr = "0.0.0.0:3478";
-        automatically_add_embedded_derp_region = true;
+      # Embedded DERP relay only; no Tailscale-hosted regions
+      derp = {
+        urls = [ ];
+        server = {
+          enabled = true;
+          region_id = 999;
+          region_code = "oci";
+          region_name = "Oracle Cloud";
+          stun_listen_addr = "0.0.0.0:3478";
+          automatically_add_embedded_derp_region = true;
+          verify_clients = true;
+        };
       };
 
       # Without a policy headscale allows all traffic between nodes

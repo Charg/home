@@ -4,7 +4,7 @@ Oracle Cloud Always Free Ampere A1 VM running headscale.
 
 This machine uses:
 - `disko` GPT layout from `disk-config.nix` (no LUKS, nobody to unlock it at boot)
-- headscale with built-in Let's Encrypt and embedded DERP (`headscale.nix`)
+- headscale with built-in Let's Encrypt and embedded DERP as the only relay (`headscale.nix`)
 - aarch64, so builds run on the target
 
 The VM, network and firewall are provisioned separately with Terraform. It
