@@ -1,0 +1,22 @@
+---
+# Pod labels come from the redis-operator (app=<Redis name>).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fleet-redis
+  namespace: fleet
+spec:
+  podSelector:
+    matchLabels:
+      app: fleet-redis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: fleet
+      ports:
+        - protocol: TCP
+          port: 6379

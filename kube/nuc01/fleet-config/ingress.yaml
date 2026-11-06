@@ -1,0 +1,27 @@
+---
+# One host for both the UI and the agents. Agents authenticate with the
+# enroll secret and per-host node keys, the UI and fleetctl with Fleet's own
+# login, so no forward-auth in front.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fleet-internal
+  namespace: fleet
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: fleet.home.packet.fail
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: fleet.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fleet-service
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - fleet.home.packet.fail

@@ -14,6 +14,7 @@ spec:
     - ghcr.io/charg
     - ghcr.io/charg/charts
     - ghcr.io/berriai
+    - https://fleetdm.github.io/fleet/charts
     - https://go.temporal.io/helm-charts
     - https://pajikos.github.io/home-assistant-helm-chart/
     - https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages
@@ -26,6 +27,8 @@ spec:
       namespace: backup
     - server: https://kubernetes.default.svc
       namespace: cloudflared
+    - server: https://kubernetes.default.svc
+      namespace: fleet
     - server: https://kubernetes.default.svc
       namespace: home-assistant
     - server: https://kubernetes.default.svc

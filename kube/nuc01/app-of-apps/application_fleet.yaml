@@ -1,0 +1,32 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet
+  namespace: argocd
+  annotations:
+    # After fleet-mysql, fleet-redis and fleet-config (wave 1) are healthy.
+    # Its own app rather than an ApplicationSet element so it can take a wave.
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: apps
+  sources:
+    - repoURL: https://fleetdm.github.io/fleet/charts
+      chart: fleet
+      targetRevision: v7.0.31
+      helm:
+        valueFiles:
+          - $values/kube/nuc01/fleet/values.yaml
+    - repoURL: https://github.com/Charg/home.git
+      targetRevision: main
+      ref: values
+  destination:
+    namespace: fleet
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

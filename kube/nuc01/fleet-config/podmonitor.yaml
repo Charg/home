@@ -1,0 +1,22 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: fleet
+  namespace: fleet
+spec:
+  selector:
+    matchLabels:
+      app: fleet
+      component: fleet-server
+  podMetricsEndpoints:
+    - port: fleet
+      path: /metrics
+      interval: 60s
+      basicAuth:
+        username:
+          name: fleet-server
+          key: prometheus-username
+        password:
+          name: fleet-server
+          key: prometheus-password

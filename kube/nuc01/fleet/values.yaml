@@ -1,0 +1,80 @@
+# https://github.com/fleetdm/fleet/blob/main/charts/fleet/values.yaml
+#
+# Rendered by app-of-apps/application_fleet.yaml (sync wave 2), after
+# fleet-mysql, fleet-redis and fleet-config are healthy.
+
+replicas: 1
+# Bump the chart and this tag together; the chart's appVersion is the matching
+# server release.
+imageTag: v4.94.0@sha256:b5c51db790a8768e79ab3a165dd2f7308fa264c3036637c620531dcbfb9fa2bc
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+fleet:
+  # Traefik terminates TLS
+  tls:
+    enabled: false
+  logging:
+    json: true
+    disableBanner: true
+
+# Vulnerability matching runs as its own CronJob so its memory spike stays out
+# of the server pod. Its NetworkPolicy is the only one with internet egress.
+vulnProcessing:
+  dedicated: true
+  schedule: "15 */6 * * *"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 3Gi
+
+osquery:
+  # Status and result logs go to stdout, where Alloy ships them to Loki,
+  # instead of an emptyDir inside the pod.
+  logging:
+    statusPlugin: stdout
+    resultPlugin: stdout
+
+# kube/nuc01/fleet-mysql
+database:
+  secretName: fleet-mysql-credentials
+  address: fleet-mysql:3306
+  passwordKey: mysql-password
+
+# kube/nuc01/fleet-redis
+cache:
+  address: fleet-redis:6379
+  usePassword: true
+  secretName: fleet-redis-credentials
+  passwordKey: password
+
+environments:
+  # Client IPs from Traefik's X-Forwarded-For
+  FLEET_SERVER_TRUSTED_PROXIES: 10.42.0.0/16
+
+# kube/nuc01/fleet-config/fleet-server.enc.yaml
+envsFrom:
+  - name: FLEET_SERVER_PRIVATE_KEY
+    valueFrom:
+      secretKeyRef:
+        name: fleet-server
+        key: private-key
+  - name: FLEET_PROMETHEUS_BASIC_AUTH_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: fleet-server
+        key: prometheus-username
+  - name: FLEET_PROMETHEUS_BASIC_AUTH_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: fleet-server
+        key: prometheus-password

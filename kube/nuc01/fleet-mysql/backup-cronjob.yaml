@@ -1,0 +1,115 @@
+---
+# Nightly logical dump of the fleet database to backup-rustfs. Fleet's data is
+# rebuildable (hosts re-enroll and re-report), so this protects the setup:
+# users, saved queries, policies and settings.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fleet-mysql-backup
+  namespace: fleet
+spec:
+  schedule: "30 2 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: fleet-mysql-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: dump
+              image: mysql:8.4.13@sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902
+              # Same uid as the upload container, which compresses this file
+              securityContext:
+                runAsUser: 65532
+                runAsGroup: 65532
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              env:
+                - name: MYSQL_PWD
+                  valueFrom:
+                    secretKeyRef:
+                      name: fleet-mysql-credentials
+                      key: root-password
+              command:
+                - mysqldump
+                - --host=fleet-mysql
+                - --user=root
+                - --single-transaction
+                - --routines
+                - --events
+                - --triggers
+                - --set-gtid-purged=OFF
+                - --databases
+                - fleet
+                - --result-file=/dump/fleet.sql
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits: { memory: 256Mi }
+              volumeMounts:
+                - name: dump
+                  mountPath: /dump
+          containers:
+            - name: upload
+              image: cgr.dev/chainguard/minio-client:latest-dev@sha256:4ded9b0773ebf1afded36c4e91efad0d4e7dee91c6b3d5d29455732095afb2d0
+              securityContext:
+                runAsUser: 65532
+                runAsGroup: 65532
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: KEEP_DAYS
+                  value: "30"
+                - name: RUSTFS_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-rustfs-credentials
+                      key: access-key
+                - name: RUSTFS_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-rustfs-credentials
+                      key: secret-key
+                - name: MC_HOST_rustfs
+                  value: "http://$(RUSTFS_ACCESS_KEY):$(RUSTFS_SECRET_KEY)@backup-rustfs.backup.svc.cluster.local:9000"
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  # An empty or truncated dump has no completion marker
+                  tail -n 1 /dump/fleet.sql | grep -q 'Dump completed' || { echo "incomplete dump" >&2; exit 1; }
+                  gzip -9 /dump/fleet.sql
+                  mc cp /dump/fleet.sql.gz "rustfs/backups/fleet-mysql/fleet-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
+                  mc rm --recursive --force --older-than "${KEEP_DAYS}d" rustfs/backups/fleet-mysql/
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits: { memory: 256Mi }
+              volumeMounts:
+                - name: dump
+                  mountPath: /dump
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: dump
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}

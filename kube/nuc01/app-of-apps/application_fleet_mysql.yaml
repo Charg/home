@@ -1,0 +1,27 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-mysql
+  namespace: argocd
+  annotations:
+    # Wave 1: datastores and Secrets before the chart (wave 2), whose PreSync
+    # migration Job needs a running database.
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/nuc01/fleet-mysql
+    targetRevision: main
+    plugin: {}
+  destination:
+    namespace: fleet
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

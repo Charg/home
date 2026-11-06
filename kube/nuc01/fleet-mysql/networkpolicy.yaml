@@ -1,0 +1,69 @@
+---
+# Only Fleet's own pods (server, migration and vuln-processing jobs) and the
+# backup job reach the database. It never initiates anything itself.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fleet-mysql
+  namespace: fleet
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: fleet-mysql
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: fleet
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: fleet-mysql-backup
+      ports:
+        - protocol: TCP
+          port: 3306
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fleet-mysql-backup
+  namespace: fleet
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: fleet-mysql-backup
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: fleet-mysql
+      ports:
+        - protocol: TCP
+          port: 3306
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: backup
+          podSelector:
+            matchLabels:
+              app: backup-rustfs
+      ports:
+        - protocol: TCP
+          port: 9000
