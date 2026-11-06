@@ -63,7 +63,9 @@ spec:
             - { name: TS_USERSPACE, value: "true" }
             - { name: TS_AUTH_ONCE, value: "true" }
             - { name: TS_ROUTES, value: "192.168.74.0/24" }
-            - { name: TS_EXTRA_ARGS, value: "--login-server=https://headscale.packet.fail --advertise-tags=tag:router" }
+            # No --advertise-tags: headscale rejects requested tags on auth-key
+            # registration; the tag comes from the key.
+            - { name: TS_EXTRA_ARGS, value: "--login-server=https://headscale.packet.fail" }
             # Must match the edge router forward and the node firewall.
             - { name: TS_TAILSCALED_EXTRA_ARGS, value: "--port=41642" }
             - { name: TS_ENABLE_HEALTH_CHECK, value: "true" }
