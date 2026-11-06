@@ -7,6 +7,7 @@ in
 {
   imports = [
     ../../common/node-dns.nix
+    ../../common/lab-ipv6.nix
   ];
 
   users.users.nixos = {

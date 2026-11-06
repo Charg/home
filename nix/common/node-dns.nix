@@ -5,6 +5,8 @@
 
 let
   nodeIP = (import ./k3s-nodes.nix).${config.networking.hostName};
+  # Serves IPv6 clients on other networks; see lab-ipv6.nix.
+  nodeIP6 = (import ./lab-ula.nix).nodeAddress nodeIP;
 
   technitium = [
     "192.168.74.52"
@@ -21,7 +23,7 @@ in
     enable = true;
     config = ''
       .:53 {
-        bind 127.0.0.1 ${nodeIP}
+        bind 127.0.0.1 ${nodeIP} ${nodeIP6}
         errors
         cache 30
         forward . ${toString technitium} ${fallback} {
