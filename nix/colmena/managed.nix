@@ -21,6 +21,9 @@ in
       config.allowUnfree = true;
       overlays = overlays;
     };
+
+    # Lets host modules use inputs in imports (_module.args is too late).
+    specialArgs = { inherit inputs; };
   };
 
   nuc01 = {

@@ -35,6 +35,22 @@ do it right after the first sync. Then, under Settings:
 - set the Fleet web address to `https://fleet.home.packet.fail`
 - turn off usage statistics (the server has no internet egress)
 
+## Agents
+
+NixOS hosts enroll through `nix/common/fleetd.nix`. Their enroll secret
+lives in `nix/machines/<host>/secrets/fleet.enc.yaml` (the same value on
+every host) and has to be one of Fleet's global enroll secrets. After
+`fleetctl login`, register it with:
+
+```sh
+secret=$(sops decrypt --extract '["fleet-enroll-secret"]' nix/machines/nuc01/secrets/fleet.enc.yaml)
+printf 'apiVersion: v1\nkind: enroll_secret\nspec:\n  secrets:\n    - secret: %s\n' "$secret" \
+  | fleetctl apply -f /dev/stdin
+```
+
+This replaces the global secret list, so rotating it means updating every
+host's file and re-running the above.
+
 ## Secrets
 
 - `fleet-server`: `private-key` (encrypts sensitive data in the database;

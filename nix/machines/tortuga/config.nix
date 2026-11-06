@@ -22,6 +22,7 @@
     ../../common/system-packages.nix
     ../../common/ca-blacklist.nix
     ../../common/openssh-hardening.nix
+    ../../common/fleetd.nix
     ../../common/sops-user-password.nix
     ../../common/tailscale.nix
     ../../common/docker-local-ports.nix
