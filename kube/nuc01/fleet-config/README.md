@@ -6,7 +6,10 @@ the agents.
 
 ## Layout and rollout
 
-Four Argo CD apps in namespace `fleet`, ordered by app-of-apps sync waves:
+Four Argo CD apps in namespace `fleet`, defined in `kube/nuc01/fleet-apps`
+and ordered by sync waves. That directory has its own parent app
+(`app-of-apps/application_fleet_apps.yaml`), so the waves only wait on these
+four apps:
 
 | wave | app | contents |
 |---|---|---|
@@ -21,7 +24,7 @@ database is not ready yet.
 
 ## Image and chart
 
-Bump the chart version (`app-of-apps/application_fleet.yaml`) and the
+Bump the chart version (`fleet-apps/fleet.yaml`) and the
 digest-pinned `imageTag` (`kube/nuc01/fleet/values.yaml`) together.
 
 ## First run

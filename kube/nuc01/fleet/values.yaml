@@ -1,6 +1,6 @@
 # https://github.com/fleetdm/fleet/blob/main/charts/fleet/values.yaml
 #
-# Rendered by app-of-apps/application_fleet.yaml (sync wave 2), after
+# Rendered by fleet-apps/fleet.yaml (sync wave 2), after
 # fleet-mysql, fleet-redis and fleet-config are healthy.
 
 replicas: 1

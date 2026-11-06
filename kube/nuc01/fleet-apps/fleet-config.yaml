@@ -5,7 +5,7 @@ metadata:
   name: fleet-config
   namespace: argocd
   annotations:
-    # Wave 1, alongside fleet-mysql; see application_fleet_mysql.yaml
+    # Wave 1, alongside fleet-mysql; see fleet-mysql.yaml
     argocd.argoproj.io/sync-wave: "1"
 spec:
   project: apps

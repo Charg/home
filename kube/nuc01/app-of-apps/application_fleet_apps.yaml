@@ -1,0 +1,24 @@
+---
+# Parent of the Fleet apps in kube/nuc01/fleet-apps, so their sync waves
+# only wait on each other rather than on every other app in bootstrap.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-apps
+  namespace: argocd
+spec:
+  project: infra
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/nuc01/fleet-apps
+    targetRevision: main
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
