@@ -27,7 +27,9 @@ spec:
       # port; pod traffic is masqueraded onto random source ports, which
       # defeats the port forward. NetworkPolicy does not apply to these pods.
       hostNetwork: true
-      dnsPolicy: Default
+      # containerboot reaches the API server as kubernetes.default.svc, which
+      # only cluster DNS resolves.
+      dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
         kubernetes.io/hostname: mpc01
       securityContext:
@@ -48,6 +50,13 @@ spec:
             - name: POD_IP
               valueFrom:
                 fieldRef: { fieldPath: status.podIP }
+            # Lets containerboot write Events to its own Pod.
+            - name: POD_NAME
+              valueFrom:
+                fieldRef: { fieldPath: metadata.name }
+            - name: POD_UID
+              valueFrom:
+                fieldRef: { fieldPath: metadata.uid }
             - { name: TS_KUBE_SECRET, value: "tailscale-router-mpc01-state" }
             - { name: TS_HOSTNAME, value: "nuc-router-mpc01" }
             # Netstack; no tun device or NET_ADMIN needed.
