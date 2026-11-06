@@ -5,6 +5,11 @@ metadata:
   name: fleet-redis
   namespace: fleet
 spec:
+  # Longhorn volumes start out root-owned; fsGroup makes /data writable.
+  podSecurityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
   kubernetesConfig:
     image: quay.io/opstree/redis:v8.10.1@sha256:d3ef5a7f11eb501034b6612b842c864e1946088c52c04b29a22f38b1fe37c99b
     imagePullPolicy: IfNotPresent
