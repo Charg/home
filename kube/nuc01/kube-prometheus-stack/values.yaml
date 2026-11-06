@@ -120,6 +120,12 @@ grafana:
         datasource:
           - name: DS_PROMETHEUS
             value: prometheus
+      argocd:
+        gnetId: 14584
+        revision: 1
+        datasource:
+          - name: DS_PROMETHEUS
+            value: prometheus
       cloudflared:
         gnetId: 24874
         revision: 4

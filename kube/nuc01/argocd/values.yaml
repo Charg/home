@@ -86,6 +86,10 @@ configs:
           find:
             glob: "**/*.enc.yaml"
 repoServer:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   resources:
     requests:
       cpu: 50m
@@ -167,6 +171,10 @@ repoServer:
       secret:
         secretName: sops-age-key
 controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   resources:
     requests:
       cpu: 100m
@@ -175,6 +183,10 @@ controller:
       cpu: 500m
       memory: 1Gi
 applicationSet:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   resources:
     requests:
       cpu: 25m
@@ -194,6 +206,10 @@ redis:
       cpu: 100m
       memory: 128Mi
 server:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   resources:
     requests:
       cpu: 50m
@@ -209,3 +225,8 @@ server:
     extraTls:
       - hosts:
           - argo.home.packet.fail
+notifications:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
