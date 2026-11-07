@@ -7,6 +7,5 @@ spec:
   serverRef:
     name: dns
   blockListUrls:
-    - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-    - https://small.oisd.nl
+    - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro-onlydomains.txt
   updateIntervalHours: 24
