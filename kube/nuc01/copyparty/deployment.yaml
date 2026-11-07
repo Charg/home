@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: copyparty
+  namespace: media
+  labels:
+    app.kubernetes.io/name: copyparty
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: copyparty
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: copyparty
+      annotations:
+        # copyparty reads its config once at startup; bump after editing
+        # the Secret to roll the pod.
+        checksum/config: "1"
+    spec:
+      automountServiceAccountToken: false
+      # Shares a node with the other plex-media consumers.
+      nodeSelector:
+        kubernetes.io/hostname: nuc01
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: copyparty
+          image: copyparty/min:1.20.26@sha256:1411895121989318a2a14c8b7b8a2016b917874a508a73bf14e316c64e8ef9e5
+          # Bypass the image's /z/initcfg, which includes everything in /cfg.
+          command: ["python3", "-m", "copyparty", "-c", "/config/copyparty.conf"]
+          env:
+            # Sessions and share databases; lost on restart, which only means
+            # logging in again.
+            - { name: XDG_CONFIG_HOME, value: /state/cfg }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - { name: http, containerPort: 3923, protocol: TCP }
+          volumeMounts:
+            - { name: config, mountPath: /config, readOnly: true }
+            - { name: state, mountPath: /state }
+            # Only the Movies folder, read-only. The rest of the volume is not
+            # in the container at all.
+            - { name: plex-media, mountPath: /movies, subPath: Movies, readOnly: true }
+          # Liveness and readiness come from the TCP socket. Every HTTP path
+          # is behind the IP allowlist, which kubelet is not in.
+          readinessProbe:
+            tcpSocket: { port: 3923 }
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: 3923 }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { memory: 512Mi }
+      volumes:
+        - name: config
+          secret:
+            secretName: copyparty-config
+        - name: state
+          emptyDir: {}
+        - name: plex-media
+          persistentVolumeClaim:
+            claimName: plex-media
+            readOnly: true

@@ -1,0 +1,14 @@
+---
+# The *.home.packet.fail wildcard does not cover a packet.fail name.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: copyparty
+  namespace: media
+spec:
+  secretName: copyparty-tls
+  dnsNames:
+    - copycopy.packet.fail
+  issuerRef:
+    kind: ClusterIssuer
+    name: lets-encrypt-packet-fail
