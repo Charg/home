@@ -20,7 +20,7 @@ spec:
       annotations:
         # copyparty reads its config once at startup; bump after editing
         # the Secret to roll the pod.
-        checksum/config: "2"
+        checksum/config: "3"
     spec:
       automountServiceAccountToken: false
       # Shares a node with the other plex-media consumers.
@@ -41,6 +41,9 @@ spec:
             # Sessions and share databases; lost on restart, which only means
             # logging in again.
             - { name: XDG_CONFIG_HOME, value: /state/cfg }
+            # Python block-buffers stdout without a TTY, which hides the
+            # per-request and login lines from kubectl logs.
+            - { name: PYTHONUNBUFFERED, value: "1" }
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -51,9 +54,11 @@ spec:
           volumeMounts:
             - { name: config, mountPath: /config, readOnly: true }
             - { name: state, mountPath: /state }
-            # Only the Movies folder, read-only. The rest of the volume is not
+            # Only the shared folders, read-only. The rest of the volume is not
             # in the container at all.
             - { name: plex-media, mountPath: /movies, subPath: Movies, readOnly: true }
+            - { name: plex-media, mountPath: /tv, subPath: TV, readOnly: true }
+            - { name: plex-media, mountPath: /anime, subPath: Anime, readOnly: true }
           # Liveness and readiness come from the TCP socket. Every HTTP path
           # is behind the IP allowlist, which kubelet is not in.
           readinessProbe:
