@@ -20,7 +20,7 @@ spec:
       annotations:
         # copyparty reads its config once at startup; bump after editing
         # the Secret to roll the pod.
-        checksum/config: "1"
+        checksum/config: "2"
     spec:
       automountServiceAccountToken: false
       # Shares a node with the other plex-media consumers.

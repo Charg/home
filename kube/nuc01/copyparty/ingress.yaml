@@ -6,8 +6,9 @@ metadata:
   namespace: media
   annotations:
     external-dns.alpha.kubernetes.io/hostname: copycopy.packet.fail
-    # Without a target, external-dns would publish the LB's LAN address.
-    external-dns.alpha.kubernetes.io/target: 47.150.124.53
+    # A hostname, so external-dns makes a CNAME and no IP is in git.
+    # Without a target it would publish the LB's LAN address.
+    external-dns.alpha.kubernetes.io/target: wan.packet.fail
     # DNS-only: through the Cloudflare proxy the client IP copyparty sees is
     # Cloudflare's, and bulk video breaks their terms.
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
