@@ -21,6 +21,18 @@ resources:
     cpu: 300m
     memory: 256Mi
 
+# JSON to stdout for Loki. ClientHost is the real client address (see the
+# Service below), which is what copyparty's allowlist checks.
+accessLog:
+  enabled: true
+  format: json
+  fields:
+    headers:
+      defaultMode: drop
+    # copyparty accepts ?pw= in the URL; keep secrets out of the log.
+    queryParameters:
+      defaultMode: drop
+
 providers:
   kubernetesCRD:
     enabled: true
