@@ -74,6 +74,10 @@ spec:
             # holds its slot for the full timeout.
             - name: METAINFO_REQUESTER_REQUEST_TIMEOUT
               value: 4s
+            # Fork default is 100, which throttled crawling ~4x here. 600 matches
+            # the crawler's own limit (40 x scaling factor) and the VPN handles it.
+            - name: METAINFO_REQUESTER_MAX_CONCURRENT_CONNECTIONS
+              value: "600"
             # classifier.yml is read from $XDG_CONFIG_HOME/bitmagnet.
             - name: XDG_CONFIG_HOME
               value: /etc/xdg
