@@ -8,4 +8,5 @@ spec:
     name: dns
   blockListUrls:
     - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro-onlydomains.txt
+    - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/tif-onlydomains.txt
   updateIntervalHours: 24
