@@ -279,23 +279,23 @@
         base = config.security.pam.services.login.rules.auth.u2f.order;
       in
       {
+        u2f-present = {
+          control = "required";
+          modulePath = pam_u2f;
+          order = base + 1;
+          settings = {
+            userpresence = 0;
+            authfile = ".config/Yubico/u2f_keys";
+          };
+        };
         u2f-login = {
           control = "sufficient";
           modulePath = pam_u2f;
-          order = base + 1;
+          order = base + 2;
           settings = {
             userpresence = 1;
             authfile = ".config/Yubico/u2f_keys_login";
             cue = true;
-          };
-        };
-        u2f-present = {
-          control = "required";
-          modulePath = pam_u2f;
-          order = base + 2;
-          settings = {
-            userpresence = 0;
-            authfile = ".config/Yubico/u2f_keys";
           };
         };
       };
