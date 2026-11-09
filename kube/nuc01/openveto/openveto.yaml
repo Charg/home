@@ -12,11 +12,14 @@ spec:
   sources:
     - repoURL: ghcr.io/charg/charts
       chart: openveto
-      # Follows the newest published chart; the image tag follows its appVersion.
+      # Follows the newest published chart. image.tag is blanked in each source
+      # (the chart defaults it to "latest") so the image follows appVersion.
       targetRevision: "*"
       helm:
         releaseName: openveto-migrations
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: openveto-env
@@ -46,6 +49,8 @@ spec:
       helm:
         releaseName: openveto-web
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: openveto-env
@@ -85,6 +90,8 @@ spec:
       helm:
         releaseName: openveto-worker
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: openveto-env
@@ -129,6 +136,8 @@ spec:
       helm:
         releaseName: openveto-mcp
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: openveto-env

@@ -12,11 +12,14 @@ spec:
   sources:
     - repoURL: ghcr.io/charg/charts
       chart: accord
-      # Follows the newest published chart; the image tag follows its appVersion.
+      # Follows the newest published chart. image.tag is blanked in each source
+      # (the chart defaults it to "latest") so the image follows appVersion.
       targetRevision: "*"
       helm:
         releaseName: accord-migrations
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: accord-env
@@ -44,6 +47,8 @@ spec:
       helm:
         releaseName: accord-web
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: accord-env
@@ -81,6 +86,8 @@ spec:
       helm:
         releaseName: accord-worker
         valuesObject:
+          image:
+            tag: ""
           imagePullSecrets:
             - name: ghcr-pull-creds
           existingSecret: accord-env
