@@ -1,8 +1,11 @@
-# Home-manager settings specific to tortuga's display: an Odyssey OLED G9
-# (G95SC, 49" 32:9). Shared GNOME settings live in programs/gnome/hm.nix.
+# Home-manager settings specific to tortuga: its display, an Odyssey OLED G9
+# (G95SC, 49" 32:9), and commit signing with the YubiKey that stays plugged
+# in. Shared GNOME settings live in programs/gnome/hm.nix.
 { lib, ... }:
 
 {
+  imports = [ ../../programs/git/signing.nix ];
+
   # GNOME can't persist display changes made in Settings while this file is
   # managed here.
   xdg.configFile."monitors.xml".text = import ./monitors.nix { inherit lib; };

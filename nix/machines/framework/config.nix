@@ -3,6 +3,7 @@
   lib,
   pkgs,
   inputs,
+  currentSystemUser,
   ...
 }:
 
@@ -85,6 +86,8 @@ in
     ../../common/tailscale.nix
     ../../common/docker-local-ports.nix
   ];
+
+  home-manager.users.${currentSystemUser}.imports = [ ../../programs/git/signing.nix ];
 
   #
   # Bootloader
