@@ -6,6 +6,7 @@
     ./headscale.nix
     ./auto-upgrade.nix
     ./backup.nix
+    ./nas-backup.nix
     ../../common/tailscale.nix
     ../../common/system-packages.nix
     ../../common/openssh-hardening.nix

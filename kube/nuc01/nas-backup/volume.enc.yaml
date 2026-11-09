@@ -1,0 +1,73 @@
+# Static NFS volume for the NAS home folder being backed up. server and path
+# are sops-encrypted to keep the account name out of the public repo; edit
+# with `sops`. The DSM NFS rule on the share is read-only, maps root to admin,
+# and allows mounting subfolders.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: nas-backup-data
+spec:
+    accessModes:
+        - ReadOnlyMany
+    capacity:
+        storage: 1Gi
+    claimRef:
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        name: nas-backup-data
+        namespace: backup
+    mountOptions:
+        - nfsvers=4.1
+    nfs:
+        server: ENC[AES256_GCM,data:roh9TbnEGL1C/3xvLg==,iv:IDxltKIv3Ht73oMef0Ru4Ufz3cJhuTfR8rDOwsgPMC0=,tag:yyLFm6we1FfBNwaaT6na1Q==,type:str]
+        path: ENC[AES256_GCM,data:E2lXPnr58b7yaKrDM/5srblc,iv:qWoJguSw+tCXXN9+0bR3ImmEkI7SZ+SF/rE+bF4hslw=,tag:AnJsQ5XcjfLI9Wo0FNMybA==,type:str]
+        readOnly: true
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: ""
+    volumeMode: Filesystem
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IG1sa2VtNzY4eDI1NTE5IENQVmNNdWFp
+            SDl5SHduYVpmdkhSdi9hSng2dlVzN2R3S2FPcDB6QUhtWHJKVzl3b0xHT2JXVS9M
+            MmRTUWIxV3JwWVRoWUc3d0lEVGhUTVlrOVFhMENoQUVFTXdnNWRSR29qdU9salI0
+            c2h5UFQ5OGY1YmxUc0s4RGo3OTd3ZHF1bXRQOWRlTnBjS0Z2SHE4TFZVMmFwSDhN
+            UVdmVTErWlBsdSs2T1Vsa2k4QU1aRmgvTGNGSWJDUDJDK01uVTdtcjRnekxaVUpU
+            VXRkOEdSMHRiRzlkUGpCNXhaQTk2N2V1SGo4dENKdkIvUzM3SHBuRlUweDJXYitI
+            d3M4eW5vR1lpenFFNW9rYVh2bWdJWjBjcHFUZ3I0SHdydVJITStBdnoyakUwMVc4
+            RFpIYkQ3TmYrdEFmUDJwbEllSy9pV0RPRkFlVWlsUjlQak9memlOT2lYekxSSXJL
+            Vk1rVFozTkZKNlNSZGl6a083eUJGcXRlQ05BL2FIMWgrWEhvWGZNQTNFVFNpZkky
+            Um9KZ1MrUDhXd3ZlamVtRTBySnMyUHNrK05jYi9DeElBM2s5ZStpUGpBU1pDT2J1
+            eEgzTjNYYTJBM1FZb2NEUHl0WE1KS2hPWHc4U3E4OHBhTElXK1V3cDFKcEg0TlNJ
+            a1FmVXdVUjh6U1krK0lCZk5odlliVm1oUFdJWXAvU0xicVdGOUJCS0lrWlVZMW9v
+            cG5tMUlncmhUL2FpeVM2ZkYycm1WYkt0OStZcXdjTFRUeVhBbHJHcVVac1dnbUFy
+            MmE4MFR5SUgrRTl1Ym8yWGQxdXNEVVlRdk5vcGNiRk9PekhReVlzeGphaytCK1Z0
+            QzdQV0pXdkZKdUdGK0p5QWNTZnQ2emxzRm91aEQyNUJRL0RkY3J5WTMvcStsdmxN
+            enpzYmNJci9FSzdOQVRmaXFjVEh1ajZ1N3pHbHF4Vy9yU2dML0xPZGM2Rm9BeVE5
+            MkZLSlJNSWZKYUxmeFJabEFYK1BUQ3BYWGdoL05MSGxIR3pHWG1EdndpVTQxTHRu
+            SDdSMzc2Ly9NMjV1bUxFdndjYllGRHVHNlRUTm9SNGpzQ2hYOVJoRVpVSWZZOUwx
+            R3AzY25xZWdOcVlvZWVPaWJGZ3FxdXJKWjNOckZKN2FwUVNEZ1BGQUxmZFR3SU9q
+            RnY1YjVvT09OUHpGT1gyQWZmdkdHd1NmaEorNVlKK2RVYnpyZks0K2hFVXlVZTgy
+            ZnZPMjFyYU1nR2xIWWk3ZlAvWmFuWHIydCtQU2x6RU5abTBvV1F3NHQ3b3JENEpB
+            OFNhaDNWQ0F2QnN2Qlg3dEh2VzJ4STJOdW1hU2JzY3luSlFhemY2M0pCZy9qek5n
+            OTJkRjlFdWdocVc5V1hWcWl3WVBlMXl0VDZOVEtwRFd0c2g4MGVSekxSdlM3eHV2
+            em80dXVOak5WMGtPQWVJcWhEaC9GZ0s4NXpOYk9ERzZEeFptWXhXUG1kRzc3UENj
+            enB4Y2g3d0tHU0VGdCttVk9iM29tVzE2c2FvVGFJMnBYWWpkcUUrSWNUVDEvTnE2
+            Wk5LTjlqSU0rWkdGeE1hWFNsT0JLVDZvQmtqQW5MZGVrR3lBOWhQSi9tS2dBTm9w
+            U3B1QzZHNkRCbXNMdVgxWnpQc2paSVhVajBlK3RnVGhrV3VhbGpWLys3YzcyeW1G
+            SjdrR0dVcHdTTXpOSUNhZ0ZJL3RwS2Yybmh4L21SMThTTzNuVFJTaUFUVlNhejIz
+            TEg1RmdBOEZhY1BMS2k1ckhtREJXSXJwTEZ3UGtUcjFpcFlPeXdiMGc4em9ocXZ3
+            NnpXckZ6TFFPNm1oMjl3VDRneXNhNklOa1VobGZhMlgxcEQwOFlBRGo5ZzdoRWIx
+            NzJUUy9pemt6elV2YXVLRjFVZWtCNGFjakl4OFJnOWdXdW5yazdvQ2FMSmx0ZTdr
+            eW9tbFBRVThCUnV5bkFRWjRram1LYUtGRUxEQkwvUTJSbFZ2MmZPRnZlVmVmUQow
+            Q0NEdEtTbHVwZ0VIMDRwbWFoaEhVckN5M3JHWk05YnJqcHV5cVFEK3prCi0tLSBx
+            Tnd1dFhOMVJIbzBrcDA1ckpNV3VickIxMk9ERndjaVl6UENiNDVDMnBzCkJcDcQt
+            +P0p/jb0ati3tu9jdRHz050Oq50RqhU5VbfFAsUWuPlW9C/uuWxln0v1jFsn/Ddx
+            kHDlmUrqFkZVEAo=
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1pq1m8fee0mfkh6fzw635qffd33y99fmjrr80k2r4zv7wkfguegp0lgv836ryfypgmdnjvxq243lvh7ftfx2wr6azz7t6mqhqsxdxse3hysqk3a63vlllpjha6j4rn729gnzhfjn2qy89dp0ce5k0wq5ed7fpn5msnkhegp8qeyelxxgxtlnea6cg7sd2jche7zcl2jsrnjfqgrwhj4xveyg7w4ffv4e3rrref5mg47n6gqxqfyxacft89dqp668vmvx6jnuxvne4na5haxs3z3zxlsqvxqqaksvjk3xlhegr4n6smd63t8l5e7x8t2pf68nq2l2z89cqk2c3h9277gj6mlvr94h9tfk5fzkktyqtjy66fuxvhj2xgqfydwsne5gn02e0rp80rd2nw4akwz3p7cuxkfhq2nuhlh9j6wqxandlcehrznnmeyun4wew83lezdu9fm484u50ql8vtpfdv8ckgmp3tyfk4gkvl9qc0dnglqj3jqvgjgjegqq6hlcdhj748mtayrcrjmgjevcfkzf2jnzzn6m4jkn26ev7ggcnqrj9nwvvngntp2ef6pj3w5ta0ufz5yetzhaskjztc2glxjtelr29nym5rdyg4yl8z33tsngxvgy5wm9kaa43xm2ax7xsu6mnqzvemxlw0n7nz4afuus87p9kvavxh8j0vvtsgjd2ejq5g38eny6j7u5p36unyw78v4m37azgln2ys3ltvnluzyg77cmlyzh7qypdqmx08zd7g43qz4lza69qa2qgwmajs85wwcc0uqc50c2tr7kxmsuryemqqew48qqvccx67u6csj0c8wrwj0a8e6q33svsq5jd0tf53t0k6rhfeah2kkpj68rwk0x4dwc8rrxl4p956u8t285cypwtqa7eqad77el926hqn05jdnjsxzdm3d2t9f3rg6ju73gp4xxgaf642atgxefhztzg9an9cj4pstk39jlkjplfz3m5rwt87skxjyrg48a8a9k497zfpjtpufejzfqjc9umpd6mrwrgjaxqqa243n3hq3vu7tyk663p5sepehdc99m7e3ulumrjt7psw7edgkdg6htjdntq4upzp9jf90s2pu74w7375m67cgenzj5ms3r4hlvjxe5tyzem69wmx26quuesdyzke9vnwgl2dpnwxv2t0m95tvswu4gnqnvdfejsjy68mhxr4c7ez5rhtr4cf5f8s25acvp0u0e328j8g8gs79607qnev08flf7c4as7ctepqd0z23gxjphhddtr90mpdn85ypvrxyklw3rqp5udp5zkc6n4vt3q72qcayhzvfj4299zajnsskz7t3u272evzn3s8ldcy54q4tmeg325z5h3glyz6g4fjkvduwvcldq2wccydej5umv8g8ks8r9st9xyeup36ys3jh9pw067k590tusp4qn8vq45kcak8xrztr9h9n8ms4msatzctcgkppgsj2xk4vkjrmgvgn2dr7syaugkfc44u5p6w4557q033nnuvtp03r9sfzxeuf4y8azwdgsu5zkkuj2evc5eu62cvtwsmte02pc47a7nhxqyuanctqk2rm5z5yy2xm0gx2zgl3uwmkznscuw0z8d9d6k8g4hh9xrgl293y0qx5ng3uz5uvpxv95hmzl9xf3uz4mn6c5w6a5c8538u6mz060rdh3pz3z565ze9n6e7l2tnyt8yzvyzdh8evxez2xfwv6skmsdjsl8gc0cynth82etff89vmc2f0ez5905rkgtzzenrx4zvnchspveffk0d2tj6fpg86h5qp0seh04p6uer7z0ljuj08tv0yr6fdmaezgwvtewreytgmmn7anm0sy4vm8t665rxuvl9q24pqmrxypuaas97cj0za9c8vtdknkcmu9aj8z8hr0v4m39rc8y9e946ncfrzngq37y5ux
+    encrypted_regex: ^(server|path)$
+    lastmodified: "2026-11-09T08:51:20Z"
+    mac: ENC[AES256_GCM,data:13nNWTOojWQ+4Gx5KBalLmNQcq5a8SKmrKj54gwm1311Y2VHKD1qgLzKTLPlSMW42ssXqB73eZ+KmggPpCukk0fLFEDCv9I9zfLVWhsGacqNHJNfsOn41Znd7FHSkYFTDNFw2eHIuIj11FbOr1nASx5SjxvfM+3o1rTT6qIGLos=,iv:SQ6wihQvDMIhNeKMSX4RGKkSxgciGAWCGM1xM6bBc8Q=,tag:Ef1yNTg/WhMgP8ZHjb+mxw==,type:str]
+    version: 3.13.3

@@ -1,0 +1,35 @@
+---
+# DNS and SSH to oci01 only. The NFS mount is made by the node, not the pod,
+# so it isn't affected. oci01's public IP is ephemeral: update this if the
+# instance is ever recreated.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nas-backup
+  namespace: backup
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: nas-backup
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 163.192.26.211/32
+      ports:
+        - protocol: TCP
+          port: 22

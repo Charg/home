@@ -82,3 +82,22 @@ On the node:
 ```bash
 tailscale up --login-server <SERVER_URL> --authkey <KEY>
 ```
+
+## 5) NAS backup volume
+
+`nas-backup.nix` keeps an off-site restic repository on a separate block
+volume, attached with Terraform. `kube/nuc01/nas-backup` pushes to it. Once
+the volume is attached, format it and create the repository, one time only:
+
+```bash
+ssh nixos@oci01 lsblk                        # the new, empty disk; usually sdb
+ssh nixos@oci01 sudo mkfs.ext4 -L backup /dev/sdb
+ssh nixos@oci01 sudo systemctl restart srv-backup.mount
+ssh nixos@oci01 sudo install -d -o nas-backup -g nas-backup -m 700 /srv/backup/restic
+ssh nixos@oci01 sudo -u nas-backup \
+  RESTIC_PASSWORD_FILE=/run/secrets/nas-backup-restic-password \
+  restic -r /srv/backup/restic init
+```
+
+The pusher can only add snapshots. Pruning and a partial `restic check` run
+monthly from `nas-backup-prune.timer`.

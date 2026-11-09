@@ -1,0 +1,102 @@
+---
+# Pushes the NAS home folder (Synology Drive and Photos) to the off-site
+# restic repository on oci01 (nix/machines/oci01/nas-backup.nix). restic
+# encrypts before anything leaves; the SSH key only reaches an append-only
+# server, so nothing here can delete or rewrite existing snapshots. Pruning
+# runs on oci01. Public SSH, like headscale-backup, so the tailnet isn't
+# involved.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nas-backup
+  namespace: backup
+spec:
+  # Clear of oci01's 02:00 prune and 04:00-06:00 reboot window
+  schedule: "0 1 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 10800
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: nas-backup
+        spec:
+          restartPolicy: Never
+          # The NFS export only allows the LAB nodes
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: "true"
+          # Root so the export's root-to-admin mapping can read every file
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: restic
+              image: restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: RESTIC_CACHE_DIR
+                  value: /cache
+                - name: RESTIC_PASSWORD_FILE
+                  value: /secret/restic-password
+                # oci01's forced command picks the repository; restic's
+                # rclone args and path are ignored
+                - name: RESTIC_REPOSITORY
+                  value: "rclone:"
+                - name: SSH
+                  value: >-
+                    ssh -i /secret/id_ed25519
+                    -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=60
+                    -o UserKnownHostsFile=/known-hosts/known_hosts -o StrictHostKeyChecking=yes
+                    nas-backup@headscale.packet.fail
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  # Fixed host so snapshots group across pods; prune matches it
+                  restic -o rclone.program="$SSH" backup /data \
+                    --host nas \
+                    --exclude '#recycle' \
+                    --exclude '#snapshot' \
+                    --exclude '@eaDir'
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                  readOnly: true
+                - name: secret
+                  mountPath: /secret
+                  readOnly: true
+                - name: known-hosts
+                  mountPath: /known-hosts
+                  readOnly: true
+                - name: cache
+                  mountPath: /cache
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: nas-backup-data
+                readOnly: true
+            - name: secret
+              secret:
+                secretName: nas-backup
+                defaultMode: 0400
+            - name: known-hosts
+              configMap:
+                name: nas-backup-known-hosts
+            - name: cache
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}

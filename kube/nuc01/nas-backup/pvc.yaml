@@ -1,0 +1,15 @@
+---
+# Bound statically to the volume in volume.enc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nas-backup-data
+  namespace: backup
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: ""
+  volumeName: nas-backup-data
+  resources:
+    requests:
+      storage: 1Gi

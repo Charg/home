@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nas-backup-known-hosts
+  namespace: backup
+data:
+  known_hosts: |
+    headscale.packet.fail ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOwY/cn+/lmtXO2ZsvzYs7+0jLNHVEo+96KIvOG+EFwr
