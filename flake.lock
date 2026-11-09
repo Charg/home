@@ -130,18 +130,18 @@
     "helios": {
       "flake": false,
       "locked": {
-        "lastModified": 1792895658,
+        "lastModified": 1794202281,
         "narHash": "sha256-xtr+eouQ4+kx2vZ0HBSIM/L9vjLH5FmaUhPW5PifH70=",
-        "ref": "feat/sway-hdr",
-        "rev": "ecb165f23fff4f02d55d68ac96635c0f9d5fb916",
-        "revCount": 3417,
-        "type": "git",
-        "url": "file:///home/chris/code/helios"
+        "owner": "Charg",
+        "repo": "helios",
+        "rev": "65890f824c7c6c6d00b7230d96be9f2f1600d030",
+        "type": "github"
       },
       "original": {
+        "owner": "Charg",
         "ref": "feat/sway-hdr",
-        "type": "git",
-        "url": "file:///home/chris/code/helios"
+        "repo": "helios",
+        "type": "github"
       }
     },
     "home-manager": {

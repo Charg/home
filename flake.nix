@@ -46,15 +46,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Game stream host for tortuga, built from the local checkout's HDR
-    # integration branch (sway HDR virtual displays + HDR capture) until those
-    # changes land upstream. The package normally fetches its own pinned
-    # release source; helios.nix builds this input instead. No submodules
-    # here: Nix fetches them by their .gitmodules branch, and build-deps' pin
-    # is no longer on its branch. After committing to the branch:
+    # Game stream host for tortuga, built from the fork's HDR integration
+    # branch (sway HDR virtual displays + HDR capture) until those changes
+    # land upstream. The package normally fetches its own pinned release
+    # source; helios.nix builds this input instead. It must be a remote URL so
+    # Renovate and CI can fetch it. After pushing to the branch:
     # `nix flake update helios`.
     helios = {
-      url = "git+file:///home/chris/code/helios?ref=feat/sway-hdr";
+      url = "github:Charg/helios/feat/sway-hdr";
       flake = false;
     };
 
