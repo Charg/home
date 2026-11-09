@@ -1,5 +1,6 @@
 {
   pkgs,
+  unstable-pkgs,
   isLinux,
   isDarwin,
   ...
@@ -7,6 +8,9 @@
 {
   programs.vscode = {
     enable = isLinux || isDarwin;
+    # Stable's vscode build breaks on 1.144's ripgrep-universal layout; unstable has the fix.
+    # TODO: drop once nixos-26.05 backports it.
+    package = unstable-pkgs.vscode;
     profiles = {
       default = {
         enableUpdateCheck = false;
