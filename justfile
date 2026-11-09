@@ -38,3 +38,47 @@ update-claude-code:
 
     echo "Updated $overlays_file to claude-code $latest_version"
     echo "Review the diff, then run 'nix flake check' before committing."
+
+update-herdr:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    releases="https://releases.herdr.dev"
+    updated=0
+
+    # <release channel> <package file>
+    for pair in "core nix/packages/herdr-core.nix" "app nix/packages/herdr-desktop.nix"; do
+      read -r channel file <<<"$pair"
+      manifest="$(curl -fsSL "$releases/$channel/latest.json")"
+      latest_version="$(jq -r '.version' <<<"$manifest")"
+      current_version="$(perl -ne 'print $1 if /^\s*version = "([^"]+)";/' "$file")"
+
+      if [[ -z "$current_version" ]]; then
+        echo "error: could not find the current pinned version in $file" >&2
+        exit 1
+      fi
+
+      if [[ "$latest_version" == "$current_version" ]]; then
+        echo "herdr $channel is already pinned to the latest release ($current_version)"
+        continue
+      fi
+
+      echo "Updating herdr $channel: $current_version -> $latest_version"
+
+      perl -pi -e "s/^(\\s*version = \")\\Q$current_version\\E(\";)/\${1}$latest_version\${2}/" "$file"
+
+      for arch in x86_64 aarch64; do
+        checksum="$(jq -r --arg t "linux-$arch" '.targets[$t].sha256 // empty' <<<"$manifest")"
+        if [[ -z "$checksum" ]]; then
+          echo "error: $channel manifest for $latest_version has no checksum for linux-$arch" >&2
+          exit 1
+        fi
+        perl -pi -e "s/(\"$arch-linux\" = \")[a-f0-9]+(\";)/\${1}$checksum\${2}/" "$file"
+      done
+
+      updated=1
+    done
+
+    if [[ "$updated" == 1 ]]; then
+      echo "Review the diff, then run 'nix flake check' before committing."
+    fi

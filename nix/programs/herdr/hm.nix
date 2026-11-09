@@ -1,6 +1,11 @@
-{ unstable-pkgs, ... }:
+{ pkgs, unstable-pkgs, ... }:
 {
-  home.packages = [ unstable-pkgs.herdr ];
+  home.packages = [
+    unstable-pkgs.herdr
+    # Overlay-pinned upstream releases (nix/lib/overlays.nix).
+    pkgs.herdr-core
+    pkgs.herdr-desktop
+  ];
 
   xdg.configFile."herdr/config.toml".text = ''
     # Managed by Home Manager - edit nix/programs/herdr/hm.nix instead.

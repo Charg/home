@@ -38,6 +38,13 @@ in
 
   (unstableOverlay "claude-code")
 
+  # nixpkgs builds Herdr from source and trails upstream's releases; pin
+  # upstream's release builds instead. Version bumps live in the package files.
+  (final: prev: {
+    herdr-core = final.callPackage ../packages/herdr-core.nix { };
+    herdr-desktop = final.callPackage ../packages/herdr-desktop.nix { };
+  })
+
   # nixpkgs-unstable still lags Anthropic's own binary releases by days-to-weeks.
   # Anthropic publishes every version straight to GCS with a manifest.json of
   # per-platform checksums (same source nixpkgs' update.sh pulls from), so pin
