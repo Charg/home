@@ -1,0 +1,56 @@
+name: Flake Lock Diff
+
+on:
+  pull_request:
+    paths:
+      - flake.lock
+      - flake.nix
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  diff:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Diff host packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+
+      # Evaluate (not build) every host's package set at the PR base and head
+      # and diff the versions. The base is a worktree so flake.nix changes on
+      # either side are reflected; the scripts always come from the head.
+      - name: Diff packages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
+          .github/scripts/flake-diff.sh "$RUNNER_TEMP/base" . > comment.md
+          cat comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      # Fork PRs get a read-only token, so they only get the job summary above.
+      - name: Comment on PR
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- flake-lock-diff -->")) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${id}" -F body=@comment.md
+          else
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file comment.md
+          fi
