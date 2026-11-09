@@ -56,13 +56,13 @@ in
     claude-code = prev.claude-code.overrideAttrs (
       old:
       let
-        version = "2.1.287";
+        version = "2.1.319";
         baseUrl = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
         checksums = {
-          "darwin-arm64" = "6eab8333fe2121553100d8f40bfada384a3e989b94f947e18ba6677a6fcb41ea";
-          "darwin-x64" = "f1863213e4f55aaadc2e6ee617f934ada29930e5de4c5e5f8f9e34a0d594fdd7";
-          "linux-arm64" = "e4daf793d1e74fb0d9874dd09e98690bbfd7be515f78a87fd05b9e2b4bb33b03";
-          "linux-x64" = "3920489a5109cff5786a1a392c25277408ff22bc796d5edb9c16a60e5a1718f0";
+          "darwin-arm64" = "1f53587e92dee8e089fa349188a4cda64fa34ace6e7b0ca2ee278ddaa3cc2ebd";
+          "darwin-x64" = "af6f1f5510ae98d56a155bf8f007aa9d5b44efccc9c10c8e10ef35039e95a940";
+          "linux-arm64" = "a7e687fd1cb054d651c7588223de3786c99d4c682365e3c3ae1e59ce7f3a591f";
+          "linux-x64" = "dabafec82ca1319fa43d8be36a10fc61b1d11821cb98ad5df04ad95e199b8eed";
         };
         platformKey = "${final.stdenv.hostPlatform.node.platform}-${final.stdenv.hostPlatform.node.arch}";
       in
@@ -85,6 +85,10 @@ in
         # libasound user is the embedded audio-capture.node addon, which links
         # it directly, and glibc only consults the executable's DT_RPATH (never
         # its DT_RUNPATH) when resolving a dlopened library's dependencies.
+        #
+        # Patch by hand with patchelf >= 0.18 and --no-sort instead of using
+        # autoPatchelf: growing .dynstr any other way relocates the Bun
+        # standalone sections and the binary segfaults on start.
         installPhase = final.lib.pipe old.installPhase [
           (builtins.replaceStrings
             [ "unzstd -q $src -o $out/bin/claude" ]
@@ -96,17 +100,18 @@ in
           (builtins.filter (line: !(final.lib.hasInfix "LD_LIBRARY_PATH" line)))
           (final.lib.concatStringsSep "\n")
         ];
-        runtimeDependencies = final.lib.optionals final.stdenv.hostPlatform.isLinux [ final.alsa-lib ];
+        dontAutoPatchelf = true;
         nativeBuildInputs =
-          old.nativeBuildInputs ++ final.lib.optionals final.stdenv.hostPlatform.isLinux [ final.patchelf ];
-        # Appended from preFixup so it runs after autoPatchelf's postFixup hook.
-        preFixup = final.lib.optionalString final.stdenv.hostPlatform.isLinux ''
-          forceRpath() {
-            local bin=$out/bin/.claude-wrapped
-            patchelf --force-rpath --set-rpath "$(patchelf --print-rpath "$bin")" "$bin"
-          }
-          postFixupHooks+=(forceRpath)
-        '';
+          old.nativeBuildInputs
+          ++ final.lib.optionals final.stdenv.hostPlatform.isLinux [ final.patchelfUnstable ];
+        postFixup =
+          (old.postFixup or "")
+          + final.lib.optionalString final.stdenv.hostPlatform.isLinux ''
+            patchelf --no-sort \
+              --set-interpreter ${final.stdenv.cc.bintools.dynamicLinker} \
+              --force-rpath --set-rpath ${final.lib.makeLibraryPath [ final.alsa-lib ]} \
+              $out/bin/.claude-wrapped
+          '';
       }
     );
   })
