@@ -5,7 +5,7 @@ metadata:
   name: ov-media-proxy
   namespace: ov
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: ov-media.home.packet.fail
+    external-dns.kubernetes.io/hostname: ov-media.home.packet.fail
     traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
 spec:
   ingressClassName: traefik-internal

@@ -8,7 +8,7 @@ serviceAccount:
 ingress:
   enabled: true
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: plex.home.packet.fail
+    external-dns.kubernetes.io/hostname: plex.home.packet.fail
   ingressClassName: traefik-internal
   url: https://plex.home.packet.fail
   tls:

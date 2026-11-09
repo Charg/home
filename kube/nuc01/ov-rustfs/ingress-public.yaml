@@ -9,7 +9,7 @@ metadata:
     # (CNAME to <tunnel>.cfargotunnel.com), not external-dns — without this,
     # external-dns would also create an A record pointing at the private
     # traefik-internal LB IP and fight with the tunnel's CNAME.
-    external-dns.alpha.kubernetes.io/exclude: "true"
+    external-dns.kubernetes.io/exclude: "true"
 spec:
   ingressClassName: traefik-internal
   rules:

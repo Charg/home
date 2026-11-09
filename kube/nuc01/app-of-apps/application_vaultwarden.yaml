@@ -25,7 +25,7 @@ spec:
           enabled: true
           className: traefik-internal
           annotations:
-            external-dns.alpha.kubernetes.io/hostname: vault.home.packet.fail
+            external-dns.kubernetes.io/hostname: vault.home.packet.fail
           hosts:
             - host: vault.home.packet.fail
               paths:

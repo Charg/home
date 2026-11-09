@@ -5,7 +5,7 @@ metadata:
   name: trawl-internal
   namespace: media
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: trawl.home.packet.fail
+    external-dns.kubernetes.io/hostname: trawl.home.packet.fail
 spec:
   ingressClassName: traefik-internal
   rules:

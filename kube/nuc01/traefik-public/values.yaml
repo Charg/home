@@ -65,7 +65,7 @@ service:
   spec:
     externalTrafficPolicy: Local
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: traefik-public.home.packet.fail
+    external-dns.kubernetes.io/hostname: traefik-public.home.packet.fail
 
 ingressRoute:
   dashboard:

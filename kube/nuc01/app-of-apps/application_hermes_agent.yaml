@@ -75,7 +75,7 @@ spec:
           enabled: true
           className: traefik-internal
           annotations:
-            external-dns.alpha.kubernetes.io/hostname: hermes.home.packet.fail
+            external-dns.kubernetes.io/hostname: hermes.home.packet.fail
             traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
           hosts:
             - host: hermes.home.packet.fail

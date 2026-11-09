@@ -54,7 +54,7 @@ ingress:
   enabled: true
   className: traefik-internal
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: litellm.home.packet.fail
+    external-dns.kubernetes.io/hostname: litellm.home.packet.fail
   hosts:
     - host: litellm.home.packet.fail
       paths:

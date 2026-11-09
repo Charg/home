@@ -8,7 +8,7 @@ metadata:
   name: fleet-internal
   namespace: fleet
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: fleet.home.packet.fail
+    external-dns.kubernetes.io/hostname: fleet.home.packet.fail
 spec:
   ingressClassName: traefik-internal
   rules:

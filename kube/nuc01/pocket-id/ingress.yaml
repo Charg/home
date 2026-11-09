@@ -5,7 +5,7 @@ metadata:
   name: pocket-id-internal
   namespace: auth
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: id.home.packet.fail
+    external-dns.kubernetes.io/hostname: id.home.packet.fail
 spec:
   ingressClassName: traefik-internal
   rules:

@@ -5,7 +5,7 @@ metadata:
   name: llama-swap-internal
   namespace: ai
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: llama.home.packet.fail
+    external-dns.kubernetes.io/hostname: llama.home.packet.fail
 spec:
   ingressClassName: traefik-internal
   rules:

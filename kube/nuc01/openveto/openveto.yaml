@@ -75,7 +75,7 @@ spec:
             enabled: true
             className: traefik-internal
             annotations:
-              external-dns.alpha.kubernetes.io/hostname: openveto.home.packet.fail
+              external-dns.kubernetes.io/hostname: openveto.home.packet.fail
             hosts:
               - host: openveto.home.packet.fail
                 paths:

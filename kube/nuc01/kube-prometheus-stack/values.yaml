@@ -57,7 +57,7 @@ grafana:
     enabled: true
     ingressClassName: traefik-internal
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: grafana.home.packet.fail
+      external-dns.kubernetes.io/hostname: grafana.home.packet.fail
     hosts:
       - grafana.home.packet.fail
     tls:
@@ -339,7 +339,7 @@ prometheus:
     enabled: true
     ingressClassName: traefik-internal
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: prometheus.home.packet.fail
+      external-dns.kubernetes.io/hostname: prometheus.home.packet.fail
       traefik.ingress.kubernetes.io/router.middlewares: monitoring-telemetry-ingest-auth@kubernetescrd
     hosts:
       - prometheus.home.packet.fail

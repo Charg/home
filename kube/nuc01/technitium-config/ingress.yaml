@@ -4,7 +4,7 @@ kind: Ingress
 metadata:
   name: dns
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: technitium.home.packet.fail
+    external-dns.kubernetes.io/hostname: technitium.home.packet.fail
 spec:
   ingressClassName: traefik-internal
   rules:

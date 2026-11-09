@@ -5,7 +5,7 @@ metadata:
   name: bitmagnet-internal
   namespace: media
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: bitmagnet.home.packet.fail
+    external-dns.kubernetes.io/hostname: bitmagnet.home.packet.fail
     traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
 spec:
   ingressClassName: traefik-internal

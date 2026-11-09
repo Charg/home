@@ -220,7 +220,7 @@ server:
   ingress:
     enabled: true
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: argo.home.packet.fail
+      external-dns.kubernetes.io/hostname: argo.home.packet.fail
     ingressClassName: traefik-internal
     extraTls:
       - hosts:

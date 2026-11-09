@@ -134,7 +134,7 @@ web:
     enabled: true
     className: traefik-internal
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: temporal.home.packet.fail
+      external-dns.kubernetes.io/hostname: temporal.home.packet.fail
       traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
     hosts:
       - "temporal.home.packet.fail/"
