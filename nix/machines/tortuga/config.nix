@@ -234,10 +234,6 @@
   virtualisation.docker.package = pkgs.docker_29;
   virtualisation.docker.autoPrune.enable = true;
 
-  # Soulseek (Nicotine+) listening port. The UDM forwards it here
-  # (clouds/home/terraform/ubiquiti/port_forwards.tf); there is no UPnP.
-  networking.firewall.allowedTCPPorts = [ 2234 ];
-
   # Exposes the GPU to containers via CDI: `docker run --device nvidia.com/gpu=all ...`
   hardware.nvidia-container-toolkit.enable = true;
 
