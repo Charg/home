@@ -31,6 +31,9 @@
       "flameshot"
       "ghostty"
       "google-chrome"
+      # herdr-core on macOS is installed by the app as a signed bundle
+      # (stable privacy grants), so it isn't nix-packaged here.
+      "herdr-app"
       "intellij-idea-ce"
       "podman-desktop"
       "raycast"

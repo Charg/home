@@ -1,8 +1,15 @@
-{ pkgs, unstable-pkgs, ... }:
+{
+  lib,
+  pkgs,
+  unstable-pkgs,
+  ...
+}:
 {
   home.packages = [
     unstable-pkgs.herdr
-    # Overlay-pinned upstream releases (nix/lib/overlays.nix).
+  ]
+  # Overlay-pinned upstream releases (nix/lib/overlays.nix); linux-only builds.
+  ++ lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
     pkgs.herdr-core
     pkgs.herdr-desktop
   ];
