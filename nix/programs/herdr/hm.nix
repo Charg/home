@@ -7,6 +7,14 @@
     pkgs.herdr-desktop
   ];
 
+  # Desktop app keys, mirroring the TUI [keys] below on an alt- layer (the
+  # app has no prefix key). Read-only: rebind here, not in the app.
+  # force: the app seeds a default keys.json on first start.
+  xdg.configFile."herdr-app/keys.json" = {
+    source = ./keys.json;
+    force = true;
+  };
+
   xdg.configFile."herdr/config.toml".text = ''
     # Managed by Home Manager - edit nix/programs/herdr/hm.nix instead.
     # Keybindings mirror nix/programs/tmux/hm.nix. Reload: herdr server reload-config
