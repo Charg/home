@@ -9,8 +9,8 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: melon-server
-    # The image tag follows the chart's appVersion, so this is the only version to bump.
-    targetRevision: 0.3.1
+    # Follows the newest published chart; the image tag follows its appVersion.
+    targetRevision: "*"
     helm:
       valuesObject:
         imagePullSecrets:

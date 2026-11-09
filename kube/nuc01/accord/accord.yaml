@@ -1,0 +1,112 @@
+---
+# One Application per product so every component resolves the same chart
+# version in one sync: migrations run as a PreSync hook before web/worker roll.
+# Each source keeps its own releaseName, so resource names are unchanged.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: accord-app
+  namespace: argocd
+spec:
+  project: apps
+  sources:
+    - repoURL: ghcr.io/charg/charts
+      chart: accord
+      # Follows the newest published chart; the image tag follows its appVersion.
+      targetRevision: "*"
+      helm:
+        releaseName: accord-migrations
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: accord-env
+          web:
+            enabled: false
+          worker:
+            enabled: false
+          registerSchedules:
+            enabled: false
+          migrations:
+            enabled: true
+            annotations:
+              argocd.argoproj.io/hook: PreSync
+              argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+    - repoURL: ghcr.io/charg/charts
+      chart: accord
+      targetRevision: "*"
+      helm:
+        releaseName: accord-web
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: accord-env
+          migrations:
+            enabled: false
+          worker:
+            enabled: false
+          registerSchedules:
+            enabled: false
+          web:
+            enabled: true
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+              limits:
+                cpu: 1000m
+                memory: 1Gi
+          ingress:
+            enabled: true
+            className: traefik-internal
+            annotations:
+              external-dns.alpha.kubernetes.io/hostname: accord.home.packet.fail
+            hosts:
+              - host: accord.home.packet.fail
+                paths:
+                  - path: /
+                    pathType: Prefix
+            tls:
+              - hosts:
+                  - accord.home.packet.fail
+    - repoURL: ghcr.io/charg/charts
+      chart: accord
+      targetRevision: "*"
+      helm:
+        releaseName: accord-worker
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: accord-env
+          migrations:
+            enabled: false
+          web:
+            enabled: false
+          registerSchedules:
+            enabled: true
+          worker:
+            enabled: true
+            replicaCount: 2
+            resources:
+              requests:
+                cpu: 500m
+                memory: 768Mi
+              limits:
+                cpu: 2000m
+                memory: 4Gi
+  destination:
+    namespace: ac
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

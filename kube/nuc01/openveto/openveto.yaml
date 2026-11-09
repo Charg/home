@@ -1,0 +1,160 @@
+---
+# One Application per product so every component resolves the same chart
+# version in one sync: migrations run as a PreSync hook before the rest roll.
+# Each source keeps its own releaseName, so resource names are unchanged.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openveto-app
+  namespace: argocd
+spec:
+  project: apps
+  sources:
+    - repoURL: ghcr.io/charg/charts
+      chart: openveto
+      # Follows the newest published chart; the image tag follows its appVersion.
+      targetRevision: "*"
+      helm:
+        releaseName: openveto-migrations
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: openveto-env
+          web:
+            enabled: false
+          worker:
+            enabled: false
+          backfillWorker:
+            enabled: false
+          watermarkCheck:
+            enabled: false
+          migrations:
+            enabled: true
+            annotations:
+              argocd.argoproj.io/hook: PreSync
+              argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+    - repoURL: ghcr.io/charg/charts
+      chart: openveto
+      targetRevision: "*"
+      helm:
+        releaseName: openveto-web
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: openveto-env
+          migrations:
+            enabled: false
+          worker:
+            enabled: false
+          backfillWorker:
+            enabled: false
+          watermarkCheck:
+            enabled: false
+          web:
+            enabled: true
+            resources:
+              requests:
+                cpu: 250m
+                memory: 256Mi
+              limits:
+                cpu: 1000m
+                memory: 1Gi
+          ingress:
+            enabled: true
+            className: traefik-internal
+            annotations:
+              external-dns.alpha.kubernetes.io/hostname: openveto.home.packet.fail
+            hosts:
+              - host: openveto.home.packet.fail
+                paths:
+                  - path: /
+                    pathType: Prefix
+            tls:
+              - hosts:
+                  - openveto.home.packet.fail
+    - repoURL: ghcr.io/charg/charts
+      chart: openveto
+      targetRevision: "*"
+      helm:
+        releaseName: openveto-worker
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: openveto-env
+          env:
+            CONGRESS_API_RATE_LIMIT_DELAY: '0.8'
+          migrations:
+            enabled: false
+          web:
+            enabled: false
+          worker:
+            enabled: true
+            env:
+              TEMPORAL_MANAGE_SCHEDULE: 'True'
+            resources:
+              requests:
+                cpu: 250m
+                memory: 384Mi
+              limits:
+                cpu: 1000m
+                memory: 2Gi
+          backfillWorker:
+            enabled: true
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 2Gi
+          watermarkCheck:
+            enabled: true
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: 250m
+                memory: 256Mi
+    - repoURL: ghcr.io/charg/charts
+      chart: openveto
+      targetRevision: "*"
+      helm:
+        releaseName: openveto-mcp
+        valuesObject:
+          imagePullSecrets:
+            - name: ghcr-pull-creds
+          existingSecret: openveto-env
+          migrations:
+            enabled: false
+          web:
+            enabled: false
+          worker:
+            enabled: false
+          backfillWorker:
+            enabled: false
+          watermarkCheck:
+            enabled: false
+          mcp:
+            enabled: true
+            env:
+              OTEL_SERVICE_NAME: openveto-mcp
+              OPENVETO_API_BASE_URL: http://openveto-web-web.ov.svc:80
+              OPENVETO_API_INTERNAL: 'true'
+  destination:
+    namespace: ov
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
