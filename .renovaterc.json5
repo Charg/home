@@ -71,21 +71,6 @@
       automerge: true,
     },
     {
-      matchFileNames: ['kube/nuc01/app-of-apps/application_set_apps.yaml'],
-      matchUpdateTypes: ['patch'],
-      matchPackageNames: [
-        '!argo-cd',
-        '!traefik',
-        '!metallb',
-        '!longhorn',
-        '!kube-prometheus-stack',
-        '!cloudnative-pg',
-        '!plugin-barman-cloud',
-      ],
-      groupName: 'nuc01 cluster updates',
-      groupSlug: 'nuc01-cluster',
-    },
-    {
       matchPackageNames: [
         'argo-cd',
         'quay.io/argoproj/argocd',
