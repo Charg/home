@@ -117,6 +117,12 @@
       automergeSchedule: ['at any time'],
       automerge: true,
     },
+    // Own charts: OCI chart artifacts carry no release timestamp, so minimumReleaseAge would
+    // hold them forever.
+    {
+      matchPackageNames: ['ghcr.io/charg/charts/**'],
+      minimumReleaseAge: null,
+    },
     {
       matchPackageNames: [
         'plexinc/pms-docker',
@@ -148,6 +154,20 @@
       ],
       datasourceTemplate: 'helm',
       versioningTemplate: 'helm',
+    },
+    // Own charts (Charg/charts), served over OCI. Argo CD writes OCI repoURLs without a scheme,
+    // so the https helm manager above skips them.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^kube/[^/]+/app-of-apps/application_[^/]+\\.yaml$/',
+      ],
+      matchStrings: [
+        'repoURL:\\s*(?<namespace>ghcr\\.io/charg/charts)\\s*\\n\\s*chart:\\s*(?<packageName>\\S+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)',
+      ],
+      datasourceTemplate: 'docker',
+      packageNameTemplate: '{{namespace}}/{{packageName}}',
+      versioningTemplate: 'semver',
     },
     {
       customType: 'regex',

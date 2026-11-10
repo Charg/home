@@ -7,9 +7,9 @@ metadata:
 spec:
   project: apps
   source:
-    repoURL: ghcr.io/charg
+    repoURL: ghcr.io/charg/charts
     chart: vaultwarden
-    targetRevision: 0.1.0
+    targetRevision: 0.1.3
     helm:
       valuesObject:
         domain: https://vault.home.packet.fail
