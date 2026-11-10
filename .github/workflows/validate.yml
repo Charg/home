@@ -1,0 +1,51 @@
+name: Validate
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  validate:
+    permissions:
+      contents: read
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Detect changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          files=$(git diff --name-only "$BASE_SHA"...HEAD)
+          kube=false nix=false
+          grep -q '^kube/' <<<"$files" && kube=true
+          grep -qE '^(flake\.(nix|lock)|nix/.*\.nix)$' <<<"$files" && nix=true
+          echo "kube=$kube" >> "$GITHUB_OUTPUT"
+          echo "nix=$nix" >> "$GITHUB_OUTPUT"
+
+      - name: Install Nix
+        if: steps.changes.outputs.kube == 'true' || steps.changes.outputs.nix == 'true'
+        uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+
+      - name: Validate kube
+        if: steps.changes.outputs.kube == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          nix shell --inputs-from . nixpkgs#kubernetes-helm nixpkgs#kubeconform nixpkgs#yq-go \
+            -c .github/scripts/validate-kube.sh "$BASE_SHA"
+
+      - name: Check flake
+        if: steps.changes.outputs.nix == 'true'
+        run: nix flake check --no-build
