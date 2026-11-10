@@ -1,0 +1,43 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: anki-sync-server
+  namespace: argocd
+spec:
+  project: apps
+  source:
+    repoURL: ghcr.io/charg/charts
+    chart: anki-sync-server
+    targetRevision: 0.1.1
+    helm:
+      valuesObject:
+        # SYNC_USER<n> entries, from anki-sync-server-config (SOPS).
+        existingSecret: anki-sync-server-users
+        persistence:
+          existingClaim: anki-sync-server-data
+        # LAN and tailnet only: traefik-internal, and headscale's split DNS sends
+        # home.packet.fail to technitium. Clients sync to https://anki.home.packet.fail/
+        ingress:
+          enabled: true
+          className: traefik-internal
+          annotations:
+            external-dns.kubernetes.io/hostname: anki.home.packet.fail
+          hosts:
+            - host: anki.home.packet.fail
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - anki.home.packet.fail
+  destination:
+    namespace: anki
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
