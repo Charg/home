@@ -169,7 +169,7 @@ alloy:
       // SRC= DST= PROTO= SPT= DPT=`. Lines that don't match pass through as-is.
       loki.process "unifi" {
         stage.regex {
-          expression = `\[(?P<fw_chain>[^\]\s]+)\]\s*(?:DESCR="(?P<fw_policy>[^"]*)")?`
+          expression = `\[(?P<fw_chain>[A-Za-z0-9_]+-[A-Z]+-\d+)\]\s*(?:DESCR="(?P<fw_policy>[^"]*)")?`
         }
         stage.regex {
           expression = `SRC=(?P<src_ip>\S+) DST=(?P<dst_ip>\S+)`
