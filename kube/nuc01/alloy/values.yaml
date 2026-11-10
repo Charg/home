@@ -18,6 +18,10 @@ alloy:
       port: 1514
       targetPort: 1514
       protocol: TCP
+    - name: syslog-unifi
+      port: 1515
+      targetPort: 1515
+      protocol: UDP
   configMap:
     content: |-
       discovery.kubernetes "pods" {
@@ -140,6 +144,46 @@ alloy:
         forward_to = [loki.write.default.receiver]
       }
 
+      // UniFi gateway remote syslog, reached through the alloy-syslog
+      // LoadBalancer below.
+      loki.source.syslog "unifi" {
+        listener {
+          address       = "0.0.0.0:1515"
+          protocol      = "udp"
+          syslog_format = "rfc3164"
+          labels        = { job = "unifi-syslog", service_name = "unifi-syslog" }
+        }
+        relabel_rules = loki.relabel.unifi_syslog.rules
+        forward_to    = [loki.process.unifi.receiver]
+      }
+
+      loki.relabel "unifi_syslog" {
+        forward_to = []
+        rule {
+          source_labels = ["__syslog_message_hostname"]
+          target_label  = "host"
+        }
+      }
+
+      // Firewall policy hits: `[<chain>-<action>-<id>] DESCR="<policy>" ...
+      // SRC= DST= PROTO= SPT= DPT=`. Lines that don't match pass through as-is.
+      loki.process "unifi" {
+        stage.regex {
+          expression = `\[(?P<fw_chain>[^\]\s]+)\]\s*(?:DESCR="(?P<fw_policy>[^"]*)")?`
+        }
+        stage.regex {
+          expression = `SRC=(?P<src_ip>\S+) DST=(?P<dst_ip>\S+)`
+        }
+        stage.regex {
+          expression = `PROTO=(?P<proto>\S+)(?: SPT=(?P<src_port>\d+) DPT=(?P<dst_port>\d+))?`
+        }
+        stage.structured_metadata {
+          values = { fw_chain = "", fw_policy = "", src_ip = "", dst_ip = "", proto = "", src_port = "", dst_port = "" }
+        }
+
+        forward_to = [loki.write.default.receiver]
+      }
+
       prometheus.scrape "technitium_query_log" {
         targets         = [{"__address__" = "127.0.0.1:12345"}]
         job_name        = "technitium-query-log"
@@ -247,3 +291,25 @@ alloy:
           url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
         }
       }
+
+extraObjects:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: alloy-syslog
+      namespace: monitoring
+      annotations:
+        metallb.io/loadBalancerIPs: 192.168.74.55
+    spec:
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+      loadBalancerSourceRanges:
+        - 192.168.74.1/32
+      selector:
+        app.kubernetes.io/instance: alloy
+        app.kubernetes.io/name: alloy
+      ports:
+        - name: syslog-unifi
+          port: 514
+          targetPort: 1515
+          protocol: UDP
