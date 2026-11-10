@@ -60,7 +60,7 @@
       bash-language-server
       basedpyright
       ruff
-      marksman
+      markdown-oxide
       lua-language-server
       taplo
       vscode-langservers-extracted

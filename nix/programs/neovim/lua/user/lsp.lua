@@ -63,7 +63,7 @@ vim.lsp.enable({
   "bashls",
   "basedpyright",
   "ruff",
-  "marksman",
+  "markdown_oxide",
   "lua_ls",
   "taplo",
   "jsonls",
