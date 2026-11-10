@@ -1,0 +1,41 @@
+require("gitsigns").setup({
+  on_attach = function(bufnr)
+    local gs = require("gitsigns")
+    local function map(mode, lhs, rhs, desc)
+      vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+    end
+
+    map("n", "]h", function()
+      gs.nav_hunk("next")
+    end, "Next hunk")
+    map("n", "[h", function()
+      gs.nav_hunk("prev")
+    end, "Prev hunk")
+    map({ "n", "x" }, "<leader>gs", gs.stage_hunk, "Stage hunk")
+    map({ "n", "x" }, "<leader>gr", gs.reset_hunk, "Reset hunk")
+    map("n", "<leader>gS", gs.stage_buffer, "Stage buffer")
+    map("n", "<leader>gp", gs.preview_hunk_inline, "Preview hunk")
+    map("n", "<leader>gb", function()
+      gs.blame_line({ full = true })
+    end, "Blame line")
+    map("n", "<leader>gB", gs.toggle_current_line_blame, "Toggle inline blame")
+    map({ "o", "x" }, "ih", gs.select_hunk, "Select hunk")
+  end,
+})
+
+require("diffview").setup({})
+
+local map = vim.keymap.set
+map("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "Diff working tree" })
+map("n", "<leader>gD", "<cmd>DiffviewOpen origin/HEAD...HEAD<cr>", { desc = "Diff branch vs default" })
+map("n", "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", { desc = "File history" })
+map("n", "<leader>gq", "<cmd>DiffviewClose<cr>", { desc = "Close diffview" })
+map("n", "<leader>gl", function()
+  Snacks.picker.git_log()
+end, { desc = "Git log" })
+map("n", "<leader>gf", function()
+  Snacks.picker.git_status()
+end, { desc = "Changed files" })
+map("n", "<leader>gg", function()
+  Snacks.lazygit()
+end, { desc = "Lazygit" })
