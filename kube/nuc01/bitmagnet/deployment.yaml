@@ -31,7 +31,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: bitmagnet
-          image: ghcr.io/charg/bitmagnet:sha-1ec38a8@sha256:b02b8fb11ef4e72b5ecb485343bf5efc24d76f198c14c3a9bf4d113fb85d2d86
+          image: ghcr.io/charg/bitmagnet:alt_main@sha256:327d1510620b628709fa3bdf405da9f59b5544b6cbfc6a15e70a9bc7ba727963
           args:
             - worker
             - run

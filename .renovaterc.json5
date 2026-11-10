@@ -47,6 +47,7 @@
       '/^kube/nuc01/pocket-id/deployment\\.yaml$/',
       '/^kube/nuc01/tinyauth/deployment\\.yaml$/',
       '/^kube/nuc01/tailscale-router/statefulset-[^/]+\\.yaml$/',
+      '/^kube/nuc01/bitmagnet/deployment\\.yaml$/',
     ],
   },
   packageRules: [
@@ -105,6 +106,16 @@
       matchFileNames: ['kube/lookie/app-of-apps/application_set_apps.yaml'],
       groupName: 'lookie cluster updates',
       groupSlug: 'lookie-cluster',
+    },
+    // Own fork: follow the alt_main tag's digest as soon as CI publishes it. Digests carry no
+    // release timestamp, so minimumReleaseAge would hold them forever.
+    {
+      matchPackageNames: ['ghcr.io/charg/bitmagnet'],
+      matchUpdateTypes: ['digest'],
+      minimumReleaseAge: null,
+      schedule: ['at any time'],
+      automergeSchedule: ['at any time'],
+      automerge: true,
     },
     {
       matchPackageNames: [

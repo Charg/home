@@ -6,8 +6,9 @@ UI has no auth.
 
 ## Image
 
-Upstream's `ghcr.io/bitmagnet-io/bitmagnet`, unsigned. Bump tag and digest
-together, and check the digest was pushed by upstream CI before a bump.
+`ghcr.io/charg/bitmagnet`, built from the fork's `alt_main` branch. Pinned as
+`alt_main@sha256:…`; Renovate bumps the digest (and automerges) when the fork's
+CI publishes a new image.
 
 Runs as uid/gid `1000`, read-only root filesystem, no capabilities, no
 writable volumes. Config is env in `deployment.yaml` plus the classifier
