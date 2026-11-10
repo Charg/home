@@ -7,9 +7,9 @@ metadata:
 spec:
   project: apps
   source:
-    repoURL: ghcr.io/charg
+    repoURL: ghcr.io/charg/charts
     chart: anythingllm
-    targetRevision: 0.1.0
+    targetRevision: 0.1.2
     helm:
       valuesObject:
         # Credentials: anythingllm-config/anythingllm-credentials.enc.yaml
