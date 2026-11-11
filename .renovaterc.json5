@@ -20,6 +20,10 @@
   automergeSchedule: [
     '* 8-11 * * 1-5',
   ],
+  // Keep in sync with nix/packages/gh-actions-lock.nix.
+  constraints: {
+    ghActionsLock: 'v0.4.1',
+  },
   lockFileMaintenance: {
     enabled: true,
   },
