@@ -92,21 +92,30 @@
       groupName: 'lookie cluster updates',
       groupSlug: 'lookie-cluster',
     },
-    // Own fork: follow the alt_main tag's digest as soon as CI publishes it. Digests carry no
-    // release timestamp, so minimumReleaseAge would hold them forever.
+    // Own artifacts: ship as soon as they are published. Digests and OCI charts carry no release
+    // timestamp, so minimumReleaseAge would hold them forever. Branch pushes run no CI (validate
+    // is pull_request only), so prCreation 'not-pending' would hold the PR for prNotPendingHours.
+    {
+      matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/charts/**'],
+      minimumReleaseAge: null,
+      prCreation: 'immediate',
+      schedule: ['at any time'],
+      automergeSchedule: ['at any time'],
+    },
     {
       matchPackageNames: ['ghcr.io/charg/bitmagnet'],
       matchUpdateTypes: ['digest'],
-      minimumReleaseAge: null,
-      schedule: ['at any time'],
-      automergeSchedule: ['at any time'],
       automerge: true,
     },
-    // Own charts: OCI chart artifacts carry no release timestamp, so minimumReleaseAge would
-    // hold them forever.
+    // Argo CD's targetRevision takes a chart version, not a digest.
     {
       matchPackageNames: ['ghcr.io/charg/charts/**'],
-      minimumReleaseAge: null,
+      pinDigests: false,
+    },
+    {
+      matchPackageNames: ['ghcr.io/charg/charts/**'],
+      matchUpdateTypes: ['minor', 'patch'],
+      automerge: true,
     },
     {
       matchPackageNames: [
