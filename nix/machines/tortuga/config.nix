@@ -216,6 +216,12 @@
 
   i18n.defaultLocale = "en_US.UTF-8";
 
+  # Start the user's systemd instance at boot and keep it after logout, so
+  # /run/user/<uid> and the session D-Bus exist without a GDM login. Moonshine
+  # launches games as units in that instance. Its module sets this too; it's
+  # here so it's visible. Was already enabled imperatively (loginctl).
+  users.users.${currentSystemUser}.linger = true;
+
   # The onboard MediaTek MT7922 (Wi-Fi over PCIe, Bluetooth over USB) is the
   # main suspect for the machine hanging in S3 and needing a hard power-off.
   # Wi-Fi is unused (wired Ethernet), so its driver is kept out entirely.
