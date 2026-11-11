@@ -45,6 +45,10 @@ in
     herdr-desktop = final.callPackage ../packages/herdr-desktop.nix { };
   })
 
+  (final: prev: {
+    gh-actions-lock = final.callPackage ../packages/gh-actions-lock.nix { };
+  })
+
   # nixpkgs-unstable still lags Anthropic's own binary releases by days-to-weeks.
   # Anthropic publishes every version straight to GCS with a manifest.json of
   # per-platform checksums (same source nixpkgs' update.sh pulls from), so pin
