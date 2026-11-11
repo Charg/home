@@ -57,6 +57,14 @@
       flake = false;
     };
 
+    # Moonshine game stream host for tortuga, tried alongside Helios. Its
+    # module builds the package against the host's nixpkgs; follows only
+    # avoids fetching a second nixpkgs.
+    moonshine = {
+      url = "github:hgaiser/moonshine";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     claude-plugins-official = {
       url = "github:anthropics/claude-plugins-official";
       flake = false;

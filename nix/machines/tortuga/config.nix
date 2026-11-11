@@ -11,6 +11,7 @@
   imports = [
     ./hardware-configuration.nix
     ./helios.nix
+    ./moonshine.nix
     ./k3s.nix
     ./netconsole.nix
     inputs.lanzaboote.nixosModules.lanzaboote

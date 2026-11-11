@@ -189,6 +189,26 @@
         "type": "github"
       }
     },
+    "moonshine": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794293114,
+        "narHash": "sha256-f2p6vlD67a1DmhT79qOoEL0itm8J5/s/UIMvWcDffQU=",
+        "owner": "hgaiser",
+        "repo": "moonshine",
+        "rev": "2fc1a293f08b5946e5e188ced4653ee5209dd462",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hgaiser",
+        "repo": "moonshine",
+        "type": "github"
+      }
+    },
     "nix-github-actions": {
       "inputs": {
         "nixpkgs": [
@@ -380,6 +400,7 @@
         "helios": "helios",
         "home-manager": "home-manager",
         "lanzaboote": "lanzaboote",
+        "moonshine": "moonshine",
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_2",
