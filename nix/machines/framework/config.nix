@@ -32,8 +32,8 @@ let
       ${pkgs.util-linux}/bin/logger -t netcheck "network conflict detected on $interface ($action): $summary"
 
       if [ -n "''${summary:-}" ]; then
-        ${pkgs.sudo}/bin/sudo -u framework \
-          DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
+        ${pkgs.sudo}/bin/sudo -u ${currentSystemUser} \
+          DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(${pkgs.coreutils}/bin/id -u ${currentSystemUser})/bus \
           ${pkgs.libnotify}/bin/notify-send \
           -u critical \
           "Network conflict on $interface" \

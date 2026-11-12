@@ -111,7 +111,8 @@
       hosts = {
         framework = {
           system = "x86_64-linux";
-          user = "framework";
+          user = "chris";
+          profile = "framework";
           home = true;
         };
 

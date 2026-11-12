@@ -30,7 +30,7 @@ This will produce a tarball `nixos-wsl.tar.gz` which can be copied into a window
 #### Visualize your flake
 ```
 ❯ nix flake show
-git+file:///home/framework/code/home
+git+file:///home/chris/code/home
 └───nixosConfigurations
     ├───framework: NixOS configuration
     └───wsl: NixOS configuration
@@ -50,7 +50,7 @@ Nix 2.24.11
 Type :? for help.
 
 nix-repl> :lf .
-warning: Git tree '/home/framework/code/home' is dirty
+warning: Git tree '/home/chris/code/home' is dirty
 Added 12 variables.
 
 nix-repl> nix-repl> outputs.nixosConfigurations.<TAB>

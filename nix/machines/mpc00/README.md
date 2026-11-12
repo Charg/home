@@ -59,7 +59,7 @@ chmod 600 "$temp/etc/ssh/ssh_host_ed25519_key"
 
 nix run github:nix-community/nixos-anywhere -- \
   --extra-files "$temp" \
-  --flake /home/framework/code/home#mpc00 \
+  --flake /home/chris/code/home#mpc00 \
   --target-host root@<MPC00_IP> \
   --disk-encryption-keys /tmp/luks.txt /tmp/luks.txt
 ```

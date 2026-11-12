@@ -1,5 +1,7 @@
 # `framework`
 
+User `chris`, configured from the `nix/users/framework` profile.
+
 Disk layout is declared in `disk-config.nix`:
 
 - `ESP` (1G, `/boot`)
