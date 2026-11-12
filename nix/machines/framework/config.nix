@@ -73,6 +73,7 @@ in
   imports = [
     inputs.nixos-hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
+    ./disk-config.nix
     ../../common/alloy.nix
     ../../common/bluetooth.nix
     ../../common/fonts.nix
@@ -550,9 +551,9 @@ in
   # The lid sensos is flakey atm. Ignore it until I can fix it.
   services.logind.settings.Login.HandleLidSwitch = "ignore";
 
-  # Hibernate is manual (`systemctl hibernate`). Note the kernel refuses it
-  # while any process holds memfd_secret memory (e.g. Bitwarden desktop).
-  boot.resumeDevice = "/dev/disk/by-uuid/6fdd768c-6af6-473c-b501-8fdd5fb79fe6";
+  # Hibernate is manual (`systemctl hibernate`) to the swap LV, which disko
+  # sets as the resume device. Note the kernel refuses it while any process
+  # holds memfd_secret memory (e.g. Bitwarden desktop).
 
   security.sudo.wheelNeedsPassword = false;
   # Pipewire - allows to use the realtime scheduler for increased performance.
