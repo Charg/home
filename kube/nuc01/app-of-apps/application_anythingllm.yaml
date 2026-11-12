@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: anythingllm
-    targetRevision: 0.1.2
+    targetRevision: 0.2.0
     helm:
       valuesObject:
         # Credentials: anythingllm-config/anythingllm-credentials.enc.yaml
