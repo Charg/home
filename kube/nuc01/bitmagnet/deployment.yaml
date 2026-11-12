@@ -83,6 +83,9 @@ spec:
               value: /etc/xdg
             - name: CLASSIFIER_WORKFLOW
               value: filtered
+            # JSON logs carry timestamps; the console encoder has none.
+            - name: LOG_JSON
+              value: "true"
           ports:
             - name: http
               containerPort: 3333
@@ -107,9 +110,12 @@ spec:
               port: 3333
             periodSeconds: 10
             failureThreshold: 30
+          # Not /status: it includes the DHT check, which fails whenever the VPN
+          # gateway blips. Torznab only needs Postgres, and with one replica an
+          # unready pod just turns search errors into connection refusals.
           readinessProbe:
             httpGet:
-              path: /status
+              path: /torznab/api?t=caps
               port: 3333
             periodSeconds: 10
           # TCP, not /status: a Postgres blip should not restart the crawler.
