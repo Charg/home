@@ -17,6 +17,8 @@
   automergeType: 'pr',
   automergeStrategy: 'squash',
   platformAutomerge: false,
+  // Merge green PRs even when behind main; otherwise each run rebases instead of merging.
+  rebaseWhen: 'conflicted',
   automergeSchedule: [
     '* 8-11 * * 1-5',
   ],
