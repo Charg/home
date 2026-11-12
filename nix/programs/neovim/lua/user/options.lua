@@ -67,10 +67,14 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
--- Clipboard: system clipboard everywhere, OSC 52 over SSH
+-- Clipboard: system clipboard everywhere, OSC 52 when the terminal is remote
+-- (SSH, or a herdr pane on a machine with no local display session)
 vim.schedule(function()
   vim.opt.clipboard:append("unnamedplus")
-  if vim.env.SSH_CLIENT or vim.env.SSH_TTY then
+  local ssh = vim.env.SSH_CLIENT or vim.env.SSH_TTY
+  local herdr_headless = vim.env.HC_TERMINAL_SOCKET
+    and not (vim.env.WAYLAND_DISPLAY or vim.env.DISPLAY)
+  if ssh or herdr_headless then
     vim.g.clipboard = "osc52"
   end
 end)
