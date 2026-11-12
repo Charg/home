@@ -1,16 +1,13 @@
-# `tortuga` install (dual boot with Windows)
+# `tortuga`
 
-This machine uses:
-- One disk shared with Windows; NixOS gets the second half
-- Its own 1 GiB ESP (`nixos-esp`) — Windows' ESP is left untouched
-- LUKS root (`nixos-root` → `cryptroot`), ext4
-- NVIDIA proprietary driver (open kernel modules)
-- User `chris`, configured from the `nix/users/framework` profile
+Dual boot with Windows. NixOS has its own ESP (`nixos-esp`) and a LUKS root
+(`cryptroot`); Windows' ESP is left untouched. User `chris`, configured from
+the `nix/users/framework` profile.
 
 ## On-demand GPU node (k3s agent)
 
 `k3s.nix` joins tortuga to the nuc01 cluster as a k3s **agent** that is *not*
-started at boot. It exposes the RTX 4080 SUPER as `nvidia.com/gpu` (via
+started at boot. It exposes the GPU as `nvidia.com/gpu` (via
 `kube/nuc01/nvidia-device-plugin`) and is tainted `nvidia.com/gpu=true:NoSchedule`,
 so only GPU workloads land here.
 
@@ -46,14 +43,14 @@ spec:
           nvidia.com/gpu: 1
 ```
 
-`kubectl logs gpu-test` should print the 4080 SUPER.
+`kubectl logs gpu-test` should list the GPU.
 
 ## Game streaming (Helios)
 
 `helios.nix` runs [Helios](https://github.com/moonlight-os/helios), a Sunshine
-fork, built with CUDA so it can encode on the 4080 with NVENC. The service runs
-Helios inside a headless Sway session rendered on the 4080, and each client
-gets its own display there; the GNOME session and the G9 are left untouched.
+fork, built with CUDA for NVENC encoding. The service runs Helios inside a headless
+Sway session on the GPU, and each client gets its own display there; the GNOME
+session and physical monitors are left untouched.
 (Helios can start a private Sway itself, but only after it has already picked
 a capture method, so launched from GNOME it finds nothing to capture.)
 
