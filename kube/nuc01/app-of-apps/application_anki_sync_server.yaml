@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: anki-sync-server
-    targetRevision: 0.2.1
+    targetRevision: 0.2.2
     helm:
       valuesObject:
         # SYNC_USER<n> entries, from anki-sync-server-config (SOPS).
