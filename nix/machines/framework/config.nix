@@ -99,6 +99,15 @@ in
   # resolves an issues with virtualbox 6.12. https://github.com/NixOS/nixpkgs/issues/363887#issuecomment-2536693220
   boot.kernelParams = [ "kvm.enable_virt_at_load=0" ];
 
+  # Unlock cryptroot with the YubiKey's FIDO2 token if it's plugged in, else
+  # fall back to the passphrase after token-timeout. Enrol the key with:
+  #   systemd-cryptenroll --fido2-device=auto --fido2-with-client-pin=no \
+  #     --fido2-with-user-presence=no /dev/disk/by-partlabel/disk-main-luks
+  boot.initrd.luks.devices.cryptroot.crypttabExtraOpts = [
+    "fido2-device=auto"
+    "token-timeout=5s"
+  ];
+
   #
   # Networking
   #
