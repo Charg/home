@@ -567,7 +567,12 @@ in
   # Used for YubiKey related operations.
   services.pcscd.enable = true;
 
-  security.pam.u2f.settings.userpresence = 0;
+  # Pin origin/appid rather than letting pam_u2f derive them from the hostname.
+  security.pam.u2f.settings = {
+    userpresence = 0;
+    origin = "pam://framework13";
+    appid = "pam://framework13";
+  };
   # gdm-password and the lock screen substack `login`; pam_u2f sits before
   # pam_unix, so a missing key fails the login even with the right password.
   security.pam.services.login.u2f = {
