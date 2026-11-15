@@ -48,11 +48,11 @@ in
   };
 
   dconf.settings = lib.mkIf isLinux {
-    "gnome/desktop/peripherals/mouse" = {
+    "org/gnome/desktop/peripherals/mouse" = {
       natural-scroll = false;
     };
 
-    "gnome/desktop/peripherals/touchpad" = {
+    "org/gnome/desktop/peripherals/touchpad" = {
       natural-scroll = false;
     };
 
