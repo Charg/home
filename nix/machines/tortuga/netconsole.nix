@@ -25,9 +25,15 @@ in
       pkgs.iproute2
       pkgs.iputils
     ];
+    # network-online.target can be reached before enp9s0 has its IPv4 address,
+    # and then the route lookup fails with "Network is unreachable". Keep
+    # retrying until the address and next hop are there, with no start limit.
+    unitConfig.StartLimitIntervalSec = 0;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      Restart = "on-failure";
+      RestartSec = "5s";
     };
     script = ''
       read -r via dev < <(ip -4 route get ${nuc01} |
