@@ -7,10 +7,6 @@
     'dependencies',
   ],
   timezone: 'America/Los_Angeles',
-  // Monday-only branch creation
-  schedule: [
-    '* * * * 1',
-  ],
   minimumReleaseAge: '7 days',
   internalChecksFilter: 'strict',
   prCreation: 'not-pending',
@@ -106,7 +102,6 @@
       matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/website', 'ghcr.io/charg/charts/**'],
       minimumReleaseAge: null,
       prCreation: 'immediate',
-      schedule: ['at any time'],
       automergeSchedule: ['at any time'],
     },
     {
@@ -123,14 +118,6 @@
       matchPackageNames: ['ghcr.io/charg/charts/**'],
       matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
-    },
-    {
-      matchPackageNames: [
-        'plexinc/pms-docker',
-        'ghcr.io/qdm12/gluetun',
-        'ghcr.io/home-operations/qbittorrent',
-      ],
-      schedule: ['at any time'],
     },
   ],
   customManagers: [
