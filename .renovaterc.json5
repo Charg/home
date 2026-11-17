@@ -33,33 +33,12 @@
   },
   kubernetes: {
     enabled: true,
+    // Only files with apiVersion/kind and image: lines yield dependencies.
     managerFilePatterns: [
-      '/^kube/lookie/prowlarr/deployment\\.yaml$/',
-      '/^kube/lookie/qbit-neo/statefulset\\.yaml$/',
-      '/^kube/lookie/scryer/deployment\\.yaml$/',
-      '/^kube/lookie/trawl/deployment\\.yaml$/',
-      '/^kube/nuc01/ac-redis/redis\\.yaml$/',
-      '/^kube/nuc01/ov-redis/redis\\.yaml$/',
-      '/^kube/nuc01/ac-rustfs/deployment\\.yaml$/',
-      '/^kube/nuc01/ac-rustfs/create-bucket-job\\.yaml$/',
-      '/^kube/nuc01/ov-rustfs/deployment\\.yaml$/',
-      '/^kube/nuc01/ov-rustfs/proxy-deployment\\.yaml$/',
-      '/^kube/nuc01/ov-rustfs/create-bucket-job\\.yaml$/',
-      '/^kube/nuc01/cloudflared/deployment\\.yaml$/',
-      '/^kube/nuc01/pocket-id/deployment\\.yaml$/',
-      '/^kube/nuc01/tinyauth/deployment\\.yaml$/',
-      '/^kube/nuc01/tailscale-router/statefulset-[^/]+\\.yaml$/',
-      '/^kube/nuc01/bitmagnet/deployment\\.yaml$/',
-      '/^kube/nuc01/website/deployment\\.yaml$/',
+      '/^kube/.+\\.ya?ml$/',
     ],
   },
   packageRules: [
-    {
-      matchFileNames: ['nix/programs/litellm/docker-compose.yaml'],
-      pinDigests: true,
-      groupName: 'litellm compose images',
-      groupSlug: 'litellm-compose',
-    },
     {
       matchUpdateTypes: ['digest', 'pin', 'pinDigest', 'patch'],
       automerge: true,
@@ -83,6 +62,8 @@
         'kube-prometheus-stack',
         'cloudnative-pg',
         'plugin-barman-cloud',
+        // Digest bumps restart the database pods.
+        'ghcr.io/cloudnative-pg/postgresql',
       ],
       automerge: false,
     },
@@ -90,16 +71,17 @@
       matchUpdateTypes: ['major'],
       automerge: false,
     },
+    // The chart's appVersion is the matching server release; bump them together.
     {
-      matchFileNames: ['kube/lookie/app-of-apps/application_set_apps.yaml'],
-      groupName: 'lookie cluster updates',
-      groupSlug: 'lookie-cluster',
+      matchFileNames: ['kube/nuc01/fleet-apps/fleet.yaml', 'kube/nuc01/fleet/values.yaml'],
+      groupName: 'fleet',
+      groupSlug: 'fleet',
     },
     // Own artifacts: ship as soon as they are published. Digests and OCI charts carry no release
     // timestamp, so minimumReleaseAge would hold them forever. Branch pushes run no CI (validate
     // is pull_request only), so prCreation 'not-pending' would hold the PR for prNotPendingHours.
     {
-      matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/website', 'ghcr.io/charg/charts/**'],
+      matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/website', 'ghcr.io/charg/charts/**', 'ghcr.io/charg/containers/**'],
       minimumReleaseAge: null,
       prCreation: 'immediate',
       automergeSchedule: ['at any time'],
@@ -111,7 +93,7 @@
     },
     // Argo CD's targetRevision takes a chart version, not a digest.
     {
-      matchPackageNames: ['ghcr.io/charg/charts/**'],
+      matchDepTypes: ['oci-chart'],
       pinDigests: false,
     },
     {
@@ -125,17 +107,7 @@
       customType: 'regex',
       managerFilePatterns: [
         '/^kube/[^/]+/app-of-apps/application_set_apps\\.yaml$/',
-      ],
-      matchStrings: [
-        'name:\\s*node-feature-discovery[\\s\\S]*?repoURL:\\s*oci://(?<namespace>\\S+)\\s*\\n\\s*chart:\\s*(?<packageName>node-feature-discovery)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)',
-      ],
-      datasourceTemplate: 'docker',
-      packageNameTemplate: '{{namespace}}/{{packageName}}',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^kube/[^/]+/app-of-apps/application_set_apps\\.yaml$/',
+        '/^kube/[^/]+/fleet-apps/fleet\\.yaml$/',
       ],
       matchStrings: [
         'repoURL:\\s*(?<registryUrl>https?://\\S+)\\s*\\n\\s*chart:\\s*(?<packageName>\\S+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)',
@@ -143,19 +115,65 @@
       datasourceTemplate: 'helm',
       versioningTemplate: 'helm',
     },
-    // Own charts (Charg/charts), served over OCI. Argo CD writes OCI repoURLs without a scheme,
-    // so the https helm manager above skips them.
+    // OCI charts. Argo CD writes OCI repoURLs without a scheme, so the https helm manager above
+    // skips them.
     {
       customType: 'regex',
       managerFilePatterns: [
         '/^kube/[^/]+/app-of-apps/application_[^/]+\\.yaml$/',
       ],
       matchStrings: [
-        'repoURL:\\s*(?<namespace>ghcr\\.io/charg/charts)\\s*\\n\\s*chart:\\s*(?<packageName>\\S+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)',
+        'repoURL:\\s*(?<namespace>[a-z0-9.-]+\\.[a-z]{2,}/[^\\s:]+)\\s*\\n\\s*chart:\\s*(?<packageName>\\S+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\d\\S*)',
       ],
       datasourceTemplate: 'docker',
       packageNameTemplate: '{{namespace}}/{{packageName}}',
       versioningTemplate: 'semver',
+      depTypeTemplate: 'oci-chart',
+    },
+    // Git-sourced Applications pinned to a tag.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^kube/[^/]+/app-of-apps/application_[^/]+\\.yaml$/',
+      ],
+      matchStrings: [
+        'repoURL:\\s*https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+?)(?:\\.git)?\\s*\\n(?:\\s*path:.*\\n)?\\s*targetRevision:\\s*(?<currentValue>v?\\d\\S*)',
+      ],
+      datasourceTemplate: 'github-tags',
+    },
+    // Image as repository/tag/digest helm values.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^kube/[^/]+/app-of-apps/application_[^/]+\\.yaml$/',
+      ],
+      matchStrings: [
+        'repository:\\s*(?<depName>\\S+)\\s*\\n\\s*tag:\\s*(?<currentValue>[^\\s@]+)\\s*\\n\\s*digest:\\s*(?<currentDigest>sha256:[a-f0-9]+)',
+      ],
+      datasourceTemplate: 'docker',
+    },
+    // CloudNativePG Cluster images.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^kube/.+\\.ya?ml$/',
+      ],
+      matchStrings: [
+        'imageName:\\s*(?<depName>[^\\s:@]+):(?<currentValue>[^\\s@]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
+      ],
+      datasourceTemplate: 'docker',
+    },
+    // Fleet chart's server image tag.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^kube/[^/]+/fleet/values\\.yaml$/',
+      ],
+      matchStrings: [
+        'imageTag:\\s*(?<currentValue>[^\\s@]+)@(?<currentDigest>sha256:[a-f0-9]+)',
+      ],
+      depNameTemplate: 'fleetdm/fleet',
+      datasourceTemplate: 'docker',
     },
     {
       customType: 'regex',
