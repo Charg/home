@@ -8,6 +8,7 @@
   # CLI Tools
   pkgs.acli # Atlassian Command Line Interface
   pkgs.age
+  pkgs.bitwarden-cli # Bitwarden CLI (bw)
   pkgs.bottom
   pkgs.codex # OpenAI Codex
   pkgs.crane # Tools for interacting with remote images and registries including crane and gcrane
