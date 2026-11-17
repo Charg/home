@@ -23,8 +23,3 @@ from the Dependency Dashboard issue).
 
 To roll back, set `image` to a `sha-<short>` tag here and commit; Renovate
 will pin its digest. Auto-updates stop until `image` is back on `main`.
-
-## Flat directory, on purpose
-
-The SOPS plugin only reads top-level `*.yaml`/`*.yml` files. Keep every
-manifest flat in this directory, and keep this README a `.md`.

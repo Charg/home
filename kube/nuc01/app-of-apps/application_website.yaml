@@ -10,7 +10,6 @@ spec:
     repoURL: https://github.com/Charg/home.git
     path: kube/nuc01/website
     targetRevision: main
-    plugin: {}
   destination:
     namespace: website
     server: https://kubernetes.default.svc
