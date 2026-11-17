@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: website
+  namespace: website
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: website
+  policyTypes:
+    - Ingress
+    - Egress
+  # Only the Cloudflare tunnel. nginx serves files baked into the image and
+  # calls out to nothing, so no egress.
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudflared
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudflared
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress: []

@@ -54,6 +54,7 @@
       '/^kube/nuc01/tinyauth/deployment\\.yaml$/',
       '/^kube/nuc01/tailscale-router/statefulset-[^/]+\\.yaml$/',
       '/^kube/nuc01/bitmagnet/deployment\\.yaml$/',
+      '/^kube/nuc01/website/deployment\\.yaml$/',
     ],
   },
   packageRules: [
@@ -102,14 +103,14 @@
     // timestamp, so minimumReleaseAge would hold them forever. Branch pushes run no CI (validate
     // is pull_request only), so prCreation 'not-pending' would hold the PR for prNotPendingHours.
     {
-      matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/charts/**'],
+      matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/website', 'ghcr.io/charg/charts/**'],
       minimumReleaseAge: null,
       prCreation: 'immediate',
       schedule: ['at any time'],
       automergeSchedule: ['at any time'],
     },
     {
-      matchPackageNames: ['ghcr.io/charg/bitmagnet'],
+      matchPackageNames: ['ghcr.io/charg/bitmagnet', 'ghcr.io/charg/website'],
       matchUpdateTypes: ['digest'],
       automerge: true,
     },

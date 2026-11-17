@@ -1,0 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: website
+  namespace: argocd
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/nuc01/website
+    targetRevision: main
+    plugin: {}
+  destination:
+    namespace: website
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true

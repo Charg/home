@@ -44,6 +44,8 @@ spec:
       namespace: temporal
     - server: https://kubernetes.default.svc
       namespace: vaultwarden
+    - server: https://kubernetes.default.svc
+      namespace: website
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace

@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: website
+  namespace: website
+  labels:
+    app.kubernetes.io/name: website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: website
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: website
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          # Digest bumped by Renovate on every Charg/website build; see README.
+          image: ghcr.io/charg/website:main@sha256:232c6f9dfdef31a793fac2712e861b200bcb10072f59e67406ddeb4b6669424c
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - { name: http, containerPort: 8080, protocol: TCP }
+          volumeMounts:
+            # nginx writes its pid and temp files here.
+            - { name: tmp, mountPath: /tmp }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { memory: 64Mi }
+      volumes:
+        - name: tmp
+          emptyDir: {}
