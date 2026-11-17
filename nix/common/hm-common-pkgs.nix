@@ -33,6 +33,7 @@
   pkgs.nodejs
   pkgs.openssl
   pkgs.python313
+  pkgs.rbw # Unofficial Bitwarden CLI, written in Rust
   pkgs.sops
   pkgs.sqlite-interactive # compiled with quality of additions like readline support
   pkgs.ssh-to-age
