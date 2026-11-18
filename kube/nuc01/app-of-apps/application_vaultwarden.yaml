@@ -17,7 +17,7 @@ spec:
         image:
           repository: ghcr.io/charg/containers/vaultwarden
           tag: 1.37.5
-          digest: sha256:bdc9fdca6c9fae7a5f9bdbb10a63db83d3a0b37a1db822b19da500c1f97bcefc
+          digest: sha256:8d6ce351133b89d92da786fba004875ebc2f22bb736bb35dbc078f85cf394fea
         podSecurityContext:
           runAsNonRoot: true
           runAsUser: 65532
