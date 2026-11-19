@@ -179,10 +179,25 @@
     # which save VRAM to a file under TemporaryFilePath.
     powerManagement.kernelSuspendNotifier = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # Open module patched with NVIDIA/open-gpu-kernel-modules#1395, which stops
+    # a use-after-free oops in nvRevokeDevice when the GPU fails to resume.
+    # Drop the patch once the PR lands in a driver release.
+    package =
+      let
+        driver = config.boot.kernelPackages.nvidiaPackages.stable;
+      in
+      driver
+      // {
+        open = driver.open.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ./patches/nvidia-open-nested-revoke.patch ];
+        });
+      };
     # Disk-backed, so a VRAM dump doesn't sit in RAM while asleep.
     moduleParams.nvidia.NVreg_TemporaryFilePath = "/var/tmp";
   };
+
+  # Keep more of the kernel log in the EFI pstore crash dump (default 10 KiB).
+  boot.kernelParams = [ "pstore.kmsg_bytes=65536" ];
 
   # Mutter reads monitors.xml from the system config dirs too, so the GDM
   # greeter comes up in the same mode as the user session.

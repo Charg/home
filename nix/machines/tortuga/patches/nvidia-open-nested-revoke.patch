@@ -1,0 +1,65 @@
+From 5db24a72350ab2679376132ac8e31a06a0950343 Mon Sep 17 00:00:00 2001
+From: Sammy Tourani <sammytourani@gmail.com>
+Date: Thu, 24 Sep 2026 10:28:05 -0400
+Subject: [PATCH] nvidia-modeset: ignore nested nvRevokeDevice() calls
+
+If the core channel cannot be reallocated on resume, nvResumeDevEvo()
+calls nvRevokeDevice(), which calls FreeDeviceReference() for every
+client.  For the modeset owner, FreeDeviceReference() releases ownership,
+RestoreConsole() fails to reallocate the core channel again and calls
+nvRevokeDevice() a second time.  The nested call runs
+FreeDeviceReference() again for the owner, so its device reference is
+dropped twice and the device is freed while other clients still point
+at it.  Their teardown then reads the freed NVDevEvoRec, which oopses in
+nvEvoDisableVblankSemControl() with a NULL pDispEvo.
+
+Return early from a nested nvRevokeDevice(); the outer loop already
+frees every remaining reference.
+---
+ src/nvidia-modeset/src/nvkms.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/src/nvidia-modeset/src/nvkms.c b/src/nvidia-modeset/src/nvkms.c
+index 4f9b65b7de..0a416adfe8 100644
+--- a/src/nvidia-modeset/src/nvkms.c
++++ b/src/nvidia-modeset/src/nvkms.c
+@@ -5307,6 +5307,8 @@ void nvKmsClose(void *pOpenVoid)
+ }
+
+
++static NvBool revokeInProgress = FALSE;
++
+ /*
+  *Frees all references to a device
+  */
+@@ -5316,6 +5318,21 @@ void nvRevokeDevice(NVDevEvoPtr pDevEvo)
+         return;
+     }
+
++    /*
++     * FreeDeviceReference() can call back into nvRevokeDevice() through
++     * ReleaseModesetOwnership() -> RestoreConsole() if the core channel
++     * cannot be reallocated.  The nested call would call
++     * FreeDeviceReference() again for the pOpenDev that is being freed,
++     * dropping its device reference twice, so the device could be freed
++     * while other clients still use it.  The outer loop frees all remaining
++     * references, so just return.
++     */
++    if (revokeInProgress) {
++        return;
++    }
++
++    revokeInProgress = TRUE;
++
+     struct NvKmsPerOpen *pOpen;
+
+     nvListForEachEntry(pOpen, &perOpenIoctlList, perOpenIoctlListEntry) {
+@@ -5330,6 +5347,8 @@ void nvRevokeDevice(NVDevEvoPtr pDevEvo)
+         }
+         FreeDeviceReference(pOpen, pOpenDev);
+     }
++
++    revokeInProgress = FALSE;
+ }
+
+ /*!
