@@ -197,7 +197,9 @@
   };
 
   # Keep more of the kernel log in the EFI pstore crash dump (default 10 KiB).
-  boot.kernelParams = [ "pstore.kmsg_bytes=65536" ];
+  # Two dumps per crash (oops + panic) at this size use about a third of the
+  # 256 KiB EFI variable store.
+  boot.kernelParams = [ "pstore.kmsg_bytes=32768" ];
 
   # Mutter reads monitors.xml from the system config dirs too, so the GDM
   # greeter comes up in the same mode as the user session.
