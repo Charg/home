@@ -18,13 +18,14 @@ spec:
     spec:
       automountServiceAccountToken: false
       securityContext:
-        runAsUser: 101
-        runAsGroup: 101
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: nginx
+        - name: website
           # Digest bumped by Renovate on every Charg/website build; see README.
           image: ghcr.io/charg/website:main@sha256:232c6f9dfdef31a793fac2712e861b200bcb10072f59e67406ddeb4b6669424c
           securityContext:
@@ -32,21 +33,26 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
+          env:
+            - { name: GOMEMLIMIT, value: 100MiB }
           ports:
-            - { name: http, containerPort: 8080, protocol: TCP }
+            - { name: https, containerPort: 8443, protocol: TCP }
+            - { name: health, containerPort: 8081, protocol: TCP }
           volumeMounts:
-            # nginx writes its pid and temp files here.
-            - { name: tmp, mountPath: /tmp }
+            # No subPath: the server picks up renewed certificates.
+            - { name: tls, mountPath: /tls, readOnly: true }
           readinessProbe:
-            httpGet: { path: /, port: http }
+            httpGet: { path: /healthz, port: health }
             periodSeconds: 10
           livenessProbe:
-            httpGet: { path: /, port: http }
+            httpGet: { path: /healthz, port: health }
             initialDelaySeconds: 5
             periodSeconds: 20
           resources:
             requests: { cpu: 10m, memory: 16Mi }
-            limits: { memory: 64Mi }
+            limits: { memory: 128Mi }
       volumes:
-        - name: tmp
-          emptyDir: {}
+        - name: tls
+          secret:
+            secretName: website-tls
+            defaultMode: 0440

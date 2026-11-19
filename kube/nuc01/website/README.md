@@ -1,7 +1,8 @@
 # website
 
-The personal site at `syn.sh`: static files served by nginx, built from
-[Charg/website](https://github.com/Charg/website).
+The personal site at `syn.sh`, built from
+[Charg/website](https://github.com/Charg/website). A Go server terminates TLS
+itself; `traefik-public` passes the connection through with the PROXY protocol.
 
 Served on `traefik-public`. DNS is not managed by external-dns.
 
