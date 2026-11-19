@@ -27,7 +27,7 @@ spec:
       containers:
         - name: website
           # Digest bumped by Renovate on every Charg/website build; see README.
-          image: ghcr.io/charg/website:main@sha256:232c6f9dfdef31a793fac2712e861b200bcb10072f59e67406ddeb4b6669424c
+          image: ghcr.io/charg/website:main@sha256:0f65fc2e20c94c719da6820cf244fee5b3c630912a13fb440fa31d08ec32824d
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
