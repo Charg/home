@@ -16,7 +16,8 @@ Digest-pinned; bump tag and digest together.
 
 ## Access
 
-Two locks, both in `copyparty-config`:
+Three locks: Traefik's `ip-allowlist` middleware on the Ingress, and two in
+`copyparty-config`:
 
 - `ipar`: allowed client IPs. It reads the client address from Traefik's
   `X-Forwarded-For`, trusted only from pod IPs (`xff-src`). Do not swap it

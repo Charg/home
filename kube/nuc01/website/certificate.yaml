@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: website
+  namespace: website
+spec:
+  secretName: website-tls
+  dnsNames:
+    - syn.sh
+  issuerRef:
+    kind: ClusterIssuer
+    name: lets-encrypt-syn-sh

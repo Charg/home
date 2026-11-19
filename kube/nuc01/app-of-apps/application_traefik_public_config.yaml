@@ -1,0 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik-public-config
+  namespace: argocd
+spec:
+  project: infra
+  source:
+    repoURL: https://github.com/Charg/home.git
+    path: kube/nuc01/traefik-public-config
+    targetRevision: main
+    plugin: {}
+  destination:
+    namespace: traefik-public
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true

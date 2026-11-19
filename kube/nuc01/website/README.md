@@ -3,10 +3,7 @@
 The personal site at `syn.sh`: static files served by nginx, built from
 [Charg/website](https://github.com/Charg/website).
 
-Served through the Cloudflare tunnel (`kube/nuc01/cloudflared`), not Traefik.
-The public hostname is set in the Cloudflare dashboard, pointing at
-`http://website.website.svc.cluster.local:8080`. No Ingress, Certificate or
-external-dns record.
+Served on `traefik-public`. DNS is not managed by external-dns.
 
 ## Image
 

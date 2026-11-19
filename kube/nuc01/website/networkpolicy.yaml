@@ -11,10 +11,15 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  # Only the Cloudflare tunnel. nginx serves files baked into the image and
-  # calls out to nothing, so no egress.
+  # cloudflared is temporary, until syn.sh is off the tunnel.
   ingress:
     - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-public
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: cloudflared

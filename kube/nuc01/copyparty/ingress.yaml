@@ -12,6 +12,7 @@ metadata:
     # DNS-only: through the Cloudflare proxy the client IP copyparty sees is
     # Cloudflare's, and bulk video breaks their terms.
     external-dns.kubernetes.io/cloudflare-proxied: "false"
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-public-ip-allowlist@kubernetescrd
 spec:
   ingressClassName: traefik-public
   rules:

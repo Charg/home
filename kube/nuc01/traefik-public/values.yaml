@@ -5,6 +5,16 @@ ingressClass:
   isDefaultClass: false
   name: traefik-public
 
+# Routes that aren't public need the ip-allowlist middleware.
+ports:
+  web:
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
 metrics:
   prometheus:
     addRoutersLabels: true
@@ -73,6 +83,8 @@ ingressRoute:
     entryPoints: ["websecure"]
     matchRule: Host(`traefik-public.home.packet.fail`)
     middlewares:
+      - name: ip-allowlist
+        namespace: traefik-public
       - name: tinyauth
         namespace: auth
     # Per-router certificate rather than a TLSStore: Traefik allows one
