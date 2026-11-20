@@ -10,6 +10,9 @@
   minimumReleaseAge: '7 days',
   internalChecksFilter: 'strict',
   prCreation: 'not-pending',
+  // CI runs on PRs only, so passing stability-days is the branch's sole check. Count it as green so
+  // PRs open once minimumReleaseAge passes; the ruleset's required Validate check gates merges.
+  internalChecksAsSuccess: true,
   automergeType: 'pr',
   automergeStrategy: 'squash',
   platformAutomerge: false,
