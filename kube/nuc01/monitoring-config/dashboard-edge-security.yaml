@@ -1,0 +1,142 @@
+---
+# WAN drops and IPS (UniFi syslog), traefik-public requests, CrowdSec.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-edge-security
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  edge-security.json: |
+    {
+      "uid": "edge-security",
+      "title": "Edge Security",
+      "tags": ["security", "unifi", "traefik", "crowdsec"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "editable": true,
+      "time": { "from": "now-24h", "to": "now" },
+      "refresh": "1m",
+      "panels": [
+        {
+          "type": "row", "title": "WAN (UniFi)", "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "id": 1, "panels": []
+        },
+        {
+          "type": "timeseries", "title": "Logged WAN drops", "id": 2,
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "normal" } } }, "overrides": [] },
+          "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [
+            { "refId": "A", "datasource": { "type": "loki", "uid": "loki" }, "legendFormat": "{{fw_policy}}",
+              "expr": "sum by (fw_policy) (count_over_time({job=\"unifi-syslog\"} | fw_policy=~\"Block External to Gateway TCP|Block traefik-public from other regions\" [$__auto]))" }
+          ]
+        },
+        {
+          "type": "table", "title": "Top scanning IPs", "id": 3,
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 1 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": { "showHeader": true, "sortBy": [{ "displayName": "Drops", "desc": true }] },
+          "transformations": [
+            { "id": "reduce", "options": { "mode": "seriesToRows", "reducers": ["lastNotNull"], "labelsToFields": true } },
+            { "id": "organize", "options": { "excludeByName": { "Field": true }, "renameByName": { "src_ip": "Source IP", "Last *": "Drops" } } }
+          ],
+          "targets": [
+            { "refId": "A", "datasource": { "type": "loki", "uid": "loki" }, "queryType": "instant",
+              "expr": "topk(15, sum by (src_ip) (count_over_time({job=\"unifi-syslog\"} | fw_policy=\"Block External to Gateway TCP\" [$__range])))" }
+          ]
+        },
+        {
+          "type": "table", "title": "Top targeted ports", "id": 4,
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 1 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": { "showHeader": true, "sortBy": [{ "displayName": "Drops", "desc": true }] },
+          "transformations": [
+            { "id": "reduce", "options": { "mode": "seriesToRows", "reducers": ["lastNotNull"], "labelsToFields": true } },
+            { "id": "organize", "options": { "excludeByName": { "Field": true }, "renameByName": { "dst_port": "Port", "Last *": "Drops" } } }
+          ],
+          "targets": [
+            { "refId": "A", "datasource": { "type": "loki", "uid": "loki" }, "queryType": "instant",
+              "expr": "topk(15, sum by (dst_port) (count_over_time({job=\"unifi-syslog\"} | fw_policy=\"Block External to Gateway TCP\" [$__range])))" }
+          ]
+        },
+        {
+          "type": "logs", "title": "IPS detections", "id": 5,
+          "description": "UniFi IPS alerts forwarded by syslog. Empty until the first detection.",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending" },
+          "targets": [
+            { "refId": "A", "datasource": { "type": "loki", "uid": "loki" },
+              "expr": "{job=\"unifi-syslog\"} |~ \"(?i)(threat|intrusion|ips alert|suricata)\" !~ \"ids_ips_threat_log.sock\"" }
+          ]
+        },
+        {
+          "type": "row", "title": "traefik-public", "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 }, "id": 6, "panels": []
+        },
+        {
+          "type": "timeseries", "title": "websecure requests by status", "id": 7,
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+          "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [
+            { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "legendFormat": "{{code}}",
+              "expr": "sum by (code) (rate(traefik_entrypoint_requests_total{job=\"traefik-public-metrics\", entrypoint=\"websecure\"}[$__rate_interval]))" }
+          ]
+        },
+        {
+          "type": "table", "title": "Top clients with 4xx/5xx", "id": 8,
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 18 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": { "showHeader": true, "sortBy": [{ "displayName": "Responses", "desc": true }] },
+          "transformations": [
+            { "id": "reduce", "options": { "mode": "seriesToRows", "reducers": ["lastNotNull"], "labelsToFields": true } },
+            { "id": "organize", "options": { "excludeByName": { "Field": true }, "renameByName": { "ClientHost": "Client", "Last *": "Responses" } } }
+          ],
+          "targets": [
+            { "refId": "A", "datasource": { "type": "loki", "uid": "loki" }, "queryType": "instant",
+              "expr": "topk(15, sum by (ClientHost) (count_over_time({namespace=\"traefik-public\", container=\"traefik-public\"} | json | DownstreamStatus >= 400 [$__range])))" }
+          ]
+        },
+        {
+          "type": "logs", "title": "Requests", "id": 9,
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 26 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "options": { "showTime": true, "wrapLogMessage": false, "sortOrder": "Descending" },
+          "targets": [
+            { "refId": "A", "datasource": { "type": "loki", "uid": "loki" },
+              "expr": "{namespace=\"traefik-public\", container=\"traefik-public\"} | json | RequestHost != \"\" | line_format \"{{.DownstreamStatus}} {{.RequestMethod}} {{.RequestHost}}{{.RequestPath}} from {{.ClientHost}} ({{.entryPointName}})\"" }
+          ]
+        },
+        {
+          "type": "row", "title": "CrowdSec", "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 }, "id": 10, "panels": []
+        },
+        {
+          "type": "timeseries", "title": "Active decisions by origin", "id": 11,
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 37 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+          "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [
+            { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "legendFormat": "{{origin}}",
+              "expr": "sum by (origin) (cs_active_decisions)" }
+          ]
+        },
+        {
+          "type": "timeseries", "title": "Local alerts by scenario", "id": 12,
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 37 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "normal" } } }, "overrides": [] },
+          "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [
+            { "refId": "A", "datasource": { "type": "prometheus", "uid": "prometheus" }, "legendFormat": "{{reason}}",
+              "expr": "sum by (reason) (increase(cs_alerts[$__rate_interval]))" }
+          ]
+        }
+      ]
+    }
