@@ -6,7 +6,7 @@
 replicas: 1
 # Bump the chart and this tag together; the chart's appVersion is the matching
 # server release.
-imageTag: v4.94.0@sha256:b5c51db790a8768e79ab3a165dd2f7308fa264c3036637c620531dcbfb9fa2bc
+imageTag: v4.94.1@sha256:2e82f79e0af9ae1ece931d4dedb23a0f56eda187609806b1613661b37765118c
 
 resources:
   requests:
