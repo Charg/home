@@ -14,6 +14,8 @@ let
 in
 
 {
+  imports = [ ./power-schedule.nix ];
+
   home.packages = [
     pkgs.gnome-themes-extra
     pkgs.pop-gtk-theme
