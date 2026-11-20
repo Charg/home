@@ -4,9 +4,8 @@ kind: IngressRouteTCP
 metadata:
   name: website
   namespace: website
-  annotations:
-    kubernetes.io/ingress.class: traefik-public
 spec:
+  ingressClassName: traefik-public
   entryPoints:
     - websecure
   routes:
