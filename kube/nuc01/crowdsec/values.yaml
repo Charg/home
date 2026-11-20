@@ -67,7 +67,8 @@ agent:
   additionalAcquisition:
     - source: loki
       url: http://loki.monitoring.svc.cluster.local:3100
-      query: '{namespace="traefik-public", container="traefik-public"}'
+      # Access log lines only; Traefik's own logs aren't JSON.
+      query: '{namespace="traefik-public", container="traefik-public"} |= "ClientHost"'
       labels:
         type: traefik
     # Drops of new connections to the gateway itself (WAN port scans).
