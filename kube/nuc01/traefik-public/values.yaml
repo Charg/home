@@ -74,20 +74,11 @@ affinity:
 service:
   spec:
     externalTrafficPolicy: Local
-  annotations:
-    external-dns.kubernetes.io/hostname: traefik-public.home.packet.fail
 
+# Dashboard only on the traefik entrypoint, which the LoadBalancer doesn't
+# expose. traefik-internal routes to it (see traefik-public-config).
 ingressRoute:
   dashboard:
     enabled: true
-    entryPoints: ["websecure"]
-    matchRule: Host(`traefik-public.home.packet.fail`)
-    middlewares:
-      - name: ip-allowlist
-        namespace: traefik-public
-      - name: tinyauth
-        namespace: auth
-    # Per-router certificate rather than a TLSStore: Traefik allows one
-    # "default" store cluster-wide, and traefik-internal owns it.
-    tls:
-      secretName: home-packet-fail-wildcard-tls
+    entryPoints: ["traefik"]
+    matchRule: PathPrefix(`/dashboard`) || PathPrefix(`/api`)

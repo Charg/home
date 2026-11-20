@@ -1,0 +1,43 @@
+---
+# The chart's Service only carries web and websecure.
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-public-dashboard
+  namespace: traefik-public
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: traefik
+    app.kubernetes.io/instance: traefik-public-traefik-public
+  ports:
+    - name: traefik
+      port: 8080
+      targetPort: traefik
+      protocol: TCP
+---
+# LAN only: served by traefik-internal.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-public-dashboard
+  namespace: traefik-public
+  annotations:
+    external-dns.kubernetes.io/hostname: traefik-public.home.packet.fail
+    traefik.ingress.kubernetes.io/router.middlewares: auth-tinyauth@kubernetescrd
+spec:
+  ingressClassName: traefik-internal
+  rules:
+    - host: traefik-public.home.packet.fail
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: traefik-public-dashboard
+                port:
+                  name: traefik
+  tls:
+    - hosts:
+        - traefik-public.home.packet.fail
