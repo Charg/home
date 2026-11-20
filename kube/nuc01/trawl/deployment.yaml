@@ -27,7 +27,7 @@ spec:
       # connect check never races the module load. See README.md.
       initContainers:
         - name: redis
-          image: redis:8.8.1-alpine@sha256:8096655e437712b07503796fb64d81359256cfcff0ab29d95a7da72863786efb
+          image: redis:8.10.3-alpine@sha256:7958cfbb9d152f87dadfbc89f1b0b15938f0b81ff8982feb327476f4911935c3
           restartPolicy: Always
           args:
             - "--save"
