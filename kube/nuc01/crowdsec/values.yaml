@@ -1,0 +1,102 @@
+# source: https://github.com/crowdsecurity/helm-charts/blob/main/charts/crowdsec/values.yaml
+# Agent reads Loki rather than node logs; Traefik enforces decisions through
+# the bouncer plugin (kube/nuc01/traefik-public). Secrets come from
+# kube/nuc01/crowdsec-config.
+
+container_runtime: containerd
+
+# Fixed LAPI secret and registration token. The chart otherwise generates them
+# on every render, which Argo would sync as a change each time.
+secrets:
+  externalSecret:
+    name: crowdsec-keys
+
+config:
+  parsers:
+    # Loki lines carry no syslog header. Map the source's type label to the
+    # program the hub parsers match on (traefik-logs, iptables-logs).
+    s00-raw:
+      loki-raw.yaml: |
+        name: home/loki-raw
+        description: "Program and message for lines read from Loki"
+        filter: "evt.Line.Labels.type in ['traefik', 'kernel']"
+        onsuccess: next_stage
+        statics:
+          - parsed: program
+            expression: evt.Line.Labels.type
+          - parsed: message
+            expression: evt.Line.Raw
+          - parsed: logsource
+            value: loki
+          - meta: datasource_path
+            expression: evt.Line.Src
+          - meta: datasource_type
+            expression: evt.Line.Module
+          # Loki entry time; replay mode drops events without one.
+          - target: evt.StrTime
+            expression: evt.Line.Time.Format('2006-01-02T15:04:05Z07:00')
+
+lapi:
+  env:
+    - name: BOUNCER_KEY_traefik
+      valueFrom:
+        secretKeyRef:
+          name: crowdsec-keys
+          key: BOUNCER_KEY_traefik
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  persistentVolume:
+    data:
+      storageClassName: longhorn
+    config:
+      storageClassName: longhorn
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+agent:
+  isDeployment: true
+  hostVarLog: false
+  acquisition: []
+  additionalAcquisition:
+    - source: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      query: '{namespace="traefik-public", container="traefik-public"}'
+      labels:
+        type: traefik
+    # Drops of new connections to the gateway itself (WAN port scans).
+    - source: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      query: '{job="unifi-syslog"} |= "[WAN_LOCAL-D-"'
+      labels:
+        type: kernel
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/iptables"
+  # Own addresses that must never be banned; kept encrypted.
+  extraVolumes:
+    - name: home-whitelist
+      secret:
+        secretName: crowdsec-home-whitelist
+  extraVolumeMounts:
+    - name: home-whitelist
+      mountPath: /etc/crowdsec/parsers/s02-enrich/home-whitelist.yaml
+      subPath: home-whitelist.yaml
+      readOnly: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
