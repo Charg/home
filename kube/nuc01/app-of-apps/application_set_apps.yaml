@@ -126,7 +126,7 @@ spec:
           - name: snmp-exporter
             repoURL: https://prometheus-community.github.io/helm-charts
             chart: prometheus-snmp-exporter
-            targetRevision: 9.21.0
+            targetRevision: 9.21.1
             namespace: monitoring
           - name: alloy
             repoURL: https://grafana.github.io/helm-charts
