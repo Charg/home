@@ -51,6 +51,14 @@
       matchUpdateTypes: ['major'],
       automerge: false,
     },
+    // Hold Fleet's MySQL on the 8.4 LTS line, which Fleet tests against; patches still flow. Lift
+    // this deliberately once Fleet lists the next LTS as supported: the data dictionary upgrade
+    // can't be rolled back.
+    {
+      matchPackageNames: ['mysql'],
+      matchFileNames: ['kube/nuc01/fleet-mysql/**'],
+      allowedVersions: '/^8\\.4\\./',
+    },
     // The chart's appVersion is the matching server release; bump them together.
     {
       matchFileNames: ['kube/nuc01/fleet-apps/fleet.yaml', 'kube/nuc01/fleet/values.yaml'],
