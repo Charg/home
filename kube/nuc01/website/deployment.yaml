@@ -27,7 +27,7 @@ spec:
       containers:
         - name: website
           # Digest bumped by Renovate on every Charg/website build; see README.
-          image: ghcr.io/charg/website:main@sha256:a75bd6998c9da24e748e15fffe50c103283d209859f6324186088a3741462054
+          image: ghcr.io/charg/website:main@sha256:ff55778696a555aab680ab62c437cb5af934ce59b28be1bd746610f1ea9e3105
           args:
             # PROXY headers accepted from in-cluster peers only.
             - -trusted-proxies=10.42.0.0/16
