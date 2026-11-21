@@ -48,21 +48,6 @@
       automerge: true,
     },
     {
-      matchPackageNames: [
-        'argo-cd',
-        'quay.io/argoproj/argocd',
-        'traefik',
-        'metallb',
-        'longhorn',
-        'kube-prometheus-stack',
-        'cloudnative-pg',
-        'plugin-barman-cloud',
-        // Digest bumps restart the database pods.
-        'ghcr.io/cloudnative-pg/postgresql',
-      ],
-      automerge: false,
-    },
-    {
       matchUpdateTypes: ['major'],
       automerge: false,
     },
