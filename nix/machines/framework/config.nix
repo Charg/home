@@ -131,6 +131,9 @@ in
   # they own. Let them manage their own interfaces instead.
   systemd.services.NetworkManager-wait-online.enable = false;
 
+  # No public fallback resolvers; use only the DNS servers handed out by the network.
+  services.resolved.settings.Resolve.FallbackDNS = [ ];
+
   networking.networkmanager.unmanaged = [
     "interface-name:docker*"
     "interface-name:br-*"
