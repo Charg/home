@@ -13,6 +13,9 @@ metadata:
     # Cloudflare's, and bulk video breaks their terms.
     external-dns.kubernetes.io/cloudflare-proxied: "false"
     traefik.ingress.kubernetes.io/router.middlewares: traefik-public-ip-allowlist@kubernetescrd
+    # HTTPS only; spec.tls alone doesn't make the router TLS-only.
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik-public
   rules:

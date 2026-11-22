@@ -32,6 +32,8 @@ spec:
             # PROXY headers accepted from in-cluster peers only.
             - -trusted-proxies=10.42.0.0/16
             - -max-conns-per-ip=32
+            # Plain HTTP for ip.syn.sh only; client from X-Real-Ip.
+            - -http-addr=:8080
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -41,6 +43,7 @@ spec:
             - { name: GOMEMLIMIT, value: 100MiB }
           ports:
             - { name: https, containerPort: 8443, protocol: TCP }
+            - { name: http, containerPort: 8080, protocol: TCP }
             - { name: health, containerPort: 8081, protocol: TCP }
           volumeMounts:
             # No subPath: the server picks up renewed certificates.

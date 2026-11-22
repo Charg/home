@@ -29,7 +29,8 @@ let
     ];
     buildInputs = old.buildInputs ++ [ pkgs.cudaPackages.cuda_cudart ];
     cmakeFlags = map (
-      flag: if flag == "-DSUNSHINE_ENABLE_CUDA:BOOL=FALSE" then "-DSUNSHINE_ENABLE_CUDA:BOOL=TRUE" else flag
+      flag:
+      if flag == "-DSUNSHINE_ENABLE_CUDA:BOOL=FALSE" then "-DSUNSHINE_ENABLE_CUDA:BOOL=TRUE" else flag
     ) old.cmakeFlags;
   });
 

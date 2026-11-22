@@ -14,7 +14,11 @@ ports:
           to: websecure
           scheme: https
           permanent: true
+          # Lowest, so explicit web routes (website's ip host) win.
+          priority: 1
   websecure:
+    # Routes without entryPoints stay off plain HTTP.
+    asDefault: true
     http:
       # CrowdSec bouncer for every HTTP route (traefik-public-config).
       middlewares:

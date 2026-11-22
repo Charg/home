@@ -9,7 +9,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: HostSNI(`syn.sh`)
+    - match: HostSNI(`syn.sh`) || HostSNI(`ip.syn.sh`)
       services:
         - name: website
           port: 8443

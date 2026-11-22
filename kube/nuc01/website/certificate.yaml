@@ -8,6 +8,7 @@ spec:
   secretName: website-tls
   dnsNames:
     - syn.sh
+    - ip.syn.sh
   issuerRef:
     kind: ClusterIssuer
     name: lets-encrypt-syn-sh
