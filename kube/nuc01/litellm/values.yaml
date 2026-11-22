@@ -54,10 +54,20 @@ proxy_config:
       litellm_params:
         <<: *llama-swap
         model: openai/gpt-oss-20b
+    # Local only: gpt-oss first, then the other local models in order when it
+    # errors (e.g. llama.cpp failing to parse its tool-call output). Each
+    # fallback swaps the loaded model, so expect a load delay.
+    - model_name: local
+      litellm_params:
+        <<: *llama-swap
+        model: openai/gpt-oss-20b
   router_settings:
     fallbacks:
       - local-or-openai:
           - gpt-6-luna
+      - local:
+          - qwen3.5-9b
+          - gemma-4-12b
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
 
