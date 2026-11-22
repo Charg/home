@@ -1,0 +1,88 @@
+---
+# Grafana MCP server for in-cluster agents (n8n). Read-only: a Viewer service
+# account token plus --disable-write. Callers authenticate with a bearer token.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-grafana
+  namespace: ai
+  labels:
+    app.kubernetes.io/name: mcp-grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mcp-grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mcp-grafana
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mcp-grafana
+          image: grafana/mcp-grafana:2.3.0@sha256:c27248b5919d09d64ea273ca1b128b32902c6796f6e2dfcd11849d4f1363f9ed
+          # The image entrypoint hardcodes the SSE transport.
+          command: ["/app/mcp-grafana"]
+          args:
+            - --transport=streamable-http
+            - --address=0.0.0.0:8000
+            - --healthz-address=0.0.0.0:8080
+            # Host header values n8n sends; anything else gets a 403.
+            - --allowed-hosts=mcp-grafana.ai.svc:8000,mcp-grafana.ai.svc.cluster.local:8000
+            - --disable-write
+          env:
+            - name: GRAFANA_URL
+              value: http://kube-prometheus-stack-grafana.monitoring.svc
+            - name: GRAFANA_SERVICE_ACCOUNT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-grafana-credentials
+                  key: GRAFANA_SERVICE_ACCOUNT_TOKEN
+            - name: MCP_GRAFANA_SERVER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: mcp-grafana-credentials
+                  key: MCP_GRAFANA_SERVER_TOKEN
+            - name: GRAFANA_USAGE_STATS
+              value: disabled
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            periodSeconds: 20
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

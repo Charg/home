@@ -55,6 +55,13 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mcp-grafana
+      ports:
+        - protocol: TCP
+          port: 8000
     # Workflow HTTP calls and node/template downloads; no private ranges.
     - to:
         - ipBlock:
