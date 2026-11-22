@@ -390,6 +390,10 @@ prometheus:
 alertmanager:
   enabled: true
   alertmanagerSpec:
+    # Full config (routes, receivers, SMTP) lives in
+    # monitoring-config/alertmanager-config.enc.yaml, key alertmanager.yaml.
+    useExistingSecret: true
+    configSecret: alertmanager-config
     storage:
       volumeClaimTemplate:
         spec:
