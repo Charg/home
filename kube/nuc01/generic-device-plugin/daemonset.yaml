@@ -34,6 +34,9 @@ spec:
                 - paths:
                     - path: /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_*
                       mountPath: /dev/ttyUSB0
+          # /dev is a read-only hostPath, so the default
+          # /dev/termination-log mountpoint can't be created on a fresh boot.
+          terminationMessagePath: /termination-log
           ports:
             - containerPort: 8080
               name: http
