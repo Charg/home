@@ -59,12 +59,6 @@
       matchFileNames: ['kube/nuc01/fleet-mysql/**'],
       allowedVersions: '/^8\\.4\\./',
     },
-    // The chart defaults the plugin image to its appVersion, and synology/synology-csi on Docker Hub
-    // stops at v1.3.1 (v1.4.0 was tagged on GitHub but never pushed). Lift once a newer image exists.
-    {
-      matchPackageNames: ['SynologyOpenSource/synology-csi'],
-      allowedVersions: '<=1.3.1',
-    },
     // The chart's appVersion is the matching server release; bump them together.
     {
       matchFileNames: ['kube/nuc01/fleet-apps/fleet.yaml', 'kube/nuc01/fleet/values.yaml'],
@@ -112,6 +106,18 @@
       packageNameTemplate: '{{namespace}}/{{packageName}}',
       versioningTemplate: 'semver',
       depTypeTemplate: 'oci-chart',
+    },
+    // Git-sourced Applications whose version should follow another datasource, e.g. a chart that
+    // defaults its image tag to appVersion: track the image so the tag only moves once it's published.
+    // A comment between path and targetRevision keeps the github-tags manager below from matching.
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^kube/[^/]+/app-of-apps/application_[^/]+\\.yaml$/',
+      ],
+      matchStrings: [
+        '#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)\\s*\\n\\s*targetRevision:\\s*(?<currentValue>\\S+)',
+      ],
     },
     // Git-sourced Applications pinned to a tag.
     {
