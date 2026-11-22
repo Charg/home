@@ -53,15 +53,13 @@ spec:
             - name: ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef: { name: pocket-id-secrets, key: encryption-key }
-            # Email features, all off by default. Enable with SMTP below.
-            # - { name: EMAIL_LOGIN_NOTIFICATION_ENABLED, value: "true" }
-            # - { name: EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED, value: "true" }
-            # - { name: EMAIL_API_KEY_EXPIRATION_ENABLED, value: "true" }
-            # - { name: EMAIL_VERIFICATION_ENABLED, value: "true" }
-          # SMTP is not set up yet. When it is, fill in pocket-id-smtp.enc.yaml
-          # and uncomment this and the SMTP egress rule in networkpolicy.yaml.
-          # envFrom:
-          #   - secretRef: { name: pocket-id-smtp }
+            # Email features; SMTP settings come from pocket-id-smtp.
+            - { name: EMAIL_LOGIN_NOTIFICATION_ENABLED, value: "true" }
+            - { name: EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED, value: "true" }
+            - { name: EMAIL_API_KEY_EXPIRATION_ENABLED, value: "true" }
+            - { name: EMAIL_VERIFICATION_ENABLED, value: "true" }
+          envFrom:
+            - secretRef: { name: pocket-id-smtp }
           ports:
             - { name: http, containerPort: 1411, protocol: TCP }
           startupProbe:

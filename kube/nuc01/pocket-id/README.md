@@ -37,14 +37,10 @@ Deployment is `replicas: 1` with `strategy: Recreate`.
 Deployment, and the admin UI settings page is not used. Any setting left
 unset takes Pocket ID's default.
 
-SMTP is not set up yet, but is ready to enable:
-
-1. Fill in `pocket-id-smtp.enc.yaml`. Its keys are the env var names
-   (`SMTP_HOST`, `SMTP_PORT`, `SMTP_TLS`, `SMTP_FROM`, `SMTP_USER`,
-   `SMTP_PASSWORD`), and it holds placeholder values until then.
-2. Uncomment the `envFrom` block and the email features you want in
-   `deployment.yaml`.
-3. Uncomment the SMTP egress rule in `networkpolicy.yaml`.
+SMTP settings are loaded from `pocket-id-smtp.enc.yaml` with `envFrom`. Its
+keys are the env var names (`SMTP_HOST`, `SMTP_PORT`, `SMTP_TLS`,
+`SMTP_FROM`, `SMTP_USER`, `SMTP_PASSWORD`). The network policy allows
+outbound TCP 587 only, so a different port needs a matching egress rule.
 
 OIDC clients, users, groups and custom claims are still stored in the
 database and managed through the admin UI.
@@ -53,7 +49,7 @@ database and managed through the admin UI.
 
 - `pocket-id-secrets`: `encryption-key`, which wraps the token signing keys
   in the database. Losing it means re-creating the instance.
-- `pocket-id-smtp`: every `SMTP_*` setting, not yet loaded. See Settings.
+- `pocket-id-smtp`: every `SMTP_*` setting. See Settings.
 
 Edit with `sops kube/nuc01/pocket-id/<file>.enc.yaml`. Decrypted at sync time
 by the Argo CD SOPS plugin.

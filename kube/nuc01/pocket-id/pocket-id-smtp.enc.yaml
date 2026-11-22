@@ -4,12 +4,12 @@ metadata:
     name: pocket-id-smtp
     namespace: auth
 stringData:
-    SMTP_HOST: ENC[AES256_GCM,data:pmFjgI129Cs=,iv:6+8brs+FAoR+MWBYfAmdCouQs8mvtBBJSEnUF6/HFa8=,tag:sNMGd2bcKcNVvwJrtZaXJg==,type:str]
+    SMTP_HOST: ENC[AES256_GCM,data:09x5KOfx5sQ3bkSUncEmTzq7,iv:3eFMiLeHYxx3SuzFQN4RccWgFVcdxkfuOfQNIaXjHNw=,tag:ZqFEOxj0gUXrTCjwihyoDw==,type:str]
     SMTP_PORT: ENC[AES256_GCM,data:OVSW,iv:FZAVMIt7SFfHJOPjHw117lpYN0i8wSJjI4lbwIh06ek=,tag:v4OHrKIH7cRYuZPpjFpQCg==,type:str]
     SMTP_TLS: ENC[AES256_GCM,data:YwDAvKlXZMM=,iv:3BjpmfG6P1mU/V6bvA4fsoImSXXGeVpSlQhg4X2NKhU=,tag:ud32Y6+XKLuAjSjlZHxwAw==,type:str]
-    SMTP_FROM: ENC[AES256_GCM,data:iNLQ1oQ6pe0=,iv:AhGV0+uCfsddwB1XQWMkpkakH88JFSKxyjRJd436G6w=,tag:328aeh14l2OIivMSLMgeFQ==,type:str]
-    SMTP_USER: ENC[AES256_GCM,data:ZnOVffWrtGs=,iv:rhrUs3QXBXCpYSpEQ3qz2X0xVrwVBfytDXwKxqsk1ps=,tag:gdzOl7ujk7vhHsRNvgewzQ==,type:str]
-    SMTP_PASSWORD: ENC[AES256_GCM,data:L/BhIJzZfxA=,iv:rGbAWZ7TjKkAi4ugkFe1QhC3xHDo/ssPQZrYCed/DtE=,tag:ySGE/Iyi55dd7+0+0xhrXQ==,type:str]
+    SMTP_FROM: ENC[AES256_GCM,data:U9xUY5v0BGA0R5yHVsT3wQ==,iv:eyYbjX0iRJi8gvaE3svjr1kwboMG6BeSILLr5c1s+/I=,tag:6sLqtfaZ5inR+FeIR1DMBw==,type:str]
+    SMTP_USER: ENC[AES256_GCM,data:WUqbw8LksVNTUzkzjFpnqw==,iv:sIq345pUJ9T3FYdXrhL0Op9f33NvzyweJl2/TlZ521w=,tag:daxXUA4vJCWcoXy6PCyGcA==,type:str]
+    SMTP_PASSWORD: ENC[AES256_GCM,data:qfY0CPKnDw95v7aS+WsdSg==,iv:+HBMK5Es6djIQfQb8tnYT+bB5cYvRr1tlJRisnq+kwI=,tag:+zZ8g/fo+3xn2uUsdoZKaA==,type:str]
 sops:
     age:
         - enc: |
@@ -53,6 +53,6 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1pq1m8fee0mfkh6fzw635qffd33y99fmjrr80k2r4zv7wkfguegp0lgv836ryfypgmdnjvxq243lvh7ftfx2wr6azz7t6mqhqsxdxse3hysqk3a63vlllpjha6j4rn729gnzhfjn2qy89dp0ce5k0wq5ed7fpn5msnkhegp8qeyelxxgxtlnea6cg7sd2jche7zcl2jsrnjfqgrwhj4xveyg7w4ffv4e3rrref5mg47n6gqxqfyxacft89dqp668vmvx6jnuxvne4na5haxs3z3zxlsqvxqqaksvjk3xlhegr4n6smd63t8l5e7x8t2pf68nq2l2z89cqk2c3h9277gj6mlvr94h9tfk5fzkktyqtjy66fuxvhj2xgqfydwsne5gn02e0rp80rd2nw4akwz3p7cuxkfhq2nuhlh9j6wqxandlcehrznnmeyun4wew83lezdu9fm484u50ql8vtpfdv8ckgmp3tyfk4gkvl9qc0dnglqj3jqvgjgjegqq6hlcdhj748mtayrcrjmgjevcfkzf2jnzzn6m4jkn26ev7ggcnqrj9nwvvngntp2ef6pj3w5ta0ufz5yetzhaskjztc2glxjtelr29nym5rdyg4yl8z33tsngxvgy5wm9kaa43xm2ax7xsu6mnqzvemxlw0n7nz4afuus87p9kvavxh8j0vvtsgjd2ejq5g38eny6j7u5p36unyw78v4m37azgln2ys3ltvnluzyg77cmlyzh7qypdqmx08zd7g43qz4lza69qa2qgwmajs85wwcc0uqc50c2tr7kxmsuryemqqew48qqvccx67u6csj0c8wrwj0a8e6q33svsq5jd0tf53t0k6rhfeah2kkpj68rwk0x4dwc8rrxl4p956u8t285cypwtqa7eqad77el926hqn05jdnjsxzdm3d2t9f3rg6ju73gp4xxgaf642atgxefhztzg9an9cj4pstk39jlkjplfz3m5rwt87skxjyrg48a8a9k497zfpjtpufejzfqjc9umpd6mrwrgjaxqqa243n3hq3vu7tyk663p5sepehdc99m7e3ulumrjt7psw7edgkdg6htjdntq4upzp9jf90s2pu74w7375m67cgenzj5ms3r4hlvjxe5tyzem69wmx26quuesdyzke9vnwgl2dpnwxv2t0m95tvswu4gnqnvdfejsjy68mhxr4c7ez5rhtr4cf5f8s25acvp0u0e328j8g8gs79607qnev08flf7c4as7ctepqd0z23gxjphhddtr90mpdn85ypvrxyklw3rqp5udp5zkc6n4vt3q72qcayhzvfj4299zajnsskz7t3u272evzn3s8ldcy54q4tmeg325z5h3glyz6g4fjkvduwvcldq2wccydej5umv8g8ks8r9st9xyeup36ys3jh9pw067k590tusp4qn8vq45kcak8xrztr9h9n8ms4msatzctcgkppgsj2xk4vkjrmgvgn2dr7syaugkfc44u5p6w4557q033nnuvtp03r9sfzxeuf4y8azwdgsu5zkkuj2evc5eu62cvtwsmte02pc47a7nhxqyuanctqk2rm5z5yy2xm0gx2zgl3uwmkznscuw0z8d9d6k8g4hh9xrgl293y0qx5ng3uz5uvpxv95hmzl9xf3uz4mn6c5w6a5c8538u6mz060rdh3pz3z565ze9n6e7l2tnyt8yzvyzdh8evxez2xfwv6skmsdjsl8gc0cynth82etff89vmc2f0ez5905rkgtzzenrx4zvnchspveffk0d2tj6fpg86h5qp0seh04p6uer7z0ljuj08tv0yr6fdmaezgwvtewreytgmmn7anm0sy4vm8t665rxuvl9q24pqmrxypuaas97cj0za9c8vtdknkcmu9aj8z8hr0v4m39rc8y9e946ncfrzngq37y5ux
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-11-22T01:21:43Z"
-    mac: ENC[AES256_GCM,data:XH+fmg/vo9glagklqZ0vKPLC02p3G/6u/KjDgdVDZW68hfdwaqXthbY0UB6TVxDdNLKLl/vBmA/Rnj2P/PrvgIYHZ7m0PsvhmyzZL1mbDQ+4CMURfq7/smxkYRzjoDuLhN13hYQ7Ojr4uCztns0bLBmMFETjVoW7jyBv+c+WSwM=,iv:StNuajOX4ogbUGqPy0xoUEVaMEWp+5YnU9grOVGUG40=,tag:g3eh1MpWKQDeFJix+1A24g==,type:str]
+    lastmodified: "2026-11-22T03:00:09Z"
+    mac: ENC[AES256_GCM,data:X/tnlfatC5H0edB5ZVwthyyyMxXsKjlwLgXxAap2RYI0FURIt3WqAg9Sg3CfWauPA/Mit+4feHlH8YHbEbdPN3lHCx2Km5bpDfbEUwmUZdt13YevLSOXqOJ15p6djhZLIW+HFdbbhc2OvX2gfjmKcJVzyB6LroZmLiZov4wTiuI=,iv:OJLs0MHJetCJzeSQBXhGTiupjeRiHj0WV9Jl2XwPeE4=,tag:XNjxNLhgEdaOG0FM/B8/bw==,type:str]
     version: 3.13.3
