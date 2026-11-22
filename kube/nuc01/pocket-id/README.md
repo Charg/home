@@ -31,10 +31,29 @@ password login.
 SQLite database, signing keys and uploads. RWO and SQLite are why the
 Deployment is `replicas: 1` with `strategy: Recreate`.
 
+## Settings
+
+`UI_CONFIG_DISABLED=true`: application settings are env vars on the
+Deployment, and the admin UI settings page is not used. Any setting left
+unset takes Pocket ID's default.
+
+SMTP is not set up yet, but is ready to enable:
+
+1. Fill in `pocket-id-smtp.enc.yaml`. Its keys are the env var names
+   (`SMTP_HOST`, `SMTP_PORT`, `SMTP_TLS`, `SMTP_FROM`, `SMTP_USER`,
+   `SMTP_PASSWORD`), and it holds placeholder values until then.
+2. Uncomment the `envFrom` block and the email features you want in
+   `deployment.yaml`.
+3. Uncomment the SMTP egress rule in `networkpolicy.yaml`.
+
+OIDC clients, users, groups and custom claims are still stored in the
+database and managed through the admin UI.
+
 ## Secrets
 
 - `pocket-id-secrets`: `encryption-key`, which wraps the token signing keys
   in the database. Losing it means re-creating the instance.
+- `pocket-id-smtp`: every `SMTP_*` setting, not yet loaded. See Settings.
 
 Edit with `sops kube/nuc01/pocket-id/<file>.enc.yaml`. Decrypted at sync time
 by the Argo CD SOPS plugin.

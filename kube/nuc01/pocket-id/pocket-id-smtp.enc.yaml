@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: pocket-id-smtp
+    namespace: auth
+stringData:
+    SMTP_HOST: ENC[AES256_GCM,data:pmFjgI129Cs=,iv:6+8brs+FAoR+MWBYfAmdCouQs8mvtBBJSEnUF6/HFa8=,tag:sNMGd2bcKcNVvwJrtZaXJg==,type:str]
+    SMTP_PORT: ENC[AES256_GCM,data:OVSW,iv:FZAVMIt7SFfHJOPjHw117lpYN0i8wSJjI4lbwIh06ek=,tag:v4OHrKIH7cRYuZPpjFpQCg==,type:str]
+    SMTP_TLS: ENC[AES256_GCM,data:YwDAvKlXZMM=,iv:3BjpmfG6P1mU/V6bvA4fsoImSXXGeVpSlQhg4X2NKhU=,tag:ud32Y6+XKLuAjSjlZHxwAw==,type:str]
+    SMTP_FROM: ENC[AES256_GCM,data:iNLQ1oQ6pe0=,iv:AhGV0+uCfsddwB1XQWMkpkakH88JFSKxyjRJd436G6w=,tag:328aeh14l2OIivMSLMgeFQ==,type:str]
+    SMTP_USER: ENC[AES256_GCM,data:ZnOVffWrtGs=,iv:rhrUs3QXBXCpYSpEQ3qz2X0xVrwVBfytDXwKxqsk1ps=,tag:gdzOl7ujk7vhHsRNvgewzQ==,type:str]
+    SMTP_PASSWORD: ENC[AES256_GCM,data:L/BhIJzZfxA=,iv:rGbAWZ7TjKkAi4ugkFe1QhC3xHDo/ssPQZrYCed/DtE=,tag:ySGE/Iyi55dd7+0+0xhrXQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IG1sa2VtNzY4eDI1NTE5IE1IcFh0d3JV
+            UDZnZjlSQmwrRGJyamdyMHpUS2Zia3FUSEgwZDhPY2N1UnpjaEJLM2Z0YnR4WDdt
+            QzRxUWg4dWJhd2dsdkx5QVU4VXd3M1p4bW1OS0NwNU5ZbllZelQvSDRCNWZiM0JI
+            R053WXQyZ0haS0REcDAvdVg4NTkxMVdEMXcrRkpZK3B6djkzc3JDSHBZSWJldVNI
+            Z016VTRwcnFNOFFPQUN2TmhxVVBsMXdQUjAxbEN6ZjRXMVVIYVZvZGQ2aHpCTHpY
+            U2VsN0ZWVWJrbzdDTlc0Q0M2VEdXc1RCdkIvSVI2WUFaZGhuQlRramtjbnJQZnQx
+            VGJSeVFRbTNic1BadDY5SmtWckRhZjVUc05HRVFVSFRtT1pTUkQvTDRtaFNEdk8r
+            a0NEcnFTbU1OR0tIdFJWVldjTmQweXNoTTQxeWlKczVrK0RBeUp3Q1QvSFd2dVdl
+            MDlIakhya3M5T3U1amkraCtiaHVCYzZJZzZPNDlHdWZYRk1BRXNEWGFUQVYzUXBl
+            M25jSEczTmR0Y2FQNE1kRSs1dzJXVGVicE5SbFo5Sk5DYWE5aWtSaXJQMnoyeXZ0
+            V2NObDl6OTF1cUR5akw2UWRNdHcwblNnNHNOMFlOUERlWkdxSDVHbE5yTnZrbVZM
+            T0p5V0laajlUOHllOUsyNmF0REsrNHpISzc2U01oRUNWT3FqSElRN2VsYTY3K21T
+            T0NpYmpOVHVhdnRBQXBkaWVVak9mUUoxU3kzaHVVRE9pejVvQ1JpcWV1aS9aREtK
+            QzM3WGpnRmZaY296RHpnbFdEVnRudUdTbTBnTHFWK1RuNU1kTUlRRVR4NDlwM01q
+            cTM3SnFVOTZwNkp0eWJzUytMOThWQS81b1hDNXVCQUF4UlE1VkFxTi81T2RLdUdu
+            eG1ISERmYURiNXh3Y2RLYy9pOVFxZ29Cdm51SlcrS0xObXR0MVNQa3A5TzRWcnRh
+            UUJQdFNkaHVZWEdxdVd0RzgxaGJSMlpRWUN3d0dkTFpYelppZFBuMUZGcStvNG95
+            bUROb2JUa2JuUDFidTRiUnBZcTFZT2dCQm1KOHBrVXcrdlJJaVVIQm9Ld2lyekMw
+            MXZlOU9kMk9VZXZ4aVh0MjVGNUpwcmNSM2ZpT3Z6SDR2bGZFbEFpS2ZzRnNTd2NW
+            M0ZwRHBpcnBheC9OaklaZ3hzamFyVW12ZzF6RDNtcFE1QTBWajlHNlo1eW1BdVcr
+            ZkVac3VZU1BTckF2VzQ1YjI2dUZkSWQxN0FrSktVK1REQmIxMU9QdVNCTEdRTUNt
+            UndlcnpXallPTnV5dk00RVpkcUUzcHMzYlk3UENPekJ0YU1hWXE1ejZRb0lzbE9W
+            N3JCYTR4WVVZRThJbzZSblNFRjNaY1ZiOGR1eC8vbjg4ekFXeTZJcEVKNEJZRGlH
+            THhWZkY3bG9UVEg1MmxUODJidjY3L1FsWFVZL0ZFM1FZR3krV3BGeUFtVHVnY0li
+            Y0FCQzRUKzNwWS94SWJzdUlLSGVIdTFtOUFoaWk3bjZ5a1FoR1VHRVRCU1Yyb1ZN
+            cjhDNGpQMllQK3lqbm4zTzhGSnlZL1FoZ29McGliR2ZDbmJPbGZoZG9tV3N5V1p4
+            ejhoeS9TODU3TUUxeHhZVTRoWHpZdWFGU1VKa2kyQyswc2hXTDlsSm83UGRlVHhV
+            U2EvODI3dThLRkZCVFkrbmpoc0VyVTV6WDczM2EydWt5RWZONGFxVW45MW9sb3R4
+            Vmp2VVRJblc2ZHBuYnpxUVpBVUpueWFuTGJnekZUcVA0UVRKOFlCeTF3dEtCWGd1
+            Z3RpOEhKc3dCNVh2Vnl4SFpsTUFTM1h4Y2IzNFZSbGJpSUtGVHNFcFlGSXJ4WmZX
+            ZGMwZ3lCbmRidnpzVkVSL0V1dW1JRTRteGFGMVk2b3g4Wm9VYlBmcERQemQwUUdH
+            amkzS3NvcmlPdnRRZnZSZWNNOUFQNHpXODhSbko3WVNadnQ3cGVWMlBCSXJhQQo5
+            djlYbTNNN1Y4QTN1eG50Rjh3VE5zNnJxUVBlODJXcmVoQ2N2UFg3NitnCi0tLSBV
+            dng4cDZNelVBK1JiTzV0RWx3VSsxTDE3aTdvS2MvaXlxK0FqN0N3RmdJCr7Pvu56
+            h0DjjYS0r4HLsRVM3mku9bfbprwBTnSMgn8L8DafInolN3xKG88t0taALRDm81Zz
+            I2rSzrppBqqe1w0=
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1pq1m8fee0mfkh6fzw635qffd33y99fmjrr80k2r4zv7wkfguegp0lgv836ryfypgmdnjvxq243lvh7ftfx2wr6azz7t6mqhqsxdxse3hysqk3a63vlllpjha6j4rn729gnzhfjn2qy89dp0ce5k0wq5ed7fpn5msnkhegp8qeyelxxgxtlnea6cg7sd2jche7zcl2jsrnjfqgrwhj4xveyg7w4ffv4e3rrref5mg47n6gqxqfyxacft89dqp668vmvx6jnuxvne4na5haxs3z3zxlsqvxqqaksvjk3xlhegr4n6smd63t8l5e7x8t2pf68nq2l2z89cqk2c3h9277gj6mlvr94h9tfk5fzkktyqtjy66fuxvhj2xgqfydwsne5gn02e0rp80rd2nw4akwz3p7cuxkfhq2nuhlh9j6wqxandlcehrznnmeyun4wew83lezdu9fm484u50ql8vtpfdv8ckgmp3tyfk4gkvl9qc0dnglqj3jqvgjgjegqq6hlcdhj748mtayrcrjmgjevcfkzf2jnzzn6m4jkn26ev7ggcnqrj9nwvvngntp2ef6pj3w5ta0ufz5yetzhaskjztc2glxjtelr29nym5rdyg4yl8z33tsngxvgy5wm9kaa43xm2ax7xsu6mnqzvemxlw0n7nz4afuus87p9kvavxh8j0vvtsgjd2ejq5g38eny6j7u5p36unyw78v4m37azgln2ys3ltvnluzyg77cmlyzh7qypdqmx08zd7g43qz4lza69qa2qgwmajs85wwcc0uqc50c2tr7kxmsuryemqqew48qqvccx67u6csj0c8wrwj0a8e6q33svsq5jd0tf53t0k6rhfeah2kkpj68rwk0x4dwc8rrxl4p956u8t285cypwtqa7eqad77el926hqn05jdnjsxzdm3d2t9f3rg6ju73gp4xxgaf642atgxefhztzg9an9cj4pstk39jlkjplfz3m5rwt87skxjyrg48a8a9k497zfpjtpufejzfqjc9umpd6mrwrgjaxqqa243n3hq3vu7tyk663p5sepehdc99m7e3ulumrjt7psw7edgkdg6htjdntq4upzp9jf90s2pu74w7375m67cgenzj5ms3r4hlvjxe5tyzem69wmx26quuesdyzke9vnwgl2dpnwxv2t0m95tvswu4gnqnvdfejsjy68mhxr4c7ez5rhtr4cf5f8s25acvp0u0e328j8g8gs79607qnev08flf7c4as7ctepqd0z23gxjphhddtr90mpdn85ypvrxyklw3rqp5udp5zkc6n4vt3q72qcayhzvfj4299zajnsskz7t3u272evzn3s8ldcy54q4tmeg325z5h3glyz6g4fjkvduwvcldq2wccydej5umv8g8ks8r9st9xyeup36ys3jh9pw067k590tusp4qn8vq45kcak8xrztr9h9n8ms4msatzctcgkppgsj2xk4vkjrmgvgn2dr7syaugkfc44u5p6w4557q033nnuvtp03r9sfzxeuf4y8azwdgsu5zkkuj2evc5eu62cvtwsmte02pc47a7nhxqyuanctqk2rm5z5yy2xm0gx2zgl3uwmkznscuw0z8d9d6k8g4hh9xrgl293y0qx5ng3uz5uvpxv95hmzl9xf3uz4mn6c5w6a5c8538u6mz060rdh3pz3z565ze9n6e7l2tnyt8yzvyzdh8evxez2xfwv6skmsdjsl8gc0cynth82etff89vmc2f0ez5905rkgtzzenrx4zvnchspveffk0d2tj6fpg86h5qp0seh04p6uer7z0ljuj08tv0yr6fdmaezgwvtewreytgmmn7anm0sy4vm8t665rxuvl9q24pqmrxypuaas97cj0za9c8vtdknkcmu9aj8z8hr0v4m39rc8y9e946ncfrzngq37y5ux
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-22T01:21:43Z"
+    mac: ENC[AES256_GCM,data:XH+fmg/vo9glagklqZ0vKPLC02p3G/6u/KjDgdVDZW68hfdwaqXthbY0UB6TVxDdNLKLl/vBmA/Rnj2P/PrvgIYHZ7m0PsvhmyzZL1mbDQ+4CMURfq7/smxkYRzjoDuLhN13hYQ7Ojr4uCztns0bLBmMFETjVoW7jyBv+c+WSwM=,iv:StNuajOX4ogbUGqPy0xoUEVaMEWp+5YnU9grOVGUG40=,tag:g3eh1MpWKQDeFJix+1A24g==,type:str]
+    version: 3.13.3

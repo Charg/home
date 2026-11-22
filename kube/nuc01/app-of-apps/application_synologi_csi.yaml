@@ -11,6 +11,7 @@ spec:
   sources:
     - repoURL: https://github.com/SynologyOpenSource/synology-csi.git
       path: deploy/helm
+      # renovate: datasource=docker depName=synology/synology-csi
       targetRevision: v1.3.1
       helm:
         releaseName: synology-csi

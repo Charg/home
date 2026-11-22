@@ -46,9 +46,22 @@ spec:
             - { name: TRUST_PROXY, value: "10.42.0.0/16" }
             - { name: ANALYTICS_DISABLED, value: "true" }
             - { name: VERSION_CHECK_DISABLED, value: "true" }
+            # Application settings come from env, not the admin UI. Unset
+            # ones take Pocket ID's defaults. See README.md.
+            - { name: UI_CONFIG_DISABLED, value: "true" }
+            - { name: ALLOW_USER_SIGNUPS, value: "disabled" }
             - name: ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef: { name: pocket-id-secrets, key: encryption-key }
+            # Email features, all off by default. Enable with SMTP below.
+            # - { name: EMAIL_LOGIN_NOTIFICATION_ENABLED, value: "true" }
+            # - { name: EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED, value: "true" }
+            # - { name: EMAIL_API_KEY_EXPIRATION_ENABLED, value: "true" }
+            # - { name: EMAIL_VERIFICATION_ENABLED, value: "true" }
+          # SMTP is not set up yet. When it is, fill in pocket-id-smtp.enc.yaml
+          # and uncomment this and the SMTP egress rule in networkpolicy.yaml.
+          # envFrom:
+          #   - secretRef: { name: pocket-id-smtp }
           ports:
             - { name: http, containerPort: 1411, protocol: TCP }
           startupProbe:

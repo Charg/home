@@ -1,6 +1,7 @@
 ---
-# Reached only through the internal ingress. Nothing outbound: analytics
-# and the version check are off, and LDAP, SMTP and logo fetching are unused.
+# Reached only through the internal ingress. Outbound is DNS only:
+# analytics and the version check are off, and LDAP, SMTP and logo fetching
+# are unused.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -37,3 +38,13 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    # Uncomment with SMTP. The server is in the pocket-id-smtp secret, so any
+    # destination.
+    # - to:
+    #     - ipBlock:
+    #         cidr: 0.0.0.0/0
+    #   ports:
+    #     - protocol: TCP
+    #       port: 465
+    #     - protocol: TCP
+    #       port: 587
