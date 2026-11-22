@@ -1,0 +1,85 @@
+# source: https://github.com/n8n-io/n8n-hosting/tree/main/charts/n8n
+#
+# Single main pod, executions run in-process (no queue mode, so no Redis or
+# workers). Credentials: n8n-config/n8n-credentials.enc.yaml. Database:
+# n8n-postgres. LLM access goes through LiteLLM (OpenAI credential with base
+# URL http://litellm.litellm.svc:4000/v1 and its own LiteLLM virtual key).
+
+queueMode:
+  enabled: false
+redis:
+  enabled: false
+
+# One replica on an RWO volume: replace the pod rather than roll it, and no
+# PDB (minAvailable 1 on a single replica blocks node drains).
+strategy:
+  type: Recreate
+pdb:
+  enabled: false
+
+secretRefs:
+  existingSecret: n8n-credentials
+
+# Without an existing secret the chart generates a random token on every
+# render (its lookup sees nothing under Argo), which never stays in sync.
+taskRunners:
+  authToken:
+    existingSecret: n8n-credentials
+    existingSecretKey: N8N_RUNNERS_AUTH_TOKEN
+
+database:
+  type: postgresdb
+  useExternal: true
+  host: n8n-postgres-rw.n8n.svc
+  port: 5432
+  database: n8n
+  user: n8n
+  passwordSecret:
+    name: n8n-postgres-credentials
+    key: password
+
+# ~/.n8n: binary data, installed community nodes.
+persistence:
+  enabled: true
+  existingClaim: n8n-data
+
+webhook:
+  url: https://n8n.home.packet.fail/
+editor:
+  url: https://n8n.home.packet.fail/
+
+config:
+  timezone: America/Los_Angeles
+  extraEnv:
+    # Behind Traefik.
+    - name: N8N_PROXY_HOPS
+      value: "1"
+    - name: N8N_DIAGNOSTICS_ENABLED
+      value: "false"
+
+podSecurityContext:
+  main:
+    seccompProfile:
+      type: RuntimeDefault
+
+ingress:
+  enabled: true
+  className: traefik-internal
+  annotations:
+    external-dns.kubernetes.io/hostname: n8n.home.packet.fail
+  hosts:
+    - host: n8n.home.packet.fail
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - n8n.home.packet.fail
+
+resources:
+  main:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi

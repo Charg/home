@@ -1,0 +1,13 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: n8n-postgres-daily
+spec:
+  schedule: "0 45 2 * * *"
+  backupOwnerReference: cluster
+  cluster:
+    name: n8n-postgres
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

@@ -47,6 +47,17 @@ proxy_config:
       litellm_params:
         <<: *llama-swap
         model: openai/qwen3.5-9b
+    # Local first, OpenAI when tortuga is off or the local model errors (see
+    # router_settings.fallbacks). The plain local names above never fall back,
+    # so callers choose whether a prompt may leave the house.
+    - model_name: local-or-openai
+      litellm_params:
+        <<: *llama-swap
+        model: openai/gpt-oss-20b
+  router_settings:
+    fallbacks:
+      - local-or-openai:
+          - gpt-6-luna
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
 

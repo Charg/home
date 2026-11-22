@@ -139,6 +139,12 @@ spec:
             targetRevision: 1.100.0
             namespace: litellm
             project: apps
+          - name: n8n
+            repoURL: ghcr.io/n8n-io/n8n-helm-chart
+            chart: n8n
+            targetRevision: 1.20.0
+            namespace: n8n
+            project: apps
           - name: technitium-operator
             repoURL: ghcr.io/charg/charts
             chart: technitium-operator
