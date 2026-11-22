@@ -40,8 +40,6 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: melon
     - server: https://kubernetes.default.svc
-      namespace: n8n
-    - server: https://kubernetes.default.svc
       namespace: ov
     - server: https://kubernetes.default.svc
       namespace: temporal

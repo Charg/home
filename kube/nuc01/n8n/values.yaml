@@ -30,7 +30,7 @@ taskRunners:
 database:
   type: postgresdb
   useExternal: true
-  host: n8n-postgres-rw.n8n.svc
+  host: n8n-postgres-rw.ai.svc
   port: 5432
   database: n8n
   user: n8n
@@ -56,11 +56,6 @@ config:
       value: "1"
     - name: N8N_DIAGNOSTICS_ENABLED
       value: "false"
-
-podSecurityContext:
-  main:
-    seccompProfile:
-      type: RuntimeDefault
 
 ingress:
   enabled: true

@@ -12,7 +12,7 @@ spec:
     targetRevision: main
     plugin: {}
   destination:
-    namespace: n8n
+    namespace: ai
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:
