@@ -3,7 +3,7 @@
 Cloud VM running headscale (`headscale.nix`) with embedded DERP as the only relay.
 
 - No LUKS; nothing is there to unlock it at boot
-- aarch64, so Colmena builds run on the target (see `nix/colmena`)
+- aarch64, so Colmena builds run on the target (`just deploy <host>`)
 - The headscale DNS record must be DNS-only; a proxying CDN breaks the control
   protocol and DERP
 

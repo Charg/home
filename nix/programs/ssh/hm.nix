@@ -1,5 +1,5 @@
 {
-  isLinux,
+  host,
   ...
 }:
 {

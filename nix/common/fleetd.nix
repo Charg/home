@@ -1,8 +1,8 @@
 {
   config,
   inputs,
-  unstable-pkgs,
-  currentSystemName,
+  pkgs,
+  host,
   ...
 }:
 
@@ -19,12 +19,12 @@
 # every host) and must match one of Fleet's global enroll secrets.
 let
   fleet-orbit =
-    (unstable-pkgs.fleet-orbit.override { buildGoModule = unstable-pkgs.buildGo127Module; })
+    (pkgs.unstable.fleet-orbit.override { buildGoModule = pkgs.unstable.buildGo127Module; })
     .overrideAttrs
       (
         finalAttrs: _: {
           version = "1.63.0";
-          src = unstable-pkgs.fetchFromGitHub {
+          src = pkgs.unstable.fetchFromGitHub {
             owner = "fleetdm";
             repo = "fleet";
             tag = "orbit-v${finalAttrs.version}";
@@ -39,7 +39,7 @@ in
   imports = [ "${inputs.nixpkgs-unstable}/nixos/modules/services/monitoring/orbit.nix" ];
 
   sops.secrets.fleet-enroll-secret = {
-    sopsFile = ../machines/${currentSystemName}/secrets/fleet.enc.yaml;
+    sopsFile = host.secretsFile "fleet";
     restartUnits = [ "orbit.service" ];
   };
 

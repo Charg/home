@@ -2,7 +2,7 @@
 
 Dual boot with Windows. NixOS has its own ESP (`nixos-esp`) and a LUKS root
 (`cryptroot`); Windows' ESP is left untouched. User `chris`, configured from
-the `nix/users/framework` profile.
+the `nix/users/framework` home setup, on the `workstation` role.
 
 ## On-demand GPU node (k3s agent)
 

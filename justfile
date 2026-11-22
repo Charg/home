@@ -82,3 +82,15 @@ update-herdr:
     if [[ "$updated" == 1 ]]; then
       echo "Review the diff, then run 'nix flake check' before committing."
     fi
+
+# Report which NixOS/darwin/Home Manager configurations differ from a base ref (eval only)
+config-identity base="main":
+    scripts/config-identity.sh {{base}}
+
+# Deploy Colmena-managed hosts: a name, comma-separated names, or @tag
+deploy on goal="switch":
+    colmena apply --on {{on}} {{goal}}
+
+# Evaluate every Colmena-managed host's system without building or deploying
+deploy-eval:
+    colmena eval -E '{ nodes, ... }: builtins.mapAttrs (_: n: n.config.system.build.toplevel.drvPath) nodes'

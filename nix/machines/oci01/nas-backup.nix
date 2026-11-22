@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  host,
+  ...
+}:
 
 # Off-site restic repository for the NAS home folder, pushed nightly by
 # kube/nuc01/nas-backup over public SSH. The pusher's key is pinned to an
@@ -45,7 +50,7 @@ in
   };
 
   sops.secrets.nas-backup-restic-password = {
-    sopsFile = ./secrets/nas-backup.enc.yaml;
+    sopsFile = host.secretsFile "nas-backup";
     key = "restic-password";
     owner = "nas-backup";
   };

@@ -4,7 +4,8 @@
   makeWrapper,
   python3,
   iproute2,
-  docker,
+  # The Docker the workstations run (virtualisation.docker.package).
+  docker_29,
 }:
 
 runCommand "netcheck"
@@ -26,7 +27,7 @@ runCommand "netcheck"
       --prefix PATH : ${
         lib.makeBinPath [
           iproute2
-          docker
+          docker_29
         ]
       }
   ''

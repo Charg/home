@@ -1,12 +1,7 @@
 { ... }:
 
 {
-  imports = [
-    ../../common/k3s-firewall.nix
-  ];
-
   networking.firewall.allowedTCPPorts = [
-    22
 
     # ac - dev containers - slot 0
     8010

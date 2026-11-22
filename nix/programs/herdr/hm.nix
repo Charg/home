@@ -1,17 +1,19 @@
 {
   lib,
   pkgs,
-  unstable-pkgs,
   ...
 }:
 {
   home.packages = [
-    unstable-pkgs.herdr
+    # Not in stable; move to pkgs.herdr once it is.
+    pkgs.unstable.herdr
   ]
-  # Overlay-pinned upstream releases (nix/lib/overlays.nix); linux-only builds.
+  # nixpkgs builds Herdr from source and trails upstream's releases; these
+  # are upstream's release builds (nix/packages), linux-only. Drop once nixpkgs
+  # packages herdr-core/herdr-desktop at upstream's version.
   ++ lib.filter (lib.meta.availableOn pkgs.stdenv.hostPlatform) [
-    pkgs.herdr-core
-    pkgs.herdr-desktop
+    pkgs.local.herdr-core
+    pkgs.local.herdr-desktop
   ];
 
   # Desktop app keys, mirroring the TUI [keys] below on an alt- layer (the

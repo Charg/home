@@ -3,16 +3,12 @@
   lib,
   pkgs,
   inputs,
-  currentSystemName,
-  isDarwin,
-  isLinux,
-  isWSL,
-  unstable-pkgs,
+  host,
   ...
 }:
 
 let
-  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs unstable-pkgs; };
+  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs; };
 in
 
 {
@@ -42,9 +38,6 @@ in
     ../../programs/vscode/hm.nix
     ../../programs/zoxide/hm.nix
     ../../programs/zsh/hm.nix
-  ]
-  ++ lib.optionals isLinux [
-    ../../programs/gnome/hm.nix
   ];
 
   #
@@ -54,7 +47,7 @@ in
     commonPkgs
 
     # Linux Packages
-    ++ (lib.optionals isLinux [
+    ++ (lib.optionals host.isLinux [
       # Browsers
       pkgs.chromium
 
@@ -81,7 +74,7 @@ in
       pkgs.kubectl
       pkgs.kubernetes-helm
       pkgs.argocd
-      (import ../../common/fleetctl.nix { inherit unstable-pkgs; })
+      pkgs.local.fleetctl
 
       # Network Tools
       # pkgs.cloudflare-warp # FIX: Flooding journal logs with weird GUI error
@@ -96,7 +89,7 @@ in
     ])
 
     # WSL Packages
-    ++ (lib.optionals isWSL [
+    ++ (lib.optionals host.isWSL [
       pkgs.xclip
     ]);
 
@@ -104,7 +97,7 @@ in
   # Program config
   #
   programs.bat.enable = true;
-  programs.firefox.enable = isLinux;
+  programs.firefox.enable = host.isLinux;
   programs.firefox.configPath = ".mozilla/firefox";
 
   #
@@ -146,8 +139,4 @@ in
       "x-scheme-handler/ftp" = [ "firefox.desktop" ];
     };
   };
-
-  # The state version is required and should stay at the version you
-  # originally installed.
-  home.stateVersion = "24.11";
 }

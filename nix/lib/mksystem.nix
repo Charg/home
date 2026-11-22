@@ -4,112 +4,74 @@
   overlays,
 }:
 
-name:
 {
-  system,
-  user,
-  # Which nix/users/<profile> config to apply; lets a host reuse a profile
-  # under a different account name.
-  profile ? user,
-  darwin ? false,
-  wsl ? false,
-
-  # If true, only return the list of modules, without calling darwinSystem or nixosSystem.
-  # OnlyModules is primarily used when performing a colmena deployment.
-  onlyModules ? false,
+  host,
+  # nix/roles/<role>.nix: everything about the machine's purpose.
+  role,
+  # nix/users/<home>: the user's account (nixos.nix, optional) and Home
+  # Manager config. Several hosts, and account names, can share one.
+  home ? null,
+  # Include Home Manager without a `home` setup, for users the machine
+  # config declares itself.
+  homeManager ? false,
+  # { system; home ? null; }
+  stateVersion,
 }:
 
 let
-  lib = nixpkgs.lib;
-  isWSL = wsl;
-  isDarwin = darwin;
-  isLinux = !isDarwin && !isWSL;
-
-  # A plain nixpkgs-unstable package set, handed to modules as `unstable-pkgs`
-  # so they can reach for e.g. `unstable-pkgs.wtp` directly instead of adding
-  # an overlay just to pull one package forward from unstable.
-  unstable-pkgs = import inputs.nixpkgs-unstable {
-    inherit system;
-    config.allowUnfree = true;
-  };
+  inherit (nixpkgs) lib;
 
   # The config files for this system.
-  machineConfig = ../machines/${name}/config.nix;
-  userOSConfig = ../users/${profile}/${if isDarwin then "darwin" else "nixos"}.nix;
-  userHMConfig = ../users/${profile}/home-manager.nix;
+  machineConfig = ../machines/${host.name}/config.nix;
+  hasHome = home != null;
+  userAccount = ../users/${home}/nixos.nix;
+  userHMConfig = ../users/${home}/home-manager.nix;
 
   # System function to call in the end. Either darwinSystem or nixosSystem, depending on the platform.
-  systemBuilder = if isDarwin then inputs.darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
+  systemBuilder = if host.isDarwin then inputs.darwin.lib.darwinSystem else nixpkgs.lib.nixosSystem;
 
   homeManagerModules =
-    if isDarwin then inputs.home-manager.darwinModules else inputs.home-manager.nixosModules;
+    if host.isDarwin then inputs.home-manager.darwinModules else inputs.home-manager.nixosModules;
 
   modules = [
     { nixpkgs.overlays = overlays; }
-    {
-      nixpkgs.config.allowUnfree = true;
-      nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
-    }
+    { nixpkgs.config.allowUnfree = true; }
 
     machineConfig
-    userOSConfig
+    { system.stateVersion = stateVersion.system; }
+  ]
+  ++ lib.optionals (hasHome || homeManager) [
     homeManagerModules.home-manager
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
-      home-manager.users.${user} = userHMConfig;
       home-manager.sharedModules = [
         inputs.sops-nix.homeManagerModules.sops
-        {
-          # sops-install-secrets' go.mod now needs a newer Go than nixos-25.11 ships;
-          # build it with nixpkgs-unstable's toolchain instead of the system's.
-          sops.package = (import inputs.sops-nix { pkgs = unstable-pkgs; }).sops-install-secrets;
-        }
       ];
-      home-manager.extraSpecialArgs = {
-        currentSystemName = name;
-        currentSystemUser = user;
-        inputs = inputs;
-        isDarwin = isDarwin;
-        isLinux = isLinux;
-        isWSL = isWSL;
-        unstable-pkgs = unstable-pkgs;
-      };
+      home-manager.extraSpecialArgs = { inherit inputs host; };
     }
-
-    {
-      config._module.args = {
-        currentSystem = system;
-        currentSystemName = name;
-        currentSystemUser = user;
-        isWSL = isWSL;
-        inputs = inputs;
-        unstable-pkgs = unstable-pkgs;
-      };
-    }
-
   ]
-  ++ lib.optionals (!isDarwin) [
+  ++ lib.optionals hasHome [
+    {
+      home-manager.users.${host.user} = userHMConfig;
+    }
+    {
+      home-manager.users.${host.user}.home.stateVersion = stateVersion.home;
+    }
+  ]
+  ++ [ ../roles/${role}.nix ]
+  ++ lib.optional (hasHome && builtins.pathExists userAccount) userAccount
+  ++ lib.optionals (!host.isDarwin) [
     inputs.disko.nixosModules.disko
     inputs.sops-nix.nixosModules.sops
-    {
-      # Same toolchain workaround as the home-manager module above.
-      sops.package = (import inputs.sops-nix { pkgs = unstable-pkgs; }).sops-install-secrets;
-    }
   ]
-  ++ lib.optionals isWSL [
+  ++ lib.optionals host.isWSL [
     inputs.nixos-wsl.nixosModules.wsl
-  ]
-  ++ lib.optionals isDarwin [
-    inputs.darwin.darwinModules.simple
   ];
 in
-# Return either the list of modules or the result of calling darwinSystem/nixosSystem with those modules.
-if onlyModules then
-  modules
-else
-  systemBuilder {
-    inherit system modules;
-    # `_module.args` can't be used in `imports`; specialArgs can.
-    specialArgs = { inherit inputs; };
-  }
+systemBuilder {
+  inherit (host) system;
+  inherit modules;
+  # Special args, unlike `_module.args`, can be used in `imports`.
+  specialArgs = { inherit inputs host; };
+}

@@ -1,7 +1,6 @@
 {
   config,
-  currentSystemName,
-  currentSystemUser,
+  host,
   ...
 }:
 
@@ -18,11 +17,11 @@
 # `hashedPasswordFile` requires.
 {
   sops.secrets.user-password = {
-    sopsFile = ../machines/${currentSystemName}/secrets/users.enc.yaml;
+    sopsFile = host.secretsFile "users";
     neededForUsers = true;
   };
 
-  users.users.${currentSystemUser}.hashedPasswordFile = config.sops.secrets.user-password.path;
+  users.users.${host.user}.hashedPasswordFile = config.sops.secrets.user-password.path;
 
   # NixOS only writes a declared password into an existing /etc/shadow entry
   # when users are immutable (update-users-groups.pl keeps existing entries

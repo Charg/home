@@ -5,48 +5,30 @@ let
   # `pkgs.<name>` reference. Only worth it when something needs the override
   # to apply implicitly (e.g. a module that reaches for `pkgs.foo` on its
   # own) or as a base to build further overrides on (see claude-code below).
-  # A module that references the package directly can just take `unstable-pkgs`
-  # as an argument (see nix/lib/mksystem.nix) and use `unstable-pkgs.<name>`
-  # instead of adding an overlay here.
-  unstableOverlay =
-    packageName:
-    (
-      final: prev:
-      let
-        unstable = import inputs.nixpkgs-unstable {
-          system = final.stdenv.hostPlatform.system;
-          config.allowUnfree = true;
-        };
-      in
-      {
-        ${packageName} = unstable.${packageName};
-      }
-    );
+  # A module that references the package directly can just use
+  # `pkgs.unstable.<name>` instead of adding an overlay here.
+  unstableOverlay = packageName: (final: prev: { ${packageName} = final.unstable.${packageName}; });
 in
 [
+  # nixpkgs-unstable, imported once per package set with the same config, as
+  # `pkgs.unstable`.
   (final: prev: {
-    tmux = prev.tmux.overrideAttrs (oldAttrs: rec {
-      version = "3.6a";
-      src = prev.fetchFromGitHub {
-        owner = "tmux";
-        repo = "tmux";
-        rev = version;
-        hash = "sha256-VwOyR9YYhA/uyVRJbspNrKkJWJGYFFktwPnnwnIJ97s=";
-      };
-    });
+    unstable = import inputs.nixpkgs-unstable {
+      system = final.stdenv.hostPlatform.system;
+      inherit (prev) config;
+    };
   })
 
+  # Base for the release pin below; drop with it.
   (unstableOverlay "claude-code")
 
-  # nixpkgs builds Herdr from source and trails upstream's releases; pin
-  # upstream's release builds instead. Version bumps live in the package files.
+  # Local packages, one per nix/packages/<name>.nix or <name>/package.nix, as
+  # `pkgs.local.<name>`. The flake exports the same set as `packages`.
   (final: prev: {
-    herdr-core = final.callPackage ../packages/herdr-core.nix { };
-    herdr-desktop = final.callPackage ../packages/herdr-desktop.nix { };
-  })
-
-  (final: prev: {
-    gh-actions-lock = final.callPackage ../packages/gh-actions-lock.nix { };
+    local = final.lib.packagesFromDirectoryRecursive {
+      inherit (final) callPackage;
+      directory = ../packages;
+    };
   })
 
   # nixpkgs-unstable still lags Anthropic's own binary releases by days-to-weeks.
@@ -56,6 +38,7 @@ in
   #   curl -fsSL "$BASE_URL/latest"                    # -> current version
   #   curl -fsSL "$BASE_URL/<version>/manifest.json"   # -> per-platform checksums
   # and update `version`/`checksums` below to match.
+  # Drop once nixpkgs-unstable's claude-code keeps up with releases.
   (final: prev: {
     claude-code = prev.claude-code.overrideAttrs (
       old:

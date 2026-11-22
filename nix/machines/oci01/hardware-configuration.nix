@@ -18,11 +18,5 @@
   # OCI's serial console connection
   boot.kernelParams = [ "console=ttyAMA0" ];
 
-  boot.loader.grub = {
-    devices = [ "nodev" ];
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-  };
-
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
 }

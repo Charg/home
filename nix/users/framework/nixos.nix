@@ -1,7 +1,7 @@
 {
   pkgs,
   inputs,
-  currentSystemUser,
+  host,
   ...
 }:
 
@@ -14,7 +14,7 @@
 
   environment.systemPackages = [ pkgs.android-tools ];
 
-  users.users.${currentSystemUser} = {
+  users.users.${host.user} = {
     isNormalUser = true;
     extraGroups = [
       "networkmanager"

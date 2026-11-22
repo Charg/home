@@ -3,16 +3,12 @@
   lib,
   pkgs,
   inputs,
-  currentSystemName,
-  isDarwin,
-  isLinux,
-  isWSL,
-  unstable-pkgs,
+  host,
   ...
 }:
 
 let
-  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs unstable-pkgs; };
+  commonPkgs = import ../../common/hm-common-pkgs.nix { inherit pkgs inputs; };
 in
 
 {
@@ -71,8 +67,4 @@ in
     # Needs to be set before antidote installs the magic-enter plugin
     MAGIC_ENTER_GIT_COMMAND = "git status -u";
   };
-
-  # The state version is required and should stay at the version you
-  # originally installed.
-  home.stateVersion = "25.05";
 }

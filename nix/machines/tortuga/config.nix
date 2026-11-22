@@ -3,7 +3,7 @@
   lib,
   pkgs,
   inputs,
-  currentSystemUser,
+  host,
   ...
 }:
 
@@ -15,22 +15,9 @@
     ./k3s.nix
     ./netconsole.nix
     inputs.lanzaboote.nixosModules.lanzaboote
-    ../../common/alloy.nix
-    ../../common/bluetooth.nix
-    ../../common/fonts.nix
-    ../../common/gnome.nix
-    ../../common/nix-ld.nix
-    ../../common/system-packages.nix
-    ../../common/ca-blacklist.nix
-    ../../common/openssh-hardening.nix
-    ../../common/fleetd.nix
-    ../../common/sops-user-password.nix
-    ../../common/rbw.nix
-    ../../common/tailscale.nix
-    ../../common/docker-local-ports.nix
   ];
 
-  home-manager.users.${currentSystemUser}.imports = [ ./hm.nix ];
+  home-manager.users.${host.user}.imports = [ ./hm.nix ];
 
   #
   # Bootloader
@@ -43,12 +30,10 @@
   # `sbctl create-keys` and enrolled with `sbctl enroll-keys --microsoft`;
   # the Microsoft keys must stay enrolled for Windows and the GPU option ROM.
   boot.loader.systemd-boot.enable = lib.mkForce false;
-  boot.loader.systemd-boot.configurationLimit = 10;
   boot.lanzaboote = {
     enable = true;
     pkiBundle = "/var/lib/sbctl";
   };
-  boot.loader.efi.canTouchEfiVariables = true;
 
   # Ask systemd-boot (honoured by lanzaboote) for the highest mode the firmware offers instead.
   # Fixes boot text being mangled
@@ -140,20 +125,7 @@
   #
   # Networking
   #
-  networking.networkmanager.enable = true;
   networking.hostName = "tortuga";
-
-  systemd.services.NetworkManager-wait-online.enable = false;
-
-  # No public fallback resolvers; use only the DNS servers handed out by the LAN.
-  services.resolved.settings.Resolve.FallbackDNS = [ ];
-
-  networking.networkmanager.unmanaged = [
-    "interface-name:docker*"
-    "interface-name:br-*"
-    "interface-name:veth*"
-    "interface-name:vboxnet*"
-  ];
 
   # Wake on magic packet, applied by udev via a systemd .link file so it holds
   # under NetworkManager. Also needs Wake on LAN enabled (and ErP off) in the
@@ -233,15 +205,13 @@
   #
   # The RTC is kept in UTC; Windows is set to match via the
   # RealTimeIsUniversal=1 registry key.
-  time.timeZone = "America/Los_Angeles";
-
-  i18n.defaultLocale = "en_US.UTF-8";
+  time.hardwareClockInLocalTime = false;
 
   # Start the user's systemd instance at boot and keep it after logout, so
   # /run/user/<uid> and the session D-Bus exist without a GDM login. Moonshine
   # launches games as units in that instance. Its module sets this too; it's
   # here so it's visible. Was already enabled imperatively (loginctl).
-  users.users.${currentSystemUser}.linger = true;
+  users.users.${host.user}.linger = true;
 
   # The onboard MediaTek MT7922 (Wi-Fi over PCIe, Bluetooth over USB) is the
   # main suspect for the machine hanging in S3 and needing a hard power-off.
@@ -258,10 +228,6 @@
     ${pkgs.kmod}/bin/modprobe btusb || true
   '';
 
-  virtualisation.docker.enable = true;
-  virtualisation.docker.package = pkgs.docker_29;
-  virtualisation.docker.autoPrune.enable = true;
-
   # Exposes the GPU to containers via CDI: `docker run --device nvidia.com/gpu=all ...`
   hardware.nvidia-container-toolkit.enable = true;
 
@@ -269,10 +235,6 @@
   # kernel module derivations to ones Hydra doesn't build, and every kernel or
   # VirtualBox bump becomes a long local compile. Without it both come from
   # cache.nixos.org as long as the kernel stays on the default kernelPackages.
-  virtualisation.virtualbox.host.enable = true;
-  # Don't bring up vboxnet0 at boot; VirtualBox creates host-only interfaces
-  # itself when a VM that uses one starts.
-  virtualisation.virtualbox.host.addNetworkInterface = false;
 
   #
   # Gaming
@@ -286,13 +248,6 @@
   # Run games with `gamemoderun %command%` (Steam launch options) for a
   # performance governor and higher scheduling priority while playing.
   programs.gamemode.enable = true;
-
-  security.sudo.wheelNeedsPassword = false;
-  security.rtkit.enable = true;
-
-  # Smart Card Reader Service
-  # Used for YubiKey related operations.
-  services.pcscd.enable = true;
 
   security.pam.services.login = {
     # Replaced by the two rules below; the disabled rule still anchors their order.
@@ -324,30 +279,6 @@
         };
       };
   };
-
-  services.pulseaudio.enable = false;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    jack.enable = true;
-    pulse.enable = true;
-  };
-
-  services.xserver = {
-    enable = true;
-    excludePackages = with pkgs; [ xterm ];
-    xkb = {
-      layout = "us";
-      variant = "";
-    };
-  };
-
-  services.printing.enable = false;
-
-  services.openssh.enable = true;
-
-  services.fwupd.enable = true;
 
   # SMART health monitoring for both NVMe drives; failures surface as GNOME
   # desktop notifications.
@@ -381,34 +312,4 @@
     heroic
     protonplus
   ];
-
-  services.journald.extraConfig = ''
-    SystemMaxUse=1G
-  '';
-
-  nix = {
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      keep-outputs = true;
-      keep-derivations = true;
-      extra-substituters = [ "https://vicinae.cachix.org" ];
-      extra-trusted-public-keys = [
-        "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
-      ];
-    };
-    optimise.automatic = true;
-  };
-
-  programs.nh = {
-    enable = true;
-    clean = {
-      enable = true;
-      extraArgs = "--keep-since 14d --keep 5";
-    };
-  };
-
-  system.stateVersion = "26.05";
 }

@@ -5,36 +5,28 @@
   overlays,
 }:
 
-name:
 {
-  system,
-  user,
-  profile ? user,
-  darwin ? false,
-  wsl ? false,
+  host,
+  # nix/users/<home>/home-manager.nix
+  home,
+  stateVersion,
 }:
 
 home-manager.lib.homeManagerConfiguration {
   pkgs = import nixpkgs {
-    inherit system;
+    inherit (host) system;
     config.allowUnfree = true;
     inherit overlays;
   };
 
-  extraSpecialArgs = {
-    currentSystemName = name;
-    currentSystemUser = user;
-    inherit inputs;
-    isDarwin = darwin;
-    isWSL = wsl;
-    isLinux = !darwin && !wsl;
-  };
+  extraSpecialArgs = { inherit inputs host; };
 
   modules = [
     {
-      home.username = user;
-      home.homeDirectory = if darwin then "/Users/${user}" else "/home/${user}";
+      home.username = host.user;
+      home.homeDirectory = if host.isDarwin then "/Users/${host.user}" else "/home/${host.user}";
+      home.stateVersion = stateVersion.home;
     }
-    ../users/${profile}/home-manager.nix
+    ../users/${home}/home-manager.nix
   ];
 }

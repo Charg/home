@@ -1,24 +1,13 @@
 {
   pkgs,
-  unstable-pkgs,
   ...
 }:
 
 {
   programs.opencode = {
     enable = true;
-    # TODO: drop override once nixpkgs fixes the stale node_modules hash
-    # node_modules hash is platform-specific (bun pulls per-platform deps)
-    package = unstable-pkgs.opencode.overrideAttrs (old: {
-      node_modules = old.node_modules.overrideAttrs (oldNm: {
-        outputHash =
-          {
-            x86_64-linux = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
-            aarch64-darwin = "sha256-dIveiaiPFGSItwLyeMuPDxTE9gpvvnlTCB/+nG24qCc=";
-          }
-          .${pkgs.stdenv.hostPlatform.system} or oldNm.outputHash;
-      });
-    });
+    # Stable trails a major version; drop once it catches up.
+    package = pkgs.unstable.opencode;
     settings = {
       autoupdate = false;
       share = "disabled";

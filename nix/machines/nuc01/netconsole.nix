@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
-  tortuga = (import ../../common/k3s-agents.nix).tortuga;
+  tortuga = config.lab.agents.tortuga.ipv4;
   port = 6666;
 in
 {

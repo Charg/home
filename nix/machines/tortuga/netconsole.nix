@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
-  nuc01 = (import ../../common/k3s-nodes.nix).nuc01;
+  nuc01 = config.lab.servers.nuc01.ipv4;
   port = 6666;
 in
 {

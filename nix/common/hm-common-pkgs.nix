@@ -1,7 +1,6 @@
 {
   pkgs,
   inputs,
-  unstable-pkgs,
 }:
 
 [
@@ -53,12 +52,12 @@
   pkgs.bitwarden-desktop
   pkgs.dbeaver-bin
 
-  # Unstable Packages
+  # Unstable Packages: each moves to stable once stable has it at the same or a newer version.
   inputs.colmena.packages.${pkgs.stdenv.hostPlatform.system}.colmena # NixOS multi-machine deployment tool
-  unstable-pkgs.datadog-pup # CLI for Datadog's observability platform
-  unstable-pkgs.mise # A tool to manage multiple versions of a CLI tool, written in Rust
-  unstable-pkgs.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
-  unstable-pkgs.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
+  pkgs.unstable.datadog-pup # CLI for Datadog's observability platform
+  pkgs.unstable.mise # A tool to manage multiple versions of a CLI tool, written in Rust
+  pkgs.unstable.prek # Better `pre-commit`, re-engineered in Rust - https://github.com/j178/prek
+  pkgs.unstable.wtp # Git worktree CLI with automated setup, branch tracking, and navigation.
 ]
 # GNU userland on macOS (shadows BSD defaults)
 ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [

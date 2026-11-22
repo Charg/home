@@ -4,9 +4,10 @@
 # until its pods are back; 1.1.1.1 covers that window.
 
 let
-  nodeIP = (import ./k3s-nodes.nix).${config.networking.hostName};
+  node = config.lab.servers.${config.networking.hostName};
+  nodeIP = node.ipv4;
   # Serves IPv6 clients on other networks; see lab-ipv6.nix.
-  nodeIP6 = (import ./lab-ula.nix).nodeAddress nodeIP;
+  nodeIP6 = node.ipv6;
 
   technitium = [
     "192.168.74.52"

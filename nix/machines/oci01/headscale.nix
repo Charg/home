@@ -1,4 +1,4 @@
-{ unstable-pkgs, ... }:
+{ ... }:
 
 let
   domain = "headscale.packet.fail";
@@ -6,8 +6,6 @@ in
 {
   services.headscale = {
     enable = true;
-    # nixos-26.05 lags upstream releases
-    package = unstable-pkgs.headscale;
     address = "0.0.0.0";
     port = 443;
 

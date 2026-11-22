@@ -2,6 +2,6 @@
 
 {
   home.packages = [
-    (pkgs.callPackage ../../packages/agent-orchestrator.nix { })
+    pkgs.local.agent-orchestrator
   ];
 }

@@ -8,9 +8,8 @@
 # table.
 
 let
-  ula = import ./lab-ula.nix;
-  nodeIP = (import ./k3s-nodes.nix).${config.networking.hostName};
-  address = ula.nodeAddress nodeIP;
+  ula = config.lab.ula;
+  address = config.lab.servers.${config.networking.hostName}.ipv6;
   iface = "eno1";
   table = "53";
 in
@@ -25,7 +24,7 @@ in
     routes = [
       {
         address = "${ula.prefix}::";
-        prefixLength = ula.prefixLength;
+        inherit (ula) prefixLength;
         via = ula.gateway;
       }
     ];

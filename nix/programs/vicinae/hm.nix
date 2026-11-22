@@ -1,8 +1,8 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
   programs.vicinae = {
     enable = true;
-    package = inputs.vicinae.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    package = pkgs.unstable.vicinae;
     systemd.enable = true;
   };
 }

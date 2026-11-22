@@ -185,7 +185,7 @@ Argo's `selfHeal` reverts each of these within seconds to minutes. Disable
 ## Node requirements
 
 - The kubelet allows the `net.ipv4.conf.all.src_valid_mark` unsafe sysctl, set
-  for every node in `nix/users/nixos/nixos.nix`. Without it the gateway pod stays
+  for every node in `nix/roles/k3s-node.nix`. Without it the gateway pod stays
   `Pending` with `SysctlForbidden`.
 - Nothing on a node routes the VXLAN subnet, `172.16.0.0/24`.
 

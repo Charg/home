@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
 let
-  nodes = import ./k3s-nodes.nix;
+  nodes = lib.mapAttrs (_: n: n.ipv4) config.lab.servers;
 
   peers = lib.attrValues (lib.filterAttrs (name: _: name != config.networking.hostName) nodes);
 
@@ -31,7 +31,7 @@ let
   # any other client.
   agentRules = map (
     agent: "iptables -w -A nixos-fw -p udp -s ${agent} --dport 8472 -j nixos-fw-accept"
-  ) (lib.attrValues (import ./k3s-agents.nix));
+  ) (lib.mapAttrsToList (_: n: n.ipv4) config.lab.agents);
 in
 {
   assertions = [

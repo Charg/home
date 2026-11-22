@@ -1,6 +1,5 @@
 {
   config,
-  isLinux,
   lib,
   pkgs,
   ...
@@ -49,7 +48,7 @@ in
     };
   };
 
-  dconf.settings = lib.mkIf isLinux {
+  dconf.settings = {
     "org/gnome/desktop/peripherals/mouse" = {
       natural-scroll = false;
     };

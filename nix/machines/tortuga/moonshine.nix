@@ -2,7 +2,7 @@
   inputs,
   lib,
   pkgs,
-  currentSystemUser,
+  host,
   ...
 }:
 
@@ -62,7 +62,7 @@ in
   # Moonlight's default id. Check the setup with `moonshine healthcheck`.
   services.moonshine = {
     enable = true;
-    user = currentSystemUser;
+    inherit (host) user;
     # The user's uid isn't declared in the config, so the module can't derive it.
     uid = 1000;
     openFirewall = true;
@@ -91,7 +91,7 @@ in
   # Lets Moonshine hold a logind sleep inhibitor while streaming (polkit rule
   # shipped in the package), so GNOME's idle suspend, which never sees the
   # streamed input, doesn't put the machine to sleep mid-stream.
-  users.users.${currentSystemUser}.extraGroups = [ "moonshine" ];
+  users.users.${host.user}.extraGroups = [ "moonshine" ];
 
   # The module starts Moonshine at boot. Leave it to be started by hand so it
   # doesn't hold the GameStream ports when Helios is in use.

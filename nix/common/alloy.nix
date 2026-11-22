@@ -1,4 +1,4 @@
-{ config, currentSystemName, ... }:
+{ config, host, ... }:
 
 let
   hostName = config.networking.hostName;
@@ -8,7 +8,7 @@ let
 in
 {
   sops.secrets.telemetry-password = {
-    sopsFile = ../machines/${currentSystemName}/secrets/telemetry.enc.yaml;
+    sopsFile = host.secretsFile "telemetry";
     restartUnits = [ "alloy.service" ];
   };
 

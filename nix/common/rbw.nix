@@ -1,8 +1,7 @@
 {
   config,
   pkgs,
-  currentSystemName,
-  currentSystemUser,
+  host,
   ...
 }:
 
@@ -15,16 +14,16 @@ let
 in
 {
   sops.secrets.rbw-email = {
-    sopsFile = ../machines/${currentSystemName}/secrets/rbw.enc.yaml;
+    sopsFile = host.secretsFile "rbw";
     key = "email";
   };
   sops.secrets.rbw-base-url = {
-    sopsFile = ../machines/${currentSystemName}/secrets/rbw.enc.yaml;
+    sopsFile = host.secretsFile "rbw";
     key = "base-url";
   };
 
   sops.templates."rbw-config.json" = {
-    owner = currentSystemUser;
+    owner = host.user;
     content = builtins.toJSON {
       email = ph.rbw-email;
       base_url = ph.rbw-base-url;
@@ -34,7 +33,7 @@ in
     };
   };
 
-  home-manager.users.${currentSystemUser}.imports = [
+  home-manager.users.${host.user}.imports = [
     (hm: {
       xdg.configFile."rbw/config.json".source = hm.config.lib.file.mkOutOfStoreSymlink renderedPath;
     })

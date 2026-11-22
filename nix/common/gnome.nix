@@ -1,8 +1,10 @@
-{ pkgs, ... }:
+{ pkgs, host, ... }:
 let
-  gnomeExtensionVicinae = pkgs.callPackage ../packages/gnome-shell-extension-vicinae.nix { };
+  gnomeExtensionVicinae = pkgs.local.gnome-shell-extension-vicinae;
 in
 {
+  # The Home Manager half: theming, extensions and dconf settings.
+  home-manager.users.${host.user}.imports = [ ../programs/gnome/hm.nix ];
 
   #
   # GNOME

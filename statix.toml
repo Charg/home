@@ -1,0 +1,5 @@
+# Dotted keys and `{ ... }:` module headers are this repo's style.
+disabled = [
+  "repeated_keys",
+  "empty_pattern",
+]

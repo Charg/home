@@ -26,7 +26,7 @@ database is not ready yet.
 
 Bump the chart version (`fleet-apps/fleet.yaml`) and the
 digest-pinned `imageTag` (`kube/nuc01/fleet/values.yaml`) together, along
-with the `fleetctl` pin in `nix/common/fleetctl.nix`.
+with the `fleetctl` pin in `nix/packages/fleetctl.nix`.
 
 ## First run
 

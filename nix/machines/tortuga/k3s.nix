@@ -7,8 +7,8 @@
 
 let
   nodeName = config.networking.hostName;
-  nodeIP = (import ../../common/k3s-agents.nix).${nodeName};
-  serverNodes = import ../../common/k3s-nodes.nix;
+  nodeIP = config.lab.agents.${nodeName}.ipv4;
+  serverNodes = lib.mapAttrs (_: n: n.ipv4) config.lab.servers;
   servers = lib.attrValues serverNodes;
 
   nvidiaToolkit = lib.getOutput "tools" config.hardware.nvidia-container-toolkit.package;

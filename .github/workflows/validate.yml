@@ -30,7 +30,8 @@ jobs:
           files=$(git diff --name-only "$BASE_SHA"...HEAD)
           kube=false nix=false
           grep -q '^kube/' <<<"$files" && kube=true
-          grep -qE '^(flake\.(nix|lock)|nix/.*\.nix)$' <<<"$files" && nix=true
+          # Anything evaluation, packages or the flake checks can read.
+          grep -qE '^(flake\.(nix|lock)|nix/.*|.*\.nix|statix\.toml|\.github/workflows/validate\.yml)$' <<<"$files" && nix=true
           echo "kube=$kube" >> "$GITHUB_OUTPUT"
           echo "nix=$nix" >> "$GITHUB_OUTPUT"
 
@@ -46,6 +47,9 @@ jobs:
           nix shell --inputs-from . nixpkgs#kubernetes-helm nixpkgs#kubeconform nixpkgs#yq-go \
             -c .github/scripts/validate-kube.sh "$BASE_SHA"
 
+      # Evaluates every configuration (standalone Home Manager, darwin and
+      # the Colmena hive through checks) and builds the formatting and lint
+      # checks; no host system is built.
       - name: Check flake
         if: steps.changes.outputs.nix == 'true'
-        run: nix flake check --no-build
+        run: nix flake check

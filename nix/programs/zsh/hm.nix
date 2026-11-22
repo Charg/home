@@ -2,10 +2,7 @@
   config,
   pkgs,
   lib,
-  currentSystemName,
-  currentSystemUser,
-  isDarwin,
-  isWSL,
+  host,
   ...
 }:
 
@@ -179,27 +176,27 @@
       #
       nixg = "nh clean all --keep 5 --keep-since 7d";
       nixrs =
-        if isDarwin then
-          "NIX_SSL_CERT_FILE=/etc/nix/macos-keychain.crt SSL_CERT_FILE=/etc/nix/macos-keychain.crt nh darwin switch -H ${currentSystemName} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
+        if host.isDarwin then
+          "NIX_SSL_CERT_FILE=/etc/nix/macos-keychain.crt SSL_CERT_FILE=/etc/nix/macos-keychain.crt nh darwin switch -H ${host.name} && rm -f ~/.zcompdump*; compinit && zcompile ~/.zcompdump;"
         else
-          "nh os switch -H ${currentSystemName} --cores 6 --max-jobs 6";
-      nixrt = "nh os test -H ${currentSystemName}";
-      nixhm = "nh home switch -c ${currentSystemUser}@${currentSystemName}";
+          "nh os switch -H ${host.name} --cores 6 --max-jobs 6";
+      nixrt = "nh os test -H ${host.name}";
+      nixhm = "nh home switch -c ${host.user}@${host.name}";
       nixfc = "nix flake check ~/code/home";
 
       # Build only, then print the package diff against the running system
       nixrb =
-        if isDarwin then
-          "nh darwin build -H ${currentSystemName} --diff always"
+        if host.isDarwin then
+          "nh darwin build -H ${host.name} --diff always"
         else
-          "nh os build -H ${currentSystemName} --diff always";
+          "nh os build -H ${host.name} --diff always";
 
       # Update every flake input and show what it actually changes
       nixup =
-        if isDarwin then
-          "nh darwin build -H ${currentSystemName} --update --diff always"
+        if host.isDarwin then
+          "nh darwin build -H ${host.name} --update --diff always"
         else
-          "nh os build -H ${currentSystemName} --update --diff always";
+          "nh os build -H ${host.name} --update --diff always";
     };
 
     shellGlobalAliases = {
@@ -210,9 +207,9 @@
       # misc
       B = "| base64 -d";
       C = "| ${
-        if isDarwin then
+        if host.isDarwin then
           "pbcopy"
-        else if isWSL then
+        else if host.isWSL then
           "xclip -selection clipboard"
         else
           "wl-copy"
@@ -233,13 +230,15 @@
 
   home.file = {
     ".zsh_functions".source = ../../programs/zsh/functions;
-    ".local/share/zplugins/magic-enter".source = builtins.fetchGit {
-      url = "https://github.com/zshzoo/magic-enter.git";
+    # Not in nixpkgs. To bump: set `rev`, build, and take `hash` from the
+    # mismatch error (or `nix run nixpkgs#nix-prefetch-github -- zshzoo
+    # magic-enter --rev <rev>`).
+    ".local/share/zplugins/magic-enter".source = pkgs.fetchFromGitHub {
+      owner = "zshzoo";
+      repo = "magic-enter";
       rev = "b5a7d0a55abab268ebd94969e2df6ea867fa2cd5";
+      hash = "sha256-3g9upBzGipbL5E2cjUG10rrahQdcmdvUx/ufmmdyzso=";
     };
-    ".local/share/zplugins/fzf-tab".source = builtins.fetchGit {
-      url = "https://github.com/Aloxaf/fzf-tab.git";
-      rev = "fc6f0dcb2d5e41a4a685bfe9af2f2393dc39f689";
-    };
+    ".local/share/zplugins/fzf-tab".source = "${pkgs.zsh-fzf-tab}/share/fzf-tab";
   };
 }
