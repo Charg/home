@@ -29,6 +29,14 @@ proxy_config:
       litellm_params:
         model: openai/gpt-6-luna
         api_key: os.environ/OPENAI_API_KEY
+    - model_name: gpt-6.2-sol
+      litellm_params:
+        model: openai/gpt-6.2-sol
+        api_key: os.environ/OPENAI_API_KEY
+    - model_name: gpt-6.2-astra
+      litellm_params:
+        model: openai/gpt-6.2-astra
+        api_key: os.environ/OPENAI_API_KEY
     # Local models via llama-swap (kube/nuc01/llama-swap) on tortuga's GPU.
     # Unavailable while the node is off; the first request after idle waits
     # for the model to load, hence the long timeout. llama-swap has no auth,
@@ -64,7 +72,7 @@ proxy_config:
   router_settings:
     fallbacks:
       - local-or-openai:
-          - gpt-6-luna
+          - gpt-6.2-sol
       - local:
           - qwen3.5-9b
           - gemma-4-12b
