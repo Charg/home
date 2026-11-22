@@ -2,8 +2,9 @@
 #
 # Single main pod, executions run in-process (no queue mode, so no Redis or
 # workers). Credentials: n8n-config/n8n-credentials.enc.yaml. Database:
-# n8n-postgres. LLM access goes through LiteLLM (OpenAI credential with base
-# URL http://litellm.litellm.svc:4000/v1 and its own LiteLLM virtual key).
+# n8n-postgres. LLM access goes through LiteLLM: CREDENTIALS_OVERWRITE_DATA
+# pins every OpenAI credential's base URL and key, so a credential only needs
+# creating (by name) in the UI.
 
 queueMode:
   enabled: false
@@ -56,6 +57,14 @@ config:
       value: "1"
     - name: N8N_DIAGNOSTICS_ENABLED
       value: "false"
+    # JSON: {"openAiApi": {"url": "http://litellm.litellm.svc:4000/v1",
+    # "apiKey": "<LiteLLM virtual key>"}}. Overwritten fields are hidden in
+    # the UI and applied at runtime.
+    - name: CREDENTIALS_OVERWRITE_DATA
+      valueFrom:
+        secretKeyRef:
+          name: n8n-credentials
+          key: CREDENTIALS_OVERWRITE_DATA
 
 ingress:
   enabled: true
