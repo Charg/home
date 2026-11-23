@@ -22,6 +22,7 @@ in
     ../../programs/delta/hm.nix
     ../../programs/direnv/hm.nix
     ../../programs/eza/hm.nix
+    ../../programs/firefox/hm.nix
     ../../programs/fzf/hm.nix
     ../../programs/ghostty/hm.nix
     ../../programs/git/hm.nix
@@ -97,8 +98,6 @@ in
   # Program config
   #
   programs.bat.enable = true;
-  programs.firefox.enable = host.isLinux;
-  programs.firefox.configPath = ".mozilla/firefox";
 
   #
   # Services
