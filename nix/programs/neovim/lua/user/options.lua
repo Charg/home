@@ -49,6 +49,22 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Soft wrap for prose
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown", "text", "gitcommit" },
+  callback = function(args)
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.breakindent = true
+    if vim.bo[args.buf].filetype == "markdown" then
+      -- Move by screen line, unless a count is given (keeps 5j etc. working)
+      local opts = { buffer = args.buf, expr = true, silent = true }
+      vim.keymap.set({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", opts)
+      vim.keymap.set({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", opts)
+    end
+  end,
+})
+
 -- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
