@@ -43,37 +43,13 @@ let
 
     exit 0
   '';
-
-  # Off at home so 192.168.74.0/24 goes over the LAN; on everywhere else to
-  # reach it through the subnet routers. "Home" is any 192.168.73.0/24 address.
-  tailscaleRoutes = pkgs.writeShellScript "tailscale-routes" ''
-    set -euo pipefail
-
-    if ${pkgs.iproute2}/bin/ip -4 -o addr show scope global \
-      | ${pkgs.gawk}/bin/awk '{print $4}' \
-      | ${pkgs.gnugrep}/bin/grep -q '^192\.168\.73\.'; then
-      accept=false
-    else
-      accept=true
-    fi
-
-    ${config.services.tailscale.package}/bin/tailscale set --accept-routes=$accept
-    ${pkgs.util-linux}/bin/logger -t tailscale-routes "accept-routes=$accept"
-  '';
-
-  tailscaleRoutesDispatcher = pkgs.writeShellScript "tailscale-routes-dispatcher" ''
-    case "$2" in
-      up | down | dhcp4-change)
-        ${pkgs.systemd}/bin/systemctl restart --no-block tailscale-routes.service
-        ;;
-    esac
-  '';
 in
 {
   imports = [
     inputs.nixos-hardware.nixosModules.framework-13-7040-amd
     ./hardware-configuration.nix
     ./disk-config.nix
+    ./netmode.nix
   ];
 
   home-manager.users.${host.user}.imports = [ ../../programs/git/signing.nix ];
@@ -118,21 +94,7 @@ in
       type = "basic";
       source = netcheckDispatcher;
     }
-    {
-      type = "basic";
-      source = tailscaleRoutesDispatcher;
-    }
   ];
-
-  # Ordered after tailscaled so a dispatcher event at boot waits for it
-  systemd.services.tailscale-routes = {
-    after = [ "tailscaled.service" ];
-    wantedBy = [ "tailscaled.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = tailscaleRoutes;
-    };
-  };
 
   environment.systemPackages = [
     netcheck
