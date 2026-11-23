@@ -8,5 +8,10 @@ spec:
     name: dns
   recursion:
     policy: AllowOnlyForPrivateNetworks
+  forwarders:
+    protocol: Https
+    addresses:
+      - https://dns.quad9.net/dns-query (9.9.9.9)
+      - https://dns.quad9.net/dns-query (149.112.112.112)
   logging:
     useLocalTime: true
