@@ -13,7 +13,7 @@ spec:
   sources:
     - repoURL: https://fleetdm.github.io/fleet/charts
       chart: fleet
-      targetRevision: v7.0.32
+      targetRevision: v7.0.33
       helm:
         valueFiles:
           - $values/kube/nuc01/fleet/values.yaml
