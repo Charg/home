@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: ghcr.io/charg/charts
     chart: vaultwarden
-    targetRevision: 0.3.5
+    targetRevision: 0.3.7
     helm:
       valuesObject:
         # Distroless build from Charg/containers: SQLite only, no shell,
