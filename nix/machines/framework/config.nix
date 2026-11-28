@@ -65,6 +65,8 @@ in
   # fall back to the passphrase after token-timeout. Enrol the key with:
   #   systemd-cryptenroll --fido2-device=auto --fido2-with-client-pin=no \
   #     --fido2-with-user-presence=no /dev/disk/by-partlabel/disk-main-luks
+  # crypttabExtraOpts is only honoured by the systemd initrd.
+  boot.initrd.systemd.enable = true;
   boot.initrd.luks.devices.cryptroot.crypttabExtraOpts = [
     "fido2-device=auto"
     "token-timeout=5s"
