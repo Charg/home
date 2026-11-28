@@ -5,10 +5,10 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/flake-lock-diff.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086'
+        - 'cachix/install-nix-action@bb0495a1086c46893eee56f32fd192dfe4a15bb9'
     '.github/workflows/validate.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086'
+        - 'cachix/install-nix-action@bb0495a1086c46893eee56f32fd192dfe4a15bb9'
     '.github/workflows/zizmor.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd'
@@ -18,9 +18,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086':
-        ref: 'v31.11.5'
-        commit: 'sha1-3dc140bfc76c49fbd4dd958429132e3746bcb086'
+    'cachix/install-nix-action@bb0495a1086c46893eee56f32fd192dfe4a15bb9':
+        ref: 'v32.0.0'
+        commit: 'sha1-bb0495a1086c46893eee56f32fd192dfe4a15bb9'
         owner_id: 36824654
         repo_id: 212301524
     'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
